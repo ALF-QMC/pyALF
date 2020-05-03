@@ -1,0 +1,2 @@
+Model = Hubbard, Lattice_type = Honeycomb, L1 = 3 , L2 = 3,  ham_T2 = 0.0
+Model = Hubbard, Lattice_type = Square, L1 = 6 , L2 = 6
