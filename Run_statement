@@ -1,0 +1,1 @@
+python3 Run.py  Config="FakhersMAC noMPI" ALFdir="/Users/fassaad/Programs/ALF/ALF-1.2" branch_R="135-introduce_hubbard_hamiltonian" Executable_T="Examples" Type="R+T" 
