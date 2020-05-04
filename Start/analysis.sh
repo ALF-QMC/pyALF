@@ -1,7 +1,3 @@
-export DIR=`pwd`
-cd /Users/fassaad/Programs/ALF/ALF-1.2
-source configureHPC.sh FakhersMAC noMPI
-cd $DIR
 export ANNAL=${ALF_DIR}"/Analysis/"
 
 for filename in *_scal; do
