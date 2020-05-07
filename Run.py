@@ -10,13 +10,15 @@ import os
 import subprocess
 import shutil
 import sys
+import json
 from colorama import Fore, Back, Style
 
 
-def Set_Default_Variables(model):
+def Set_Default_Variables():
     """Defines a dictionary containing all parameters with default values."""
     
     Params = {}
+    Params_model = {}
     
     Params["VAR_Lattice"] = {
         # Parameters that define the Bravais lattice
@@ -92,19 +94,20 @@ def Set_Default_Variables(model):
         "Tolerance"  : 0.1  ,
         }
     
-    if model == "Hubbard":
-        Params["VAR_Hubbard"] = {
-            # Parameters of the Hubbard hamiltonian
-            "HS"       :  "Mz" ,
-            "ham_T"    :  1.0  ,
-            "ham_chem" :  0.0  ,
-            "ham_U"    :  4.0  ,
-            "ham_T2"   :  1.0  ,
-            "ham_U2"   :  4.0  ,
-            "ham_Tperp":  1.0  ,
-            }
+    Params_model["VAR_Hubbard"] = {
+        # Parameters of the Hubbard hamiltonian
+        "HS"       :  "Mz" ,
+        "ham_T"    :  1.0  ,
+        "ham_chem" :  0.0  ,
+        "ham_U"    :  4.0  ,
+        "ham_T2"   :  1.0  ,
+        "ham_U2"   :  4.0  ,
+        "ham_Tperp":  1.0  ,
+        }
+        
+    #json.dumps(Params)
     
-    return Params
+    return Params, Params_model
 
 def convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be written into a parameter file"""
@@ -124,56 +127,41 @@ def Print_parameters(Params, file):
     print ("Setting up parameter file for", file )
     with open(file, 'w') as f:
         for namespace in Params:
-            f.write( "&{}\n".format(name) )
-            for var in Params[name]:
-                f.write(var + ' = ' + convert_par_to_str(Params[name][var]) + '\n')
+            f.write( "&{}\n".format(namespace) )
+            for var in Params[namespace]:
+                f.write(var + ' = ' + convert_par_to_str(Params[namespace][var]) + '\n')
             f.write("/\n\n")
 
 def Directory_name(Sim):
-    Dir=str()
-    for name in Sim.split(','):
-        if name.split('=')[0].strip() in ["L1", "L2","Lattice_type","Model",
+    Dir=''
+    for name in Sim:
+        if name in ["L1", "L2","Lattice_type","Model",
                     "Checkerboard","Symm","N_SUN","N_FL", "Phi_X","N_Phi",
                     "Dtau","Beta","Projector",
                     "Theta", "ham_T","ham_chem","ham_U",
                     "ham_T2", "ham_U2", "ham_Tperp"]:
-            if name.split('=')[0].strip() in ["Lattice_type","Model"]:
-                Dir=Dir+str(name.split('=')[1].strip()+"_")
+            if name in ["Lattice_type","Model"]:
+                Dir='{}{}_'.format(Dir, Sim[name])
             else:
-                Dir=Dir+str(name.split('=')[0].strip().strip("ham_")+"="+
-                            name.split('=')[1].strip()+"_")
+                Dir='{}{}={}_'.format(Dir, name.strip("ham_"), Sim[name])
     return Dir[:-1]
-
-def Check_Var(name):
-    #print("check",name)
-    if str(name).strip() not in   ["L1", "L2", "Lattice_type", "Model",
-                  "Checkerboard", "Symm",
-                  "N_SUN", "N_FL","Phi_X", "Phi_Y", "Bulk", "N_Phi", "Dtau",
-                  "Beta", "Projector", "Theta", "HS","ham_T", "ham_chem",
-                  "ham_U", "ham_T2", "ham_U2", "ham_Tperp", "Nwrap",
-                  "NSweep", "NBin", "Ltau", "LOBS_ST",
-                  "LOBS_EN", "CPU_MAX", "Propose_S0", "Global_moves",
-                  "N_Global", "Global_tau_moves","N_Global_tau",
-                  "Nt_sequential_start", "Nt_sequential_end", "n_skip",
-                  "N_rebin", "N_Cov", "NGamma", "Om_st", "Om_en", "Ndis",
-                  "NBins", "NSweeps", "NWarm", "N_alpha","alpha_st", "R",
-                  "Channel", "Checkpoint", "Tolerance", "N_exchange_steps",
-                  "N_Tempering_frequency", "mpi_per_parameter_set",
-                  "Tempering_calc_det"]:
-        print("Name ",name, " does not correspond to a parameter" )
-        exit()
+        
+def update_var(Params, var, value):
+    """Tries to update value of parameter called var in Params"""
+    for name in Params:
+        for var2 in Params[name]:
+            if var2 == var:
+                Params[name][var2] = value
+                return Params
+    raise Exception ('"{}" does not correspond to a parameter'.format(var) )
 
 def Set_param(Sim):
-    if str(Sim.split(',')[0].split('=')[0].strip()).lower() ==  "stop":
-        print("Done")
-        exit()
-    Params = Set_Default_Variables()
-    for Var_sim in Sim.split(','):
-        Check_Var(str(Var_sim.split('=')[0]).strip())
-        for name in Params:
-            for var in Params[name]:
-                if  str(Var_sim.split('=')[0]).strip() == var:
-                    Params[name][var] = str(Var_sim.split('=')[1]).strip()
+    model = Sim['Model']
+    Params, Params_model = Set_Default_Variables()
+    Params['VAR_'+model] = Params_model['VAR_'+model]
+    
+    for var in Sim:
+        Params = update_var(Params, var, Sim[var])
     return Params
 
 def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
@@ -254,14 +242,18 @@ if __name__ == "__main__":
     if  Alfdir == "none" :
         print("Alfdir is mandatory")
         exit()
-    f = open("Sims")
-    Simulations = f.read().splitlines()
-    f.close()
+    
+    with open("Sims") as f:
+        Simulations = f.read().splitlines()
     print ( "Number of simulations ", len(Simulations))
     for Sim in Simulations:
-        Params= Set_param(Sim)
-        model = Sim.split(',')[0].split('=')[1].strip()
+        if Sim.strip() ==  "stop":
+            print("Done")
+            exit()
+        Sim = json.loads(Sim)
+        model = Sim['Model']
         print("Model is", model) 
+        Params = Set_param(Sim)
         Dir = Directory_name(Sim)
         print(Dir)
         cwd = os.getcwd()
