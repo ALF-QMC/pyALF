@@ -11,6 +11,7 @@ import subprocess
 import shutil
 import sys
 import json
+import argparse
 from colorama import Fore, Back, Style
 
 
@@ -202,46 +203,32 @@ def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
 
 
 if __name__ == "__main__":
-    print ('Number of arguments:', len(sys.argv), 'arguments.' )
-    print (sys.argv)
-    if len(sys.argv) == 1:
-        print(Fore.RED+"Usage: python3 Run.py Type=  Alfdir=  Runbranch=  Program= Testbranch= Config=")
-        print(Style.RESET_ALL)
-        print("Type        : R+T, R, T        with R=Run,  T=Test. Default=R+A")
-        print("Alfdir      : Path to ALF directory.                Mandatory")
-        print("branch_R    : Will run git checkout \"Runbranch\".    Default=master")
-        print("Executable_R: Name of ref executable                Default=\"Model\".out")
-        print("Config      : Will run ./configureHPC \"Config\"      Default=Intel")
-        print("branch_T    : Branch to test against Runbranch      Default=master")
-        print("Executable_T: Name of test executable               Default=\"Model\".out")
-
-    # Default
-    Type         = "R"
-    Alfdir       = "none"
-    branch_R     = "master"
-    branch_T     = "master"
-    Config       = "Intel"
-    Executable_R = "none"
-    Executable_T = "none"
-    print(sys.argv)
-    for arg in sys.argv:
-        if arg.split('=')[0].lower() == "type" :
-            Type=str(arg.split('=')[1])
-        if arg.split('=')[0].lower() == "alfdir" :
-            Alfdir=os.path.expanduser(arg.split('=')[1])
-        if arg.split('=')[0].lower() == "branch_r" :
-            branch_R=str(arg.split('=')[1])
-        if arg.split('=')[0].lower() == "config" :
-            Config=str(arg.split('=')[1])
-        if arg.split('=')[0].lower() == "branch_t" :
-            branch_T=str(arg.split('=')[1])
-        if arg.split('=')[0].lower() == "executable_r" :
-            Executable_R=str(arg.split('=')[1])
-        if arg.split('=')[0].lower() == "executable_t" :
-            Executable_T=str(arg.split('=')[1])
-    if  Alfdir == "none" :
-        print("Alfdir is mandatory")
-        exit()
+    parser = argparse.ArgumentParser(
+        description='Helper script for compiling, running and testing ALF.',
+        #formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        )
+    parser.add_argument('--alfdir', required=True,      help="Path to ALF directory")
+    parser.add_argument('--type',     default="R"     , help='Options R+T, R, T with R=Run,  T=Test. (default: R)')
+    parser.add_argument('--branch_R', default="master", help='Git branch to checkout for run.        (default: master)')
+    parser.add_argument('--branch_T', default="master", help='Branch to test against Runbranch.      (default: master)')
+    parser.add_argument('--config',   default="Intel" , help='Will run ./configureHPC.sh CONFIG      (default: Intel)')
+    parser.add_argument('--executable_R',               help='Name of  ref executable.               (default: <Model>.out)')
+    parser.add_argument('--executable_T',               help='Name of test executable.               (default: <Model>.out)')
+    
+    
+    args = parser.parse_args()
+    
+    print(args)
+    
+    print( args.alfdir )
+    
+    Type         = args.type
+    Alfdir       = os.path.expanduser(args.alfdir)
+    branch_R     = args.branch_R
+    branch_T     = args.branch_T
+    Config       = args.config
+    Executable_R = args.executable_R
+    Executable_T = args.executable_T
     
     with open("Sims") as f:
         Simulations = f.read().splitlines()
@@ -261,7 +248,7 @@ if __name__ == "__main__":
         print ("rundir is ", rundir)
         print(Type, Type.split("+"),Type.split("+")[0] )
         if "R" in str(Type.split("+")).strip():
-            if Executable_R == "none":
+            if Executable_R == None:
                 Executable1 = model
             else:
                 Executable1 = Executable_R
@@ -272,7 +259,7 @@ if __name__ == "__main__":
         os.chdir(cwd)
         if "T" in str(Type.split("+")).strip():
             rundirT=str(rundir+"_Test")
-            if Executable_T == "none":
+            if Executable_T == None:
                 Executable1 = model
             else:
                 Executable1 = Executable_T
