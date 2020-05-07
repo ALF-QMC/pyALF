@@ -1,1 +1,2 @@
 python3 Run.py  Config="FakhersMAC noMPI" ALFdir="~/Programs/ALF" branch_R="135-introduce_hubbard_hamiltonian" Executable_T="Examples" Type="R+T" 
+./Run.py --alfdir ~/Programs/ALF --config "GNU noMPI" --branch_R 135-introduce_hubbard_hamiltonian --executable_T Examples  --type R+T 

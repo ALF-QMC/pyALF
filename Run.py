@@ -166,15 +166,8 @@ def Set_param(Sim):
     return Params
 
 def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
-    if os.path.exists(rundir):
-        os.chdir(rundir)
-        os.system("rm parameters")
-        os.system("bash out_to_in.sh")
-    else:
-        os.mkdir(rundir)
-        os.chdir(rundir)
-        os.system("cp ../Start/* .")
-    Print_parameters(Params, "parameters")
+    
+    #Compiling program
     os.chdir(Alfdir)
     os.system("make clean")
     command=str("git checkout " + Runbranch ) 
@@ -185,21 +178,89 @@ def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
     print (Fore.RED+command)
     print(Style.RESET_ALL)
     os.system(command)
-    os.chdir(rundir)
-    command=str(Alfdir+"/Prog/" + str(Executable).strip() + ".out" )
-    print (Fore.RED+command)
-    print(Style.RESET_ALL)
-    os.system(command)
-    os.chdir(Alfdir)
     command=str(". ./configureHPC.sh " + Config + "; make ana " )
     print (Fore.RED+command)
     print(Style.RESET_ALL)
     os.system(command)
+    
+    #Preparing run directory
+    if not os.path.exists(rundir):
+        os.mkdir(rundir)
     os.chdir(rundir)
-    command=str( "cd " + Alfdir+ "; . ./configureHPC.sh " + Config + "; cd "
-                    + rundir + "; bash analysis.sh" )
+    out_to_in()
+    os.system("cp ../Start/seeds .")
+    Print_parameters(Params, "parameters")
+    
+    #Running Monte Carlo
+    command=str(Alfdir+"/Prog/" + str(Executable).strip() + ".out" )
+    print (Fore.RED+command)
+    print(Style.RESET_ALL)
+    os.system(command)
+    analysis(Alfdir)
     print (Fore.RED+command)
     os.system(command)
+
+    
+def out_to_in(verbose=False):
+    """Renames all the output configurations confout_* to confin_* 
+    to continue the Monte Carlo simulation where the previous stopped"""
+    for name in os.listdir():
+        if name[:8] == 'confout_':
+            name2 = 'confin_' + name[8:]
+            if verbose:
+                print( 'mv {} {}'.format(name, name2) )
+            os.replace(name, name2)
+
+
+def analysis(Alfdir):
+    if os.path.exists('Var_scal'):
+        os.remove('Var_scal')
+    for name in os.listdir():
+        if name[-5:] == '_scal':
+            print( 'Analysing {}'.format(name) )
+            os.symlink(name, 'Var_scal')
+            command = Alfdir + '/Analysis/cov_scal.out'
+            os.system(command)
+            os.remove('Var_scal')
+            os.replace('Var_scalJ', name+'J')
+            
+            for name2 in os.listdir():
+                if name2[:14] == 'Var_scal_Auto_':
+                    name3 = name + name2[8:]
+                    os.replace(name2, name3)
+    
+    if os.path.exists('ineq'):
+        os.remove('ineq')
+    for name in os.listdir():
+        if name[-3:] == '_eq':
+            print( 'Analysing {}'.format(name) )
+            os.symlink(name, 'ineq')
+            command = Alfdir + '/Analysis/cov_eq.out'
+            os.system(command)
+            os.remove('ineq')
+            
+            for name2 in os.listdir():
+                if name2[:14] == 'Var_eq_Auto_Tr':
+                    name3 = name + name2[6:]
+                    os.replace(name2, name3)
+    
+    if os.path.exists('intau'):
+        os.remove('intau')
+    for name in os.listdir():
+        if name[-4:] == '_tau':
+            print( 'Analysing {}'.format(name) )
+            os.symlink(name, 'intau')
+            command = Alfdir + '/Analysis/cov_tau.out'
+            os.system(command)
+            os.remove('intau')
+            
+            for name2 in os.listdir():
+                if name2[:2] == 'g_':
+                    directory = name[:-4] + name2[1:]
+                    if not os.path.exists(directory):
+                        os.mkdir(directory)
+                    os.replace(name2, directory +'/'+ name2)
+    
 
 
 if __name__ == "__main__":
@@ -207,20 +268,22 @@ if __name__ == "__main__":
         description='Helper script for compiling, running and testing ALF.',
         #formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
-    parser.add_argument('--alfdir', required=True,      help="Path to ALF directory")
-    parser.add_argument('--type',     default="R"     , help='Options R+T, R, T with R=Run,  T=Test. (default: R)')
-    parser.add_argument('--branch_R', default="master", help='Git branch to checkout for run.        (default: master)')
-    parser.add_argument('--branch_T', default="master", help='Branch to test against Runbranch.      (default: master)')
-    parser.add_argument('--config',   default="Intel" , help='Will run ./configureHPC.sh CONFIG      (default: Intel)')
-    parser.add_argument('--executable_R',               help='Name of  ref executable.               (default: <Model>.out)')
-    parser.add_argument('--executable_T',               help='Name of test executable.               (default: <Model>.out)')
-    
+    parser.add_argument('--alfdir', required=True,      
+                        help="Path to ALF directory")
+    parser.add_argument('--type',     default="R"     , 
+                        help='Options R+T, R, T with R=Run,  T=Test. (default: R)')
+    parser.add_argument('--branch_R', default="master", 
+                        help='Git branch to checkout for run.        (default: master)')
+    parser.add_argument('--branch_T', default="master", 
+                        help='Branch to test against Runbranch.      (default: master)')
+    parser.add_argument('--config',   default="Intel" , 
+                        help='Will run ./configureHPC.sh CONFIG      (default: Intel)')
+    parser.add_argument('--executable_R',               
+                        help='Name of  ref executable.               (default: <Model>.out)')
+    parser.add_argument('--executable_T',               
+                        help='Name of test executable.               (default: <Model>.out)')
     
     args = parser.parse_args()
-    
-    print(args)
-    
-    print( args.alfdir )
     
     Type         = args.type
     Alfdir       = os.path.expanduser(args.alfdir)
