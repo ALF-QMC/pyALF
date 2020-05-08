@@ -12,6 +12,7 @@ import shutil
 import sys
 import json
 import argparse
+from shutil import copyfile
 from colorama import Fore, Back, Style
 
 
@@ -188,7 +189,7 @@ def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
         os.mkdir(rundir)
     os.chdir(rundir)
     out_to_in()
-    os.system("cp ../Start/seeds .")
+    copyfile('../seeds', 'seeds')
     Print_parameters(Params, "parameters")
     
     #Running Monte Carlo
