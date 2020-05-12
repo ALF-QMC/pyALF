@@ -19,10 +19,10 @@ from colorama import Fore, Back, Style
 def Set_Default_Variables():
     """Defines a dictionary containing all parameters with default values."""
     
-    Params = {}
-    Params_model = {}
+    params = {}
+    params_model = {}
     
-    Params["VAR_Lattice"] = {
+    params["VAR_Lattice"] = {
         # Parameters that define the Bravais lattice
         "L1": 6,
         "L2": 6,
@@ -30,7 +30,7 @@ def Set_Default_Variables():
         "Model":"Hubbard"
         }
     
-    Params["VAR_Model_Generic"] = {
+    params["VAR_Model_Generic"] = {
         # General parameters concerning any model
         "Checkerboard": True,
         "Symm"        : True,
@@ -46,7 +46,7 @@ def Set_Default_Variables():
         "Theta"       : 10.0,
         }
     
-    Params["VAR_QMC"] = {
+    params["VAR_QMC"] = {
         # General parameters for the Monte Carlo algorithm
         "Nwrap"              : 10 ,
         "NSweep"             : 20 ,
@@ -64,14 +64,14 @@ def Set_Default_Variables():
         "Nt_sequential_end"  : -1 ,
         }
     
-    Params["VAR_errors"] = {
+    params["VAR_errors"] = {
         # Post-processing parameters
         "n_skip" : 1,
         "N_rebin": 1,
         "N_Cov"  : 0,
         }
     
-    Params["VAR_TEMP"] = {
+    params["VAR_TEMP"] = {
         # Parallel tempering parameters
         "N_exchange_steps"      : 6   ,
         "N_Tempering_frequency" : 10  ,
@@ -79,7 +79,7 @@ def Set_Default_Variables():
         "Tempering_calc_det"    : True,
         }
     
-    Params["VAR_Max_Stoch"] = {
+    params["VAR_Max_Stoch"] = {
         # MaxEnt parameters
         "NGamma"     : 400  ,
         "Om_st"      : -10.0,
@@ -96,7 +96,7 @@ def Set_Default_Variables():
         "Tolerance"  : 0.1  ,
         }
     
-    Params_model["VAR_Hubbard"] = {
+    params_model["VAR_Hubbard"] = {
         # Parameters of the Hubbard hamiltonian
         "HS"       :  "Mz" ,
         "ham_T"    :  1.0  ,
@@ -107,9 +107,9 @@ def Set_Default_Variables():
         "ham_Tperp":  1.0  ,
         }
         
-    #json.dumps(Params)
+    #json.dumps(params)
     
-    return Params, Params_model
+    return params, params_model
 
 def convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be written into a parameter file"""
@@ -125,57 +125,55 @@ def convert_par_to_str(parameter):
     
     raise Exception('Error in "convert_par_to_str": unrecognized type')
 
-def Print_parameters(Params, file):
+def write_parameters(params, file):
     print ("Setting up parameter file for", file )
     with open(file, 'w') as f:
-        for namespace in Params:
+        for namespace in params:
             f.write( "&{}\n".format(namespace) )
-            for var in Params[namespace]:
-                f.write(var + ' = ' + convert_par_to_str(Params[namespace][var]) + '\n')
+            for var in params[namespace]:
+                f.write(var + ' = ' + convert_par_to_str(params[namespace][var]) + '\n')
             f.write("/\n\n")
 
-def Directory_name(Sim):
+def Directory_name(sim):
     Dir=''
-    for name in Sim:
+    for name in sim:
         if name in ["L1", "L2","Lattice_type","Model",
                     "Checkerboard","Symm","N_SUN","N_FL", "Phi_X","N_Phi",
                     "Dtau","Beta","Projector",
                     "Theta", "ham_T","ham_chem","ham_U",
                     "ham_T2", "ham_U2", "ham_Tperp"]:
             if name in ["Lattice_type","Model"]:
-                Dir='{}{}_'.format(Dir, Sim[name])
+                Dir='{}{}_'.format(Dir, sim[name])
             else:
-                Dir='{}{}={}_'.format(Dir, name.strip("ham_"), Sim[name])
+                Dir='{}{}={}_'.format(Dir, name.strip("ham_"), sim[name])
     return Dir[:-1]
         
-def update_var(Params, var, value):
-    """Tries to update value of parameter called var in Params"""
-    for name in Params:
-        for var2 in Params[name]:
+def update_var(params, var, value):
+    """Tries to update value of parameter called var in params"""
+    for name in params:
+        for var2 in params[name]:
             if var2 == var:
-                Params[name][var2] = value
-                return Params
+                params[name][var2] = value
+                return params
     raise Exception ('"{}" does not correspond to a parameter'.format(var) )
 
-def Set_param(Sim):
-    model = Sim['Model']
-    Params, Params_model = Set_Default_Variables()
-    Params['VAR_'+model] = Params_model['VAR_'+model]
+def Set_param(sim):
+    model = sim['Model']
+    params, params_model = Set_Default_Variables()
+    params['VAR_'+model] = params_model['VAR_'+model]
     
-    for var in Sim:
-        Params = update_var(Params, var, Sim[var])
-    return Params
+    for var in sim:
+        params = update_var(params, var, sim[var])
+    return params
 
-def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
-    
-    #Compiling program
-    os.chdir(Alfdir)
+def Compile(alfdir, branch, Config, executable):
+    os.chdir(alfdir)
     os.system("make clean")
-    command=str("git checkout " + Runbranch ) 
+    command=str("git checkout " + branch ) 
     print (Fore.RED+command)
     print(Style.RESET_ALL)
     os.system(command)
-    command=str(". ./configureHPC.sh " + Config + "; make " + Executable )
+    command=str(". ./configureHPC.sh " + Config + "; make " + executable )
     print (Fore.RED+command)
     print(Style.RESET_ALL)
     os.system(command)
@@ -183,21 +181,22 @@ def Run(rundir,Alfdir,Runbranch,Config,Executable,Params):
     print (Fore.RED+command)
     print(Style.RESET_ALL)
     os.system(command)
-    
+
+def Run(rundir, alfdir, executable, params):
     #Preparing run directory
     if not os.path.exists(rundir):
         os.mkdir(rundir)
     os.chdir(rundir)
     out_to_in()
     copyfile('../seeds', 'seeds')
-    Print_parameters(Params, "parameters")
+    write_parameters(params, "parameters")
     
     #Running Monte Carlo
-    command=str(Alfdir+"/Prog/" + str(Executable).strip() + ".out" )
+    command=str(alfdir+"/Prog/" + str(executable).strip() + ".out" )
     print (Fore.RED+command)
     print(Style.RESET_ALL)
     os.system(command)
-    analysis(Alfdir)
+    analysis(alfdir)
     print (Fore.RED+command)
     os.system(command)
 
@@ -213,14 +212,16 @@ def out_to_in(verbose=False):
             os.replace(name, name2)
 
 
-def analysis(Alfdir):
+def analysis(alfdir):
+    """Performs the default analysis on all files ending in 
+    _scal, _eq or _tau in current working directory"""
     if os.path.exists('Var_scal'):
         os.remove('Var_scal')
     for name in os.listdir():
         if name[-5:] == '_scal':
             print( 'Analysing {}'.format(name) )
             os.symlink(name, 'Var_scal')
-            command = Alfdir + '/Analysis/cov_scal.out'
+            command = alfdir + '/Analysis/cov_scal.out'
             os.system(command)
             os.remove('Var_scal')
             os.replace('Var_scalJ', name+'J')
@@ -236,7 +237,7 @@ def analysis(Alfdir):
         if name[-3:] == '_eq':
             print( 'Analysing {}'.format(name) )
             os.symlink(name, 'ineq')
-            command = Alfdir + '/Analysis/cov_eq.out'
+            command = alfdir + '/Analysis/cov_eq.out'
             os.system(command)
             os.remove('ineq')
             
@@ -251,7 +252,7 @@ def analysis(Alfdir):
         if name[-4:] == '_tau':
             print( 'Analysing {}'.format(name) )
             os.symlink(name, 'intau')
-            command = Alfdir + '/Analysis/cov_tau.out'
+            command = alfdir + '/Analysis/cov_tau.out'
             os.system(command)
             os.remove('intau')
             
@@ -287,50 +288,51 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     Type         = args.type
-    Alfdir       = os.path.expanduser(args.alfdir)
+    alfdir       = os.path.expanduser(args.alfdir)
     branch_R     = args.branch_R
     branch_T     = args.branch_T
     Config       = args.config
-    Executable_R = args.executable_R
-    Executable_T = args.executable_T
+    executable_R = args.executable_R
+    executable_T = args.executable_T
     
     with open("Sims") as f:
-        Simulations = f.read().splitlines()
-    print ( "Number of simulations ", len(Simulations))
-    for Sim in Simulations:
-        if Sim.strip() ==  "stop":
+        simulations = f.read().splitlines()
+    print ( "Number of simulations ", len(simulations))
+    for sim in simulations:
+        if sim.strip() ==  "stop":
             print("Done")
             exit()
-        Sim = json.loads(Sim)
-        model = Sim['Model']
+        sim = json.loads(sim)
+        model = sim['Model']
         print("Model is", model) 
-        Params = Set_param(Sim)
-        Dir = Directory_name(Sim)
+        params = Set_param(sim)
+        Dir = Directory_name(sim)
         print(Dir)
         cwd = os.getcwd()
         rundir = str(cwd+"/"+Dir)
         print ("rundir is ", rundir)
         print(Type, Type.split("+"),Type.split("+")[0] )
         if "R" in str(Type.split("+")).strip():
-            if Executable_R == None:
-                Executable1 = model
+            if executable_R == None:
+                executable1 = model
             else:
-                Executable1 = Executable_R
-            Run(rundir,Alfdir,branch_R,Config,Executable1,Params)
-            f=open("Kin_scalJ")
-            Kin_R=f.read().splitlines()[2]
-            f.close               
+                executable1 = executable_R
+            #Run(rundir,alfdir,branch_R,Config,executable1,params)
+            Compile(alfdir, branch_R, Config, executable1)
+            Run(rundir, alfdir, executable1, params)
+            with open("Kin_scalJ") as f:
+                Kin_R = f.read().splitlines()[2]
         os.chdir(cwd)
         if "T" in str(Type.split("+")).strip():
             rundirT=str(rundir+"_Test")
-            if Executable_T == None:
-                Executable1 = model
+            if executable_T == None:
+                executable1 = model
             else:
-                Executable1 = Executable_T
-            Run(rundirT,Alfdir,branch_T,Config,Executable1,Params)
-            f=open("Kin_scalJ")
-            Kin_T=f.read().splitlines()[2]
-            f.close 
+                executable1 = executable_T
+            Compile(alfdir, branch_T, Config, executable1)
+            Run(rundir, alfdir, executable1, params)
+            with open("Kin_scalJ") as f:
+                Kin_T=f.read().splitlines()[2]
         os.chdir(cwd)
         with open(str(rundir)+".txt","w") as f:
             f.write(Kin_T)
@@ -338,7 +340,7 @@ if __name__ == "__main__":
         
         
 # You need to write a general  run routine 
-#  in ALFdir, Branch,  Config, rundir,  Executable
+#  in ALFdir, Branch,  Config, rundir,  executable
 # You need to write ageneral analysis routine
 #  in ALFdir, Branch,  Config, rundir
 
