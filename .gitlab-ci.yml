@@ -8,6 +8,6 @@ Test:
       changes:
         - Run.py
     script:
-      - apt-get update && apt-get install -y pylint3
+      - apt-get update && apt-get install -y pylint3 numpy colorama
       - pylint3 -E Run.py
 
