@@ -12,8 +12,22 @@ import shutil
 import sys
 import json
 import argparse
+import numpy as np
 from shutil import copyfile
 from colorama import Fore, Back, Style
+
+
+class cd:
+    """Context manager for changing the current working directory"""
+    def __init__(self, directory):
+        self.directory = os.path.expanduser(directory)
+    
+    def __enter__(self):
+        self.savedPath = os.getcwd()
+        os.chdir(self.directory)
+
+    def __exit__(self, type, value, traceback):
+        os.chdir(self.savedPath)
 
 
 def Set_Default_Variables():
@@ -122,8 +136,8 @@ def convert_par_to_str(parameter):
             return '.T.'
         else:
             return '.F.'
-    
-    raise Exception('Error in "convert_par_to_str": unrecognized type')
+    else:
+        raise Exception('Error in "convert_par_to_str": unrecognized type')
 
 def write_parameters(params, file):
     print ("Setting up parameter file for", file )
@@ -167,31 +181,31 @@ def Set_param(sim):
     return params
 
 def Compile(alfdir, branch, Config, executable):
-    os.chdir(alfdir)
-    os.system("make clean")
-    command=str("git checkout " + branch ) 
-    print (Fore.RED+command)
-    print(Style.RESET_ALL)
-    os.system(command)
-    command=str(". ./configureHPC.sh " + Config + "; make " + executable )
-    print (Fore.RED+command)
-    print(Style.RESET_ALL)
-    os.system(command)
-    command=str(". ./configureHPC.sh " + Config + "; make ana " )
-    print (Fore.RED+command)
-    print(Style.RESET_ALL)
-    os.system(command)
-
-def Run(rundir, alfdir, executable, params):
+    with cd(alfdir):
+        os.system("make clean")
+        command=str("git checkout " + branch ) 
+        print (Fore.RED+command)
+        print(Style.RESET_ALL)
+        os.system(command)
+        command=str(". ./configureHPC.sh " + Config + "; make " + executable )
+        print (Fore.RED+command)
+        print(Style.RESET_ALL)
+        os.system(command)
+        command=str(". ./configureHPC.sh " + Config + "; make ana " )
+        print (Fore.RED+command)
+        print(Style.RESET_ALL)
+        os.system(command)
+    
+def prepare_dir(params):
     #Preparing run directory
-    if not os.path.exists(rundir):
-        os.mkdir(rundir)
-    os.chdir(rundir)
-    out_to_in()
+    print( os.getcwd() )
     copyfile('../seeds', 'seeds')
     write_parameters(params, "parameters")
-    
+
+def Run(alfdir, executable):
     #Running Monte Carlo
+    #with cd(rundir):
+    out_to_in()
     command=str(alfdir+"/Prog/" + str(executable).strip() + ".out" )
     print (Fore.RED+command)
     print(Style.RESET_ALL)
@@ -262,7 +276,20 @@ def analysis(alfdir):
                     if not os.path.exists(directory):
                         os.mkdir(directory)
                     os.replace(name2, directory +'/'+ name2)
+
+
+def read_scalJ(name):
+    with open(name) as f:
+        lines=f.read().splitlines()
+    Nobs = int((len(lines)-3)/2)
     
+    sign = np.array( lines[-1].split()[-2:] )
+    
+    obs = np.zeros( [Nobs, 2] )
+    for iobs in range(Nobs):
+        obs[iobs] = lines[iobs+2].split()[-2:]
+    
+    return sign, obs
 
 
 if __name__ == "__main__":
@@ -272,8 +299,10 @@ if __name__ == "__main__":
         )
     parser.add_argument('--alfdir', required=True,      
                         help="Path to ALF directory")
-    parser.add_argument('--type',     default="R"     , 
-                        help='Options R+T, R, T with R=Run,  T=Test. (default: R)')
+    parser.add_argument('-R', action='store_true', 
+                        help='Do a run')
+    parser.add_argument('-T', action='store_true', 
+                        help='Do a test')
     parser.add_argument('--branch_R', default="master", 
                         help='Git branch to checkout for run.        (default: master)')
     parser.add_argument('--branch_T', default="master", 
@@ -287,7 +316,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    Type         = args.type
+    do_R         = args.R
+    do_T         = args.T
     alfdir       = os.path.expanduser(args.alfdir)
     branch_R     = args.branch_R
     branch_T     = args.branch_T
@@ -311,32 +341,37 @@ if __name__ == "__main__":
         cwd = os.getcwd()
         rundir = str(cwd+"/"+Dir)
         print ("rundir is ", rundir)
-        print(Type, Type.split("+"),Type.split("+")[0] )
-        if "R" in str(Type.split("+")).strip():
+        if do_R:
+            if not os.path.exists(rundir):
+                os.mkdir(rundir)
+            os.chdir(rundir)
             if executable_R == None:
                 executable1 = model
             else:
                 executable1 = executable_R
-            #Run(rundir,alfdir,branch_R,Config,executable1,params)
             Compile(alfdir, branch_R, Config, executable1)
-            Run(rundir, alfdir, executable1, params)
-            with open("Kin_scalJ") as f:
-                Kin_R = f.read().splitlines()[2]
+            prepare_dir(params)
+            Run(alfdir, executable1)
+            sign, Kin_R = read_scalJ("Kin_scalJ")
         os.chdir(cwd)
-        if "T" in str(Type.split("+")).strip():
+        if do_T:
             rundirT=str(rundir+"_Test")
+            if not os.path.exists(rundir):
+                os.mkdir(rundir)
+            os.chdir(rundir)
             if executable_T == None:
                 executable1 = model
             else:
                 executable1 = executable_T
             Compile(alfdir, branch_T, Config, executable1)
-            Run(rundir, alfdir, executable1, params)
-            with open("Kin_scalJ") as f:
-                Kin_T=f.read().splitlines()[2]
+            prepare_dir(params)
+            Run(alfdir, executable1)
+            sign, Kin_T = read_scalJ("Kin_scalJ")
         os.chdir(cwd)
         with open(str(rundir)+".txt","w") as f:
-            f.write(Kin_T)
-            f.write(Kin_R)
+            f.write( 'Run:  {} +- {}\n'.format( *Kin_R[0] ) )
+            f.write( 'Test: {} +- {}\n'.format( *Kin_T[0] ) )
+            f.write( 'Diff: {} +- {}\n'.format( *(Kin_R[0] - Kin_T[0])  ) )
         
         
 # You need to write a general  run routine 
