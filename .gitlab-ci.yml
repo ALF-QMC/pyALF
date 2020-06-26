@@ -1,0 +1,13 @@
+types:
+  - build
+
+Test:
+    image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+    type: build
+    only:
+      changes:
+        - Run.py
+    script:
+      - apt-get update && apt-get install -y pylint3
+      - pylint3 -E Run.py
+
