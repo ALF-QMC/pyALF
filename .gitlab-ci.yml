@@ -1,0 +1,31 @@
+types:
+    - build
+  
+.test_template: &test_definition
+    type: build
+    only:
+      changes:
+        - Run.py
+    script:
+      - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama
+      - pylint3 -E Run.py
+
+
+Test_Buster:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+  <<: *test_definition
+
+Test_Stretch:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
+  <<: *test_definition
+
+Warn_Buster:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+  allow_failure: true
+  stage: build
+  only:
+    changes:
+      - Run.py
+  script:
+    - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama
+    - pylint3 Run.py
