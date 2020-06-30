@@ -24,6 +24,46 @@ class cd:
         os.chdir(self.savedPath)
 
 
+class simulation:
+    def __init__(self, sim, alf_dir='ALF', sim_dir=None, executable=None, 
+                 compile_config='GNU noMPI', branch=None):
+        self.sim = sim
+        self.alf_dir = os.path.abspath(alf_dir)
+        if sim_dir == None:
+            self.sim_dir = os.path.abspath(directory_name(sim))
+        else:
+            self.sim_dir = os.path.abspath(sim_dir)
+        
+        if executable == None:
+            executable = sim['Model']
+        self.executable = executable + '.out'
+        self.compile_config = compile_config
+        self.branch = branch
+        
+    def compile(self):
+        compile_alf(self.alf_dir, self.branch, self.compile_config, model='all')
+            
+    def run(self):
+        if not os.path.exists(self.sim_dir):
+            os.mkdir(self.sim_dir)
+        
+        with cd(self.sim_dir):
+            copyfile(os.path.join(self.alf_dir, 'Scripts_and_Parameters_files', 'Start', 'seeds'), 'seeds')
+            params = set_param(self.sim)
+            write_parameters(params)
+            out_to_in(verbose=False)
+            subprocess.run([os.path.join(self.alf_dir, 'Prog', self.executable)])
+            
+    def ana(self):
+        with cd(self.sim_dir):
+            analysis(self.alf_dir)
+    
+    def get_obs(self, names=None):
+        return get_obs(self.sim_dir, names)
+    
+        
+
+
 def convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be written into a parameter file"""
     if type(parameter) == type(1) or type(parameter) == type(1.):
@@ -95,22 +135,6 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all'):
         os.system(". ./configureHPC.sh " + config + "; make clean " + model)
 
 
-def run(sim, alf_dir='ALF', executable=None):
-    sim_dir = directory_name(sim)
-    alf_dir = os.path.abspath(alf_dir)
-    if executable == None:
-        executable = sim['Model']+'.out'
-    
-    if not os.path.exists(sim_dir):
-        os.mkdir(sim_dir)
-    
-    with cd(sim_dir):
-        copyfile(os.path.join(alf_dir, 'Scripts_and_Parameters_files', 'Start', 'seeds'), 'seeds')
-        params = set_param(sim)
-        write_parameters(params)
-        subprocess.run([os.path.join(alf_dir, 'Prog', executable)])
-
-
 def out_to_in(verbose=False):
     """Renames all the output configurations confout_* to confin_* 
     to continue the Monte Carlo simulation where the previous stopped"""
@@ -120,13 +144,6 @@ def out_to_in(verbose=False):
             if verbose:
                 print( 'mv {} {}'.format(name, name2) )
             os.replace(name, name2)
-
-
-def ana(sim, alf_dir='ALF'):
-    sim_dir = directory_name(sim)
-    alf_dir = os.path.abspath(alf_dir)
-    with cd(sim_dir):
-        analysis(alf_dir)
 
 
 def analysis(alfdir):
@@ -184,8 +201,7 @@ def analysis(alfdir):
                     os.replace(name2, directory +'/'+ name2)
 
 
-def get_obs(sim, names=None):
-    sim_dir = directory_name(sim)
+def get_obs(sim_dir, names=None):
     obs = {}
     if names == None:
         names = os.listdir( sim_dir )

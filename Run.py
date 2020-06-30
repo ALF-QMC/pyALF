@@ -49,16 +49,25 @@ if __name__ == "__main__":
         if sim.strip() ==  "stop":
             print("Done")
             exit()
-        sim = json.loads(sim)
         if do_R:
-            compile_alf(alf_dir, branch_R, config)
-            run(sim, alf_dir, executable_R)
-            ana(sim)
-            obs1 = get_obs(sim)
+            print( 'do R' )
+            sim_R = simulation( json.loads(sim), alf_dir, executable=executable_R, 
+                                 compile_config=config, branch=branch_R )
+            sim_R.compile()
+            sim_R.run()
+            sim_R.ana()
+            obs_R = sim_R.get_obs()
         if do_T:
-            raise Exception('Test not yet implemted')
+            print( 'do T' )
+            sim_T = simulation( json.loads(sim), alf_dir, executable=executable_T, 
+                                 compile_config=config, branch=branch_T )
+            sim_T.sim_dir = sim_T.sim_dir + '_test'
+            sim_T.compile()
+            sim_T.run()
+            sim_T.ana()
+            obs_T = sim_T.get_obs()
         
-        #with open(sim_dir+".txt","w") as f:
-            #f.write( 'Run:  {} +- {}\n'.format( *Kin_R[0] ) )
-            #f.write( 'Test: {} +- {}\n'.format( *Kin_T[0] ) )
-            #f.write( 'Diff: {} +- {}\n'.format( *(Kin_R[0] - Kin_T[0])  ) )
+        with open(sim_R.sim_dir + ".txt", "w") as f:
+            f.write( 'Run:  {} +- {}\n'.format( *obs_R['Kin_scalJ']['obs'][0] ) )
+            f.write( 'Test: {} +- {}\n'.format( *obs_T['Kin_scalJ']['obs'][0] ) )
+            f.write( 'Diff: {} +- {}\n'.format( *(obs_R['Kin_scalJ']['obs'][0] - obs_T['Kin_scalJ']['obs'][0])  ) )
