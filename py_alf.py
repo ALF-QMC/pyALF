@@ -1,14 +1,21 @@
+"""
+Provides interfaces for compilig running and postprocessing ALF in Python.
+"""
+
 import os
 import subprocess
-import numpy as np
 from shutil import copyfile
-# from colorama import Fore, Back, Style
+import numpy as np
+import default_variables
 
-from default_variables import set_default_variables
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2020, The ALF Project"
+__license__ = "GPL"
 
 
 class cd:
     """Context manager for changing the current working directory"""
+
     def __init__(self, directory):
         self.directory = os.path.expanduser(directory)
 
@@ -117,7 +124,8 @@ def update_var(params, var, value):
 
 def set_param(sim):
     model = sim['Model']
-    params, params_model = set_default_variables()
+    params = default_variables.PARAMS
+    params_model = default_variables.PARAMS_MODEL
     params['VAR_'+model] = params_model['VAR_'+model]
 
     for var in sim:

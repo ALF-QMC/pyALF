@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat May  2 22:05:24 2020
-
-@author: fassaad
+Helper script for compiling, running and testing ALF.
 """
+
 import os
 import json
 import argparse
-
 from py_alf import Simulation
+
+__author__ = "Fakher F. Assaad, and Jonas Schwab"
+__copyright__ = "Copyright 2020, The ALF Project"
+__license__ = "GPL"
 
 
 if __name__ == "__main__":
