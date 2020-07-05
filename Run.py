@@ -9,6 +9,7 @@ __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
 import os
+import sys
 import json
 import argparse
 from py_alf import Simulation
@@ -19,29 +20,29 @@ if __name__ == "__main__":
         description='Helper script for compiling, running and testing ALF.',
         )
     parser.add_argument(
-            '--alfdir', required=True,
-            help="Path to ALF directory")
+        '--alfdir', required=True,
+        help="Path to ALF directory")
     parser.add_argument(
-            '-R', action='store_true',
-            help='Do a run')
+        '-R', action='store_true',
+        help='Do a run')
     parser.add_argument(
-            '-T', action='store_true',
-            help='Do a test')
+        '-T', action='store_true',
+        help='Do a test')
     parser.add_argument(
-            '--branch_R', default="master",
-            help='Git branch to checkout for run.      (default: master)')
+        '--branch_R', default="master",
+        help='Git branch to checkout for run.      (default: master)')
     parser.add_argument(
-            '--branch_T', default="master",
-            help='Branch to test against Runbranch.    (default: master)')
+        '--branch_T', default="master",
+        help='Branch to test against Runbranch.    (default: master)')
     parser.add_argument(
-            '--config',   default='GNU noMPI',
-            help='Will run ./configureHPC.sh CONFIG    (default: Intel)')
+        '--config', default='GNU noMPI',
+        help='Will run ./configureHPC.sh CONFIG    (default: Intel)')
     parser.add_argument(
-            '--executable_R',
-            help='Name of  ref executable.             (default: <Model>.out)')
+        '--executable_R',
+        help='Name of  ref executable.             (default: <Model>.out)')
     parser.add_argument(
-            '--executable_T',
-            help='Name of test executable.             (default: <Model>.out)')
+        '--executable_T',
+        help='Name of test executable.             (default: <Model>.out)')
 
     args = parser.parse_args()
 
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     for sim in simulations:
         if sim.strip() == "stop":
             print("Done")
-            exit()
+            sys.exit()
         if do_R:
             print('do R')
             sim_R = Simulation(json.loads(sim), alf_dir,
