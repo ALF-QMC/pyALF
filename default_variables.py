@@ -8,9 +8,11 @@ __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
+from collections import OrderedDict
 
-PARAMS = {}
-PARAMS_MODEL = {}
+
+PARAMS = OrderedDict()
+PARAMS_MODEL = OrderedDict()
 
 PARAMS["VAR_Lattice"] = {
     # Parameters that define the Bravais lattice
