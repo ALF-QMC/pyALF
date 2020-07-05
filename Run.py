@@ -3,6 +3,7 @@
 """
 Helper script for compiling, running and testing ALF.
 """
+# pylint: disable=invalid-name
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"

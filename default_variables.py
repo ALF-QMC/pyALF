@@ -3,6 +3,7 @@ Defines dictionaries containing all ALF parameters with default values.
 PARAMS contains all generic parameters independent from the choice of model.
 PARAMS_MODEL contains a dictionary for each model.
 """
+# pylint: disable=bad-whitespace
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"

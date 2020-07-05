@@ -1,5 +1,6 @@
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
+# pylint: disable=invalid-name, too-many-arguments, too-many-branches
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
