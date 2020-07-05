@@ -4,14 +4,14 @@
 Helper script for compiling, running and testing ALF.
 """
 
+__author__ = "Fakher F. Assaad, and Jonas Schwab"
+__copyright__ = "Copyright 2020, The ALF Project"
+__license__ = "GPL"
+
 import os
 import json
 import argparse
 from py_alf import Simulation
-
-__author__ = "Fakher F. Assaad, and Jonas Schwab"
-__copyright__ = "Copyright 2020, The ALF Project"
-__license__ = "GPL"
 
 
 if __name__ == "__main__":

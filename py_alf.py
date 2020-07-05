@@ -1,6 +1,9 @@
+"""Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
-Provides interfaces for compilig running and postprocessing ALF in Python.
-"""
+
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2020, The ALF Project"
+__license__ = "GPL"
 
 import os
 import subprocess
@@ -8,26 +11,27 @@ from shutil import copyfile
 import numpy as np
 import default_variables
 
-__author__ = "Jonas Schwab"
-__copyright__ = "Copyright 2020, The ALF Project"
-__license__ = "GPL"
-
 
 class cd:
-    """Context manager for changing the current working directory"""
+    """Context manager for changing the current working directory."""
 
     def __init__(self, directory):
         self.directory = os.path.expanduser(directory)
+        self.saved_path = os.getcwd()
 
     def __enter__(self):
-        self.savedPath = os.getcwd()
         os.chdir(self.directory)
 
-    def __exit__(self, type, value, traceback):
-        os.chdir(self.savedPath)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.chdir(self.saved_path)
 
 
 class Simulation:
+    """Object corresponding to a simulation directory.
+
+    Provides functions for preparing, running and postprocessing a simulation.
+    """
+
     def __init__(self, sim, alf_dir='ALF', sim_dir=None, executable=None,
                  compile_config='GNU noMPI', branch=None):
         self.sim = sim
@@ -53,9 +57,9 @@ class Simulation:
 
         with cd(self.sim_dir):
             copyfile(
-                    os.path.join(self.alf_dir, 'Scripts_and_Parameters_files',
-                                 'Start', 'seeds'),
-                    'seeds')
+                os.path.join(self.alf_dir, 'Scripts_and_Parameters_files',
+                             'Start', 'seeds'),
+                'seeds')
             params = set_param(self.sim)
             write_parameters(params)
             out_to_in(verbose=False)
@@ -72,28 +76,28 @@ class Simulation:
 
 def convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be
-    written into a parameter file"""
-    if isinstance(parameter, int) or isinstance(parameter, float):
+    written into a parameter file.
+    """
+    if isinstance(parameter, (float, int)):
         return str(parameter)
-    elif isinstance(parameter, str):
+    if isinstance(parameter, str):
         return '"' + parameter + '"'
-    elif isinstance(parameter, bool):
+    if isinstance(parameter, bool):
         if parameter:
             return '.T.'
-        else:
-            return '.F.'
-    else:
-        raise Exception('Error in "convert_par_to_str": unrecognized type')
+        return '.F.'
+
+    raise Exception('Error in "convert_par_to_str": unrecognized type')
 
 
 def write_parameters(params):
-    with open('parameters', 'w') as f:
+    with open('parameters', 'w') as file:
         for namespace in params:
-            f.write("&{}\n".format(namespace))
+            file.write("&{}\n".format(namespace))
             for var in params[namespace]:
-                f.write(var + ' = '
-                        + convert_par_to_str(params[namespace][var]) + '\n')
-            f.write("/\n\n")
+                file.write(var + ' = '
+                           + convert_par_to_str(params[namespace][var]) + '\n')
+            file.write("/\n\n")
 
 
 def directory_name(sim):
@@ -113,7 +117,7 @@ def directory_name(sim):
 
 
 def update_var(params, var, value):
-    """Tries to update value of parameter called var in params"""
+    """Try to update value of parameter called var in params."""
     for name in params:
         for var2 in params[name]:
             if var2 == var:
@@ -133,13 +137,12 @@ def set_param(sim):
     return params
 
 
-def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all'):
-    """This does compile stuff"""
+def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
+                url='git@git.physik.uni-wuerzburg.de:ALF/ALF.git'):
+    """Compiles ALF. Clones a new repository if alf_dir does not exist."""
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
-        subprocess.run(["git", "clone",
-                        'git@git.physik.uni-wuerzburg.de:ALF/ALF.git',
-                        alf_dir])
+        subprocess.run(["git", "clone", url, alf_dir])
 
     with cd(alf_dir):
         if branch is not None:
@@ -149,10 +152,10 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all'):
 
 def out_to_in(verbose=False):
     """Renames all the output configurations confout_* to confin_*
-    to continue the Monte Carlo simulation where the previous stopped
+    to continue the Monte Carlo simulation where the previous stopped.
     """
     for name in os.listdir():
-        if name[:8] == 'confout_':
+        if name.startswith('confout_'):
             name2 = 'confin_' + name[8:]
             if verbose:
                 print('mv {} {}'.format(name, name2))
@@ -160,13 +163,13 @@ def out_to_in(verbose=False):
 
 
 def analysis(alfdir):
-    """Performs the default analysis on all files ending in
-    _scal, _eq or _tau in current working directory
+    """Perform the default analysis on all files ending in _scal, _eq or _tau
+    in current working directory.
     """
     if os.path.exists('Var_scal'):
         os.remove('Var_scal')
     for name in os.listdir():
-        if name[-5:] == '_scal':
+        if name.endswith('_scal'):
             print('Analysing {}'.format(name))
             os.symlink(name, 'Var_scal')
             command = alfdir + '/Analysis/cov_scal.out'
@@ -175,7 +178,7 @@ def analysis(alfdir):
             os.replace('Var_scalJ', name+'J')
 
             for name2 in os.listdir():
-                if name2[:14] == 'Var_scal_Auto_':
+                if name2.startswith('Var_scal_Auto_'):
                     name3 = name + name2[8:]
                     os.replace(name2, name3)
 
