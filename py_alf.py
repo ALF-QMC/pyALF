@@ -52,6 +52,8 @@ class Simulation:
                     model='all')
 
     def run(self):
+        print('Prepare directory {} for Monte Carlo run'
+              .format(self.sim_dir))
         if not os.path.exists(self.sim_dir):
             os.mkdir(self.sim_dir)
 
@@ -63,8 +65,18 @@ class Simulation:
             params = set_param(self.sim)
             write_parameters(params)
             out_to_in(verbose=False)
-            subprocess.run(
-                [os.path.join(self.alf_dir, 'Prog', self.executable+'.out')])
+            executable = os.path.join(self.alf_dir, 'Prog',
+                                      self.executable+'.out')
+            print('Run {}'.format(executable))
+            try:
+                Run = subprocess.run(executable,
+                                     # check=True,
+                                     stderr=subprocess.STDOUT,
+                                     text=True,
+                                     capture_output=True)
+            except subprocess.CalledProcessError:
+                print('Error while running {}.'.format(executable))
+            print('Output:\n', Run.stdout)
 
     def ana(self):
         with cd(self.sim_dir):
@@ -112,7 +124,7 @@ def directory_name(sim):
                 dirname = '{}{}_'.format(dirname, sim[name])
             else:
                 dirname = '{}{}={}_'.format(
-                        dirname, name.strip("ham_"), sim[name])
+                    dirname, name.strip("ham_"), sim[name])
     return dirname[:-1]
 
 
@@ -140,13 +152,27 @@ def set_param(sim):
 def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 url='git@git.physik.uni-wuerzburg.de:ALF/ALF.git'):
     """Compiles ALF. Clones a new repository if alf_dir does not exist."""
+
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
-        subprocess.run(["git", "clone", url, alf_dir])
+        print("Repository {} does not exist, cloning from {}"
+              .format(alf_dir, url))
+        try:
+            Run = subprocess.run(["git", "clone", url, alf_dir],
+                                 check=True, capture_output=True, text=True)
+        except subprocess.CalledProcessError:
+            print('Error while cloning repository')
+            print(Run.stdout)
 
     with cd(alf_dir):
         if branch is not None:
-            subprocess.run(["git", "checkout", branch])
+            try:
+                Run = subprocess.run(["git", "checkout", branch],
+                                     check=True, capture_output=True,
+                                     text=True)
+            except subprocess.CalledProcessError:
+                print('Error while checking out {}'.format(branch))
+                print(Run.stdout)
         os.system(". ./configureHPC.sh " + config + "; make clean " + model)
 
 
