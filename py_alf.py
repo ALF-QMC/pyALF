@@ -69,14 +69,9 @@ class Simulation:
                                       self.executable+'.out')
             print('Run {}'.format(executable))
             try:
-                Run = subprocess.run(executable,
-                                     check=True,
-                                     stderr=subprocess.STDOUT,
-                                     text=True,
-                                     capture_output=True)
+                subprocess.run(executable, check=True)
             except subprocess.CalledProcessError:
                 print('Error while running {}.'.format(executable))
-            print('Output:\n', Run.stdout)
 
     def ana(self):
         with cd(self.sim_dir):
@@ -158,21 +153,16 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
         print("Repository {} does not exist, cloning from {}"
               .format(alf_dir, url))
         try:
-            Run = subprocess.run(["git", "clone", url, alf_dir],
-                                 check=True, capture_output=True, text=True)
+            subprocess.run(["git", "clone", url, alf_dir], check=True)
         except subprocess.CalledProcessError:
             print('Error while cloning repository')
-            print(Run.stdout)
 
     with cd(alf_dir):
         if branch is not None:
             try:
-                Run = subprocess.run(["git", "checkout", branch],
-                                     check=True, capture_output=True,
-                                     text=True)
+                subprocess.run(["git", "checkout", branch], check=True)
             except subprocess.CalledProcessError:
                 print('Error while checking out {}'.format(branch))
-                print(Run.stdout)
         os.system(". ./configureHPC.sh " + config + "; make clean " + model)
 
 
