@@ -70,7 +70,7 @@ class Simulation:
             print('Run {}'.format(executable))
             try:
                 Run = subprocess.run(executable,
-                                     # check=True,
+                                     check=True,
                                      stderr=subprocess.STDOUT,
                                      text=True,
                                      capture_output=True)
