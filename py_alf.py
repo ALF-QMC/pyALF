@@ -72,6 +72,8 @@ class Simulation:
                 subprocess.run(executable, check=True)
             except subprocess.CalledProcessError:
                 print('Error while running {}.'.format(executable))
+                with open('parameters') as f:
+                    print(f.read())
 
     def ana(self):
         with cd(self.sim_dir):
