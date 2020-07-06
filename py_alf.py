@@ -30,7 +30,7 @@ class cd:
 class Simulation:
     """Object corresponding to a simulation directory.
 
-    Provides functions for preparing, running and postprocessing a simulation.
+    Provides functions for preparing, running, and postprocessing a simulation.
     """
 
     def __init__(self, sim, alf_dir='ALF', sim_dir=None, executable=None,
@@ -87,7 +87,7 @@ class Simulation:
         """Returns dictionary containing anaysis results from observables.
 
         Currently only scalar and equal time correlators.
-        If names is None: gets all observables, else the ones listed in names
+        If names is None: gets all observables, else the ones listed in names.
         """
         return get_obs(self.sim_dir, names)
 
@@ -150,7 +150,7 @@ def _update_var(params, var, value):
 
 
 def set_param(sim):
-    """Returns dictionarty containing all parameters needed by ALF.
+    """Returns dictionary containing all parameters needed by ALF.
 
     Input: Dictionary with chosen set of <parameter: value> pairs.
     Output: Dictionary containing all namelists needed by ALF.
