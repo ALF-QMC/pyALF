@@ -49,10 +49,12 @@ class Simulation:
         self.branch = branch
 
     def compile(self):
+        """Compiles ALF. Clones a new repository if alf_dir does not exist."""
         compile_alf(self.alf_dir, self.branch, self.compile_config,
                     model='all')
 
     def run(self):
+        """Prepares simulation diractory and runs ALF."""
         print('Prepare directory {} for Monte Carlo run'
               .format(self.sim_dir))
         if not os.path.exists(self.sim_dir):
@@ -77,14 +79,20 @@ class Simulation:
                     print(f.read())
 
     def ana(self):
+        """Performs default analysis on Monte Carlo data."""
         with cd(self.sim_dir):
             analysis(self.alf_dir)
 
     def get_obs(self, names=None):
+        """Returns dictionary containing anaysis results from observables.
+
+        Currently only scalar and equal time correlators.
+        If names is None: gets all observables, else the ones listed in names
+        """
         return get_obs(self.sim_dir, names)
 
 
-def convert_par_to_str(parameter):
+def _convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be
     written into a parameter file.
     """
@@ -97,20 +105,25 @@ def convert_par_to_str(parameter):
             return '.T.'
         return '.F.'
 
-    raise Exception('Error in "convert_par_to_str": unrecognized type')
+    raise Exception('Error in "_convert_par_to_str": unrecognized type')
 
 
 def write_parameters(params):
+    """Writes nameslists to file 'parameters'"""
     with open('parameters', 'w') as file:
         for namespace in params:
             file.write("&{}\n".format(namespace))
             for var in params[namespace]:
                 file.write(var + ' = '
-                           + convert_par_to_str(params[namespace][var]) + '\n')
+                           + _convert_par_to_str(params[namespace][var])
+                           + '\n')
             file.write("/\n\n")
 
 
 def directory_name(sim):
+    """Returns name of directory for simulations, given a set of simulation
+    parameters.
+    """
     dirname = ''
     for name in sim:
         if name in ["L1", "L2", "Lattice_type", "Model",
@@ -126,7 +139,7 @@ def directory_name(sim):
     return dirname[:-1]
 
 
-def update_var(params, var, value):
+def _update_var(params, var, value):
     """Try to update value of parameter called var in params."""
     for name in params:
         for var2 in params[name]:
@@ -137,13 +150,18 @@ def update_var(params, var, value):
 
 
 def set_param(sim):
+    """Returns dictionarty containing all parameters needed by ALF.
+
+    Input: Dictionary with chosen set of <parameter: value> pairs.
+    Output: Dictionary containing all namelists needed by ALF.
+    """
     model = sim['Model']
     params = default_variables.PARAMS
     params_model = default_variables.PARAMS_MODEL
     params['VAR_'+model] = params_model['VAR_'+model]
 
     for var in sim:
-        params = update_var(params, var, sim[var])
+        params = _update_var(params, var, sim[var])
     return params
 
 
@@ -238,18 +256,25 @@ def analysis(alfdir):
 
 
 def get_obs(sim_dir, names=None):
+    """Returns dictionary containing anaysis results from observables.
+
+    Currently only scalar and equal time correlators.
+    If names is None: gets all observables, else the ones listed in names
+    """
     obs = {}
     if names is None:
         names = os.listdir(sim_dir)
     for name in names:
         if name.endswith('_scalJ'):
-            obs[name] = read_scalJ(os.path.join(sim_dir, name))
+            obs[name] = _read_scalJ(os.path.join(sim_dir, name))
         if name.endswith('_eqJK') or name.endswith('_eqJR'):
-            obs[name] = read_eqJ(os.path.join(sim_dir, name))
+            obs[name] = _read_eqJ(os.path.join(sim_dir, name))
     return obs
 
 
-def read_scalJ(name):
+def _read_scalJ(name):
+    """Returns dictionary containing anaysis results from scalar observable.
+    """
     with open(name) as f:
         lines = f.readlines()
     N_obs = int((len(lines)-3)/2)
@@ -263,7 +288,10 @@ def read_scalJ(name):
     return {'sign': sign, 'obs': obs}
 
 
-def read_eqJ(name):
+def _read_eqJ(name):
+    """Returns dictionary containing anaysis results from equal time
+    correlation function
+    """
     with open(name) as f:
         lines = f.readlines()
 
