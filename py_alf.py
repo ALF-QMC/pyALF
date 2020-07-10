@@ -36,7 +36,7 @@ class Simulation:
     def __init__(self, sim, alf_dir='ALF', sim_dir=None, executable=None,
                  compile_config='GNU noMPI', branch=None):
         self.sim = sim
-        self.alf_dir = os.path.abspath(alf_dir)
+        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         if sim_dir is None:
             self.sim_dir = os.path.abspath(directory_name(sim))
         else:
@@ -143,7 +143,7 @@ def _update_var(params, var, value):
     """Try to update value of parameter called var in params."""
     for name in params:
         for var2 in params[name]:
-            if var2 == var:
+            if var2.lower() == var.lower():
                 params[name][var2] = value
                 return params
     raise Exception('"{}" does not correspond to a parameter'.format(var))
@@ -199,7 +199,7 @@ def out_to_in(verbose=False):
             os.replace(name, name2)
 
 
-def analysis(alfdir):
+def analysis(alf_dir):
     """Perform the default analysis on all files ending in _scal, _eq or _tau
     in current working directory.
     """
@@ -209,8 +209,8 @@ def analysis(alfdir):
         if name.endswith('_scal'):
             print('Analysing {}'.format(name))
             os.symlink(name, 'Var_scal')
-            command = alfdir + '/Analysis/cov_scal.out'
-            os.system(command)
+            executable = os.path.join(alf_dir, 'Analysis', 'cov_scal.out')
+            subprocess.run(executable, check=True)
             os.remove('Var_scal')
             os.replace('Var_scalJ', name+'J')
 
@@ -225,8 +225,8 @@ def analysis(alfdir):
         if name.endswith('_eq'):
             print('Analysing {}'.format(name))
             os.symlink(name, 'ineq')
-            command = alfdir + '/Analysis/cov_eq.out'
-            os.system(command)
+            executable = os.path.join(alf_dir, 'Analysis', 'cov_eq.out')
+            subprocess.run(executable, check=True)
             os.remove('ineq')
             os.replace('equalJ', name+'JK')
             os.replace('equalJR', name+'JR')
@@ -242,8 +242,8 @@ def analysis(alfdir):
         if name.endswith('_tau'):
             print('Analysing {}'.format(name))
             os.symlink(name, 'intau')
-            command = alfdir + '/Analysis/cov_tau.out'
-            os.system(command)
+            executable = os.path.join(alf_dir, 'Analysis', 'cov_tau.out')
+            subprocess.run(executable, check=True)
             os.remove('intau')
             os.replace('SuscepJ', name+'JK')
 
@@ -295,9 +295,9 @@ def _read_eqJ(name):
     with open(name) as f:
         lines = f.readlines()
 
-    if name[-1] == 'K':
+    if name.endswith('K'):
         x_name = 'k'
-    elif name[-1] == 'R':
+    elif name.endswith('R'):
         x_name = 'r'
 
     N_lines = len(lines)
