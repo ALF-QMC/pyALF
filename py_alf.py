@@ -1,6 +1,7 @@
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name, too-many-arguments, too-many-branches
+# pylint: disable=too-many-instance-attributes
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
@@ -33,19 +34,33 @@ class Simulation:
     Provides functions for preparing, running, and postprocessing a simulation.
     """
 
-    def __init__(self, sim, alf_dir='ALF', sim_dir=None, executable=None,
-                 compile_config='GNU noMPI', branch=None):
-        self.sim = sim
+    def __init__(self, sim_dict, alf_dir='ALF', sim_dir=None, executable=None,
+                 compile_config='GNU noMPI', branch=None, mpi=False):
+        self.mpi = mpi
+        if isinstance(sim_dict, list):
+            self.tempering = True
+            self.mpi = True
+        else:
+            self.tempering = False
+
+        self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         if sim_dir is None:
-            self.sim_dir = os.path.abspath(directory_name(sim))
+            self.sim_dir = os.path.abspath(directory_name(sim_dict))
         else:
             self.sim_dir = os.path.abspath(sim_dir)
 
         if executable is None:
-            executable = sim['Model']
+            executable = sim_dict['Model']
         self.executable = executable
-        self.compile_config = compile_config
+        self.compile_config = compile_config.upper()
+        if self.mpi:
+            self.compile_config = self.compile_config.replace('NOMPI', 'MPI')
+            self.compile_config = self.compile_config.replace('SERIAL', 'MPI')
+            if 'MPI' not in self.compile_config:
+                self.compile_config = self.compile_config + ' MPI'
+        if self.tempering and 'TEMPERING' not in self.compile_config:
+            self.compile_config = self.compile_config + ' TEMPERING'
         self.branch = branch
 
     def compile(self):
@@ -54,34 +69,38 @@ class Simulation:
                     model='all')
 
     def run(self):
-        """Prepares simulation diractory and runs ALF."""
-        print('Prepare directory {} for Monte Carlo run'
-              .format(self.sim_dir))
-        if not os.path.exists(self.sim_dir):
-            os.mkdir(self.sim_dir)
+        """Prepares simulation directory and runs ALF."""
+        if self.tempering:
+            _prep_sim_dir(self.alf_dir, self.sim_dir, self.sim_dict[0])
+            for i, sim_dict in enumerate(self.sim_dict):
+                _prep_sim_dir(self.alf_dir,
+                              os.path.join(self.sim_dir, "Temp_{}".format(i)),
+                              sim_dict)
+        else:
+            _prep_sim_dir(self.alf_dir, self.sim_dir, self.sim_dict)
 
+        executable = os.path.join(self.alf_dir, 'Prog', self.executable+'.out')
         with cd(self.sim_dir):
-            copyfile(
-                os.path.join(self.alf_dir, 'Scripts_and_Parameters_files',
-                             'Start', 'seeds'),
-                'seeds')
-            params = set_param(self.sim)
-            write_parameters(params)
-            out_to_in(verbose=False)
-            executable = os.path.join(self.alf_dir, 'Prog',
-                                      self.executable+'.out')
             print('Run {}'.format(executable))
             try:
-                subprocess.run(executable, check=True)
+                if self.mpi:
+                    subprocess.run(['mpiexec', executable], check=True)
+                else:
+                    subprocess.run(executable, check=True)
             except subprocess.CalledProcessError:
                 print('Error while running {}.'.format(executable))
                 with open('parameters') as f:
                     print(f.read())
 
-    def ana(self):
+
+    def analysis(self):
         """Performs default analysis on Monte Carlo data."""
-        with cd(self.sim_dir):
-            analysis(self.alf_dir)
+        if self.tempering:
+            for i in range(len(self.sim_dict)):
+                analysis(self.alf_dir,
+                         os.path.join(self.sim_dir, "Temp_{}".format(i)))
+        else:
+            analysis(self.alf_dir, self.sim_dir)
 
     def get_obs(self, names=None):
         """Returns dictionary containing anaysis results from observables.
@@ -90,6 +109,20 @@ class Simulation:
         If names is None: gets all observables, else the ones listed in names.
         """
         return get_obs(self.sim_dir, names)
+
+
+def _prep_sim_dir(alf_dir, sim_dir, sim_dict):
+    print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
+    if not os.path.exists(sim_dir):
+        os.mkdir(sim_dir)
+
+    with cd(sim_dir):
+        copyfile(os.path.join(alf_dir, 'Scripts_and_Parameters_files', 'Start',
+                              'seeds'),
+                 'seeds')
+        params = set_param(sim_dict)
+        write_parameters(params)
+        out_to_in(verbose=False)
 
 
 def _convert_par_to_str(parameter):
@@ -120,22 +153,24 @@ def write_parameters(params):
             file.write("/\n\n")
 
 
-def directory_name(sim):
+def directory_name(sim_dict):
     """Returns name of directory for simulations, given a set of simulation
     parameters.
+
+    TODO: Automatically generate a list of all parameters to use.
     """
     dirname = ''
-    for name in sim:
+    for name in sim_dict:
         if name in ["L1", "L2", "Lattice_type", "Model",
                     "Checkerboard", "Symm", "N_SUN", "N_FL", "Phi_X", "N_Phi",
                     "Dtau", "Beta", "Projector",
                     "Theta", "ham_T", "ham_chem", "ham_U",
                     "ham_T2", "ham_U2", "ham_Tperp"]:
             if name in ["Lattice_type", "Model"]:
-                dirname = '{}{}_'.format(dirname, sim[name])
+                dirname = '{}{}_'.format(dirname, sim_dict[name])
             else:
                 dirname = '{}{}={}_'.format(
-                    dirname, name.strip("ham_"), sim[name])
+                    dirname, name.strip("ham_"), sim_dict[name])
     return dirname[:-1]
 
 
@@ -149,19 +184,19 @@ def _update_var(params, var, value):
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 
 
-def set_param(sim):
+def set_param(sim_dict):
     """Returns dictionary containing all parameters needed by ALF.
 
     Input: Dictionary with chosen set of <parameter: value> pairs.
     Output: Dictionary containing all namelists needed by ALF.
     """
-    model = sim['Model']
+    model = sim_dict['Model']
     params = default_variables.PARAMS
     params_model = default_variables.PARAMS_MODEL
     params['VAR_'+model] = params_model['VAR_'+model]
 
-    for var in sim:
-        params = _update_var(params, var, sim[var])
+    for name, value in sim_dict.items():
+        params = _update_var(params, name, value)
     return params
 
 
@@ -199,60 +234,61 @@ def out_to_in(verbose=False):
             os.replace(name, name2)
 
 
-def analysis(alf_dir):
+def analysis(alf_dir, sim_dir='.'):
     """Perform the default analysis on all files ending in _scal, _eq or _tau
-    in current working directory.
+    in directory sim_dir.
     """
-    if os.path.exists('Var_scal'):
-        os.remove('Var_scal')
-    for name in os.listdir():
-        if name.endswith('_scal'):
-            print('Analysing {}'.format(name))
-            os.symlink(name, 'Var_scal')
-            executable = os.path.join(alf_dir, 'Analysis', 'cov_scal.out')
-            subprocess.run(executable, check=True)
+    with cd(sim_dir):
+        if os.path.exists('Var_scal'):
             os.remove('Var_scal')
-            os.replace('Var_scalJ', name+'J')
+        for name in os.listdir():
+            if name.endswith('_scal'):
+                print('Analysing {}'.format(name))
+                os.symlink(name, 'Var_scal')
+                executable = os.path.join(alf_dir, 'Analysis', 'cov_scal.out')
+                subprocess.run(executable, check=True)
+                os.remove('Var_scal')
+                os.replace('Var_scalJ', name+'J')
 
-            for name2 in os.listdir():
-                if name2.startswith('Var_scal_Auto_'):
-                    name3 = name + name2[8:]
-                    os.replace(name2, name3)
+                for name2 in os.listdir():
+                    if name2.startswith('Var_scal_Auto_'):
+                        name3 = name + name2[8:]
+                        os.replace(name2, name3)
 
-    if os.path.exists('ineq'):
-        os.remove('ineq')
-    for name in os.listdir():
-        if name.endswith('_eq'):
-            print('Analysing {}'.format(name))
-            os.symlink(name, 'ineq')
-            executable = os.path.join(alf_dir, 'Analysis', 'cov_eq.out')
-            subprocess.run(executable, check=True)
+        if os.path.exists('ineq'):
             os.remove('ineq')
-            os.replace('equalJ', name+'JK')
-            os.replace('equalJR', name+'JR')
+        for name in os.listdir():
+            if name.endswith('_eq'):
+                print('Analysing {}'.format(name))
+                os.symlink(name, 'ineq')
+                executable = os.path.join(alf_dir, 'Analysis', 'cov_eq.out')
+                subprocess.run(executable, check=True)
+                os.remove('ineq')
+                os.replace('equalJ', name+'JK')
+                os.replace('equalJR', name+'JR')
 
-            for name2 in os.listdir():
-                if name2.startswith('Var_eq_Auto_Tr'):
-                    name3 = name + name2[6:]
-                    os.replace(name2, name3)
+                for name2 in os.listdir():
+                    if name2.startswith('Var_eq_Auto_Tr'):
+                        name3 = name + name2[6:]
+                        os.replace(name2, name3)
 
-    if os.path.exists('intau'):
-        os.remove('intau')
-    for name in os.listdir():
-        if name.endswith('_tau'):
-            print('Analysing {}'.format(name))
-            os.symlink(name, 'intau')
-            executable = os.path.join(alf_dir, 'Analysis', 'cov_tau.out')
-            subprocess.run(executable, check=True)
+        if os.path.exists('intau'):
             os.remove('intau')
-            os.replace('SuscepJ', name+'JK')
+        for name in os.listdir():
+            if name.endswith('_tau'):
+                print('Analysing {}'.format(name))
+                os.symlink(name, 'intau')
+                executable = os.path.join(alf_dir, 'Analysis', 'cov_tau.out')
+                subprocess.run(executable, check=True)
+                os.remove('intau')
+                os.replace('SuscepJ', name+'JK')
 
-            for name2 in os.listdir():
-                if name2.startswith('g_'):
-                    directory = name[:-4] + name2[1:]
-                    if not os.path.exists(directory):
-                        os.mkdir(directory)
-                    os.replace(name2, os.path.join(directory, name2))
+                for name2 in os.listdir():
+                    if name2.startswith('g_'):
+                        directory = name[:-4] + name2[1:]
+                        if not os.path.exists(directory):
+                            os.mkdir(directory)
+                        os.replace(name2, os.path.join(directory, name2))
 
 
 def get_obs(sim_dir, names=None):
