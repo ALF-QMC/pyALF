@@ -71,7 +71,7 @@ if __name__ == "__main__":
                                branch=branch_R)
             sim_R.compile()
             sim_R.run()
-            sim_R.ana()
+            sim_R.analysis()
             obs_R = sim_R.get_obs()
         if do_T:
             print('do T')
@@ -82,7 +82,7 @@ if __name__ == "__main__":
             sim_T.sim_dir = sim_T.sim_dir + '_test'
             sim_T.compile()
             sim_T.run()
-            sim_T.ana()
+            sim_T.analysis()
             obs_T = sim_T.get_obs()
 
         with open(sim_R.sim_dir + ".txt", "w") as f:
