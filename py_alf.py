@@ -34,14 +34,40 @@ class Simulation:
     Provides functions for preparing, running, and postprocessing a simulation.
     """
 
-    def __init__(self, sim_dict, alf_dir='ALF', sim_dir=None, executable=None,
-                 compile_config='GNU noMPI', branch=None, mpi=False):
+    def __init__(self, sim_dict, alf_dir='./ALF', sim_dir=None, executable=None,
+                 compile_config='GNU noMPI', branch=None, mpi=False,
+                 n_mpi=None):
+        """Initialize the Simulation object.
+
+        Required argument:
+        sim_dict -- Dictionary specfying parameters owerwriting defaults.
+                    Can be a list of dictionaries to enable parallel tempering.
+
+        Keyword arguments:
+        alf_dir -- Directory containing the ALF source code (default: './ALF').
+                   If the directory does not exist, the source code will be
+                   fetched from a server.
+        sim_dir -- Directory in which the Monte Carlo will be run.
+                   If not specified, sim_dir will be generated from sim_dict.
+        executable -- Name of ALF executable to run.
+                      If not specified, executable will be the model name.
+        compile_config
+            -- Arguments to hand over to configure script prior to compilation.
+               (default: 'GNU noMPI')
+        branch -- If specified, this will be checked out, prior to compilation.
+        mpi    -- Employ MPI (default: False)
+        n_mpi  -- Number of MPI processes
+        """
         self.mpi = mpi
         if isinstance(sim_dict, list):
             self.tempering = True
             self.mpi = True
         else:
             self.tempering = False
+
+        if self.mpi and n_mpi is None:
+            raise Exception('You have to specify n_mpi if you use MPI.')
+        self.n_mpi = n_mpi
 
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
@@ -84,7 +110,8 @@ class Simulation:
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    subprocess.run(['mpiexec', executable], check=True)
+                    subprocess.run(['mpiexec', '-n', str(self.n_mpi), executable],
+                                   check=True)
                 else:
                     subprocess.run(executable, check=True)
             except subprocess.CalledProcessError:
@@ -219,7 +246,15 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 subprocess.run(["git", "checkout", branch], check=True)
             except subprocess.CalledProcessError:
                 print('Error while checking out {}'.format(branch))
-        os.system(". ./configureHPC.sh " + config + "; make clean " + model)
+        subprocess.run(['./configureHPC.sh', *config.split()], check=True)
+        with open('enviroment', 'r') as f:
+            lines = f.readlines()
+        env = dict((line.strip().split("=", 1) for line in lines))
+        os.environ.update(env)
+        subprocess.run(['make', 'clean'], check=True)
+        subprocess.run(['make', model], check=True)
+
+
 
 
 def out_to_in(verbose=False):
