@@ -34,9 +34,9 @@ class Simulation:
     Provides functions for preparing, running, and postprocessing a simulation.
     """
 
-    def __init__(self, sim_dict, alf_dir='./ALF', sim_dir=None, executable=None,
-                 compile_config='GNU noMPI', branch=None, mpi=False,
-                 n_mpi=None):
+    def __init__(self, sim_dict, alf_dir='./ALF', sim_dir=None,
+                 executable=None, compile_config='GNU noMPI', branch=None,
+                 mpi=False, n_mpi=None):
         """Initialize the Simulation object.
 
         Required argument:
@@ -110,15 +110,15 @@ class Simulation:
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    subprocess.run(['mpiexec', '-n', str(self.n_mpi), executable],
-                                   check=True)
+                    subprocess.run(
+                        ['mpiexec', '-n', str(self.n_mpi), executable],
+                        check=True)
                 else:
                     subprocess.run(executable, check=True)
             except subprocess.CalledProcessError:
                 print('Error while running {}.'.format(executable))
                 with open('parameters') as f:
                     print(f.read())
-
 
     def analysis(self):
         """Performs default analysis on Monte Carlo data."""
@@ -187,6 +187,9 @@ def directory_name(sim_dict):
     TODO: Automatically generate a list of all parameters to use.
     """
     dirname = ''
+    if isinstance(sim_dict, list):
+        sim_dict = sim_dict[0]
+        dirname = 'temper_'
     for name in sim_dict:
         if name in ["L1", "L2", "Lattice_type", "Model",
                     "Checkerboard", "Symm", "N_SUN", "N_FL", "Phi_X", "N_Phi",
@@ -194,10 +197,9 @@ def directory_name(sim_dict):
                     "Theta", "ham_T", "ham_chem", "ham_U",
                     "ham_T2", "ham_U2", "ham_Tperp"]:
             if name in ["Lattice_type", "Model"]:
-                dirname = '{}{}_'.format(dirname, sim_dict[name])
+                dirname = f'{dirname}{sim_dict[name]}_'
             else:
-                dirname = '{}{}={}_'.format(
-                    dirname, name.strip("ham_"), sim_dict[name])
+                dirname = f'{dirname}{name.strip("ham_")}={sim_dict[name]}_'
     return dirname[:-1]
 
 
@@ -246,15 +248,29 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 subprocess.run(["git", "checkout", branch], check=True)
             except subprocess.CalledProcessError:
                 print('Error while checking out {}'.format(branch))
-        subprocess.run(['./configureHPC.sh', *config.split()], check=True)
-        with open('enviroment', 'r') as f:
-            lines = f.readlines()
-        env = dict((line.strip().split("=", 1) for line in lines))
-        os.environ.update(env)
-        subprocess.run(['make', 'clean'], check=True)
-        subprocess.run(['make', model], check=True)
-
-
+        try:
+            subprocess.run(['./configureHPC.sh', *config.split()], check=True)
+            with open('environment', 'r') as f:
+                lines = f.readlines()
+            env = dict((line.strip().split("=", 1) for line in lines))
+        except Exception:
+            print('Setting environment failed, using default environment.')
+            flags = '-cpp -O3 -ffree-line-length-none -ffast-math'
+            lib_dir = f'{alf_dir}/Libraries'
+            env_add = {
+                'ALF_DIR': alf_dir,
+                'ALF_FC': 'gfortran',
+                'ALF_FLAGS_QRREF': flags,
+                'ALF_FLAGS_MODULES': flags,
+                'ALF_FLAGS_ANA': f'{flags} -I{lib_dir}/Modules',
+                'ALF_FLAGS_PROG': f'{flags} -I{lib_dir}/Modules',
+                'ALF_LIB': f'{lib_dir}/Modules/modules_90.a '
+                           + f'{lib_dir}/libqrref/libqrref.a -llapack -lblas'
+                }
+            env = os.environ.copy()
+            env.update(env_add)
+        subprocess.run(['make', 'clean'], check=True, env=env)
+        subprocess.run(['make', model], check=True, env=env)
 
 
 def out_to_in(verbose=False):
