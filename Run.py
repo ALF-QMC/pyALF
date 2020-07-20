@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import argparse
+from collections import OrderedDict
 from py_alf import Simulation
 
 
@@ -63,24 +64,25 @@ if __name__ == "__main__":
         if sim.strip() == "stop":
             print("Done")
             sys.exit()
+        sim_dict = json.loads(sim, object_pairs_hook=OrderedDict)
         if do_R:
             print('do R')
-            sim_R = Simulation(json.loads(sim), alf_dir,
+            sim_R = Simulation(sim_dict, alf_dir,
                                executable=executable_R,
                                compile_config=config,
                                branch=branch_R)
-            sim_R.compile(model=executable_R )  
+            sim_R.compile(model=executable_R)
             sim_R.run()
             sim_R.analysis()
             obs_R = sim_R.get_obs()
         if do_T:
             print('do T')
-            sim_T = Simulation(json.loads(sim), alf_dir,
+            sim_T = Simulation(sim_dict, alf_dir,
                                executable=executable_T,
                                compile_config=config,
                                branch=branch_T)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
-            sim_T.compile(model=executable_T )
+            sim_T.compile(model=executable_T)
             sim_T.run()
             sim_T.analysis()
             obs_T = sim_T.get_obs()
