@@ -249,28 +249,13 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 subprocess.run(["git", "checkout", branch], check=True)
             except subprocess.CalledProcessError:
                 print('Error while checking out {}'.format(branch))
-        try:
-            subprocess.run(['./configureHPC.sh', *config.split()], check=True)
-            with open('environment', 'r') as f:
-                lines = f.readlines()
-            env = dict((line.strip().split("=", 1) for line in lines))
-        except Exception:
-            print('Setting environment failed, using default environment.')
-            flags = '-cpp -O3 -ffree-line-length-none -ffast-math'
-            lib_dir = '{}/Libraries'.format(alf_dir)
-            env_add = {
-                'ALF_DIR': alf_dir,
-                'ALF_FC': 'gfortran',
-                'ALF_FLAGS_QRREF': flags,
-                'ALF_FLAGS_MODULES': flags,
-                'ALF_FLAGS_ANA': '{} -I{}/Modules'.format(flags, lib_dir),
-                'ALF_FLAGS_PROG': '{} -I{}/Modules'.format(flags, lib_dir),
-                'ALF_LIB': '{}/Modules/modules_90.a '.format(lib_dir)
-                           + '{}/libqrref/libqrref.a '.format(lib_dir)
-                           + '-llapack -lblas'
-                }
-            env = os.environ.copy()
-            env.update(env_add)
+        subprocess.run(
+            ['bash', '-c',
+             '. ./configureHPC.sh {}; env > environment'.format(config)],
+            check=True)
+        with open('environment', 'r') as f:
+            lines = f.readlines()
+        env = dict((line.strip().split("=", 1) for line in lines))
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', model], check=True, env=env)
 
