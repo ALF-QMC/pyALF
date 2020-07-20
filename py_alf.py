@@ -89,10 +89,10 @@ class Simulation:
             self.compile_config = self.compile_config + ' TEMPERING'
         self.branch = branch
 
-    def compile(self):
+    def compile(self, model='all'):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
         compile_alf(self.alf_dir, self.branch, self.compile_config,
-                    model='all')
+                    model)
 
     def run(self):
         """Prepares simulation directory and runs ALF."""
@@ -262,6 +262,7 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 env[item[0]] = item[1]
         # env = dict((line.strip().split("=", 1) for line in lines))
         subprocess.run(['make', 'clean'], check=True, env=env)
+        subprocess.run(['make', 'ana'], check=True, env=env)
         subprocess.run(['make', model], check=True, env=env)
 
 

@@ -1,1 +1,1 @@
-./Run.py -RT --alfdir ~/Programs/ALF --config "GNU noMPI" --branch_R 135-introduce_hubbard_hamiltonian --executable_T Examples --executable_R Examples
+./Run.py -R  -T --alfdir /Users/assaad_home/ALF/Work --config "FakhersMAC noMPI" --branch_R 135-introduce_hubbard_hamiltonian --branch_T 135-introduce_hubbard_hamiltonian  --executable_T Hubbard --executable_R Examples

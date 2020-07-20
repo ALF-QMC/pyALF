@@ -69,7 +69,7 @@ if __name__ == "__main__":
                                executable=executable_R,
                                compile_config=config,
                                branch=branch_R)
-            sim_R.compile()
+            sim_R.compile(model=executable_R )  
             sim_R.run()
             sim_R.analysis()
             obs_R = sim_R.get_obs()
@@ -80,7 +80,7 @@ if __name__ == "__main__":
                                compile_config=config,
                                branch=branch_T)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
-            sim_T.compile()
+            sim_T.compile(model=executable_T )
             sim_T.run()
             sim_T.analysis()
             obs_T = sim_T.get_obs()
