@@ -45,6 +45,13 @@ if __name__ == "__main__":
     parser.add_argument(
         '--executable_T',
         help='Name of test executable.             (default: <Model>.out)')
+    parser.add_argument(
+        '--mpi', default=False,
+        help='mpi run                              (default: False)')
+    parser.add_argument(
+        '--n_mpi', default=4,
+        help='number of mpi processes              (default: 4)')
+
 
     args = parser.parse_args()
 
@@ -56,6 +63,8 @@ if __name__ == "__main__":
     config = args.config
     executable_R = args.executable_R
     executable_T = args.executable_T
+    mpi = args.mpi
+    n_mpi=args.n_mpi
 
     with open("Sims") as f:
         simulations = f.read().splitlines()
@@ -70,7 +79,7 @@ if __name__ == "__main__":
             sim_R = Simulation(sim_dict, alf_dir,
                                executable=executable_R,
                                compile_config=config,
-                               branch=branch_R)
+                               branch=branch_R, mpi=mpi, n_mpi=n_mpi)
             sim_R.compile(model=executable_R)
             sim_R.run()
             sim_R.analysis()
@@ -80,7 +89,7 @@ if __name__ == "__main__":
             sim_T = Simulation(sim_dict, alf_dir,
                                executable=executable_T,
                                compile_config=config,
-                               branch=branch_T)
+                               branch=branch_T,mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
             sim_T.compile(model=executable_T)
             sim_T.run()
