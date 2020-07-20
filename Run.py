@@ -69,7 +69,7 @@ if __name__ == "__main__":
                                executable=executable_R,
                                compile_config=config,
                                branch=branch_R)
-            sim_R.compile(model=executable_R)  
+            sim_R.compile(model=executable_R)
             sim_R.run()
             sim_R.analysis()
             obs_R = sim_R.get_obs()
