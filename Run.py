@@ -64,9 +64,9 @@ if __name__ == "__main__":
         if sim.strip() == "stop":
             print("Done")
             sys.exit()
+        sim_dict = json.loads(sim, object_pairs_hook=OrderedDict)
         if do_R:
             print('do R')
-            sim_dict = json.loads(sim, object_pairs_hook=OrderedDict)
             sim_R = Simulation(sim_dict, alf_dir,
                                executable=executable_R,
                                compile_config=config,
