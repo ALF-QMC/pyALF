@@ -197,9 +197,10 @@ def directory_name(sim_dict):
                     "Theta", "ham_T", "ham_chem", "ham_U",
                     "ham_T2", "ham_U2", "ham_Tperp"]:
             if name in ["Lattice_type", "Model"]:
-                dirname = f'{dirname}{sim_dict[name]}_'
+                dirname = '{}{}_'.format(dirname, sim_dict[name])
             else:
-                dirname = f'{dirname}{name.strip("ham_")}={sim_dict[name]}_'
+                dirname = '{}{}={}_'.format(dirname, name.strip("ham_"),
+                                            sim_dict[name])
     return dirname[:-1]
 
 
@@ -256,16 +257,17 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
         except Exception:
             print('Setting environment failed, using default environment.')
             flags = '-cpp -O3 -ffree-line-length-none -ffast-math'
-            lib_dir = f'{alf_dir}/Libraries'
+            lib_dir = '{}/Libraries'.format(alf_dir)
             env_add = {
                 'ALF_DIR': alf_dir,
                 'ALF_FC': 'gfortran',
                 'ALF_FLAGS_QRREF': flags,
                 'ALF_FLAGS_MODULES': flags,
-                'ALF_FLAGS_ANA': f'{flags} -I{lib_dir}/Modules',
-                'ALF_FLAGS_PROG': f'{flags} -I{lib_dir}/Modules',
-                'ALF_LIB': f'{lib_dir}/Modules/modules_90.a '
-                           + f'{lib_dir}/libqrref/libqrref.a -llapack -lblas'
+                'ALF_FLAGS_ANA': '{} -I{}/Modules'.format(flags, lib_dir),
+                'ALF_FLAGS_PROG': '{} -I{}/Modules'.format(flags, lib_dir),
+                'ALF_LIB': '{}/Modules/modules_90.a '.format(lib_dir)
+                           + '{}/libqrref/libqrref.a '.format(lib_dir)
+                           + '-llapack -lblas'
                 }
             env = os.environ.copy()
             env.update(env_add)
