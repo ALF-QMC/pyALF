@@ -255,7 +255,8 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
             check=True)
         with open('environment', 'r') as f:
             lines = f.readlines()
-        print(lines)
+        for line in lines:
+            print(line, line.strip().split("=", 1))
         env = dict((line.strip().split("=", 1) for line in lines))
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', model], check=True, env=env)
