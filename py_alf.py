@@ -91,8 +91,7 @@ class Simulation:
 
     def compile(self, model='all'):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
-        compile_alf(self.alf_dir, self.branch, self.compile_config,
-                    model)
+        compile_alf(self.alf_dir, self.branch, self.compile_config, model)
 
     def run(self):
         """Prepares simulation directory and runs ALF."""
@@ -251,7 +250,7 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 print('Error while checking out {}'.format(branch))
         subprocess.run(
             ['bash', '-c',
-             '. ./configureHPC.sh {}; env > environment'.format(config)],
+             '. ./configure.sh {}; env > environment'.format(config)],
             check=True)
         with open('environment', 'r') as f:
             lines = f.readlines()

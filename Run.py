@@ -38,7 +38,7 @@ if __name__ == "__main__":
         help='Branch to test against Runbranch.    (default: master)')
     parser.add_argument(
         '--config', default='GNU noMPI',
-        help='Will run ./configureHPC.sh CONFIG    (default: Intel)')
+        help='Will run ./configure.sh CONFIG       (default: GNU noMPI)')
     parser.add_argument(
         '--executable_R',
         help='Name of  ref executable.             (default: <Model>.out)')
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     executable_R = args.executable_R
     executable_T = args.executable_T
     mpi = args.mpi
-    n_mpi=args.n_mpi
+    n_mpi = args.n_mpi
 
     with open("Sims") as f:
         simulations = f.read().splitlines()
@@ -89,7 +89,7 @@ if __name__ == "__main__":
             sim_T = Simulation(sim_dict, alf_dir,
                                executable=executable_T,
                                compile_config=config,
-                               branch=branch_T,mpi=mpi, n_mpi=n_mpi)
+                               branch=branch_T, mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
             sim_T.compile(model=executable_T)
             sim_T.run()
