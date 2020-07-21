@@ -140,9 +140,12 @@ class Simulation:
 def _prep_sim_dir(alf_dir, sim_dir, sim_dict):
     print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
     if not os.path.exists(sim_dir):
+        print('Create new directory.')
         os.mkdir(sim_dir)
 
     with cd(sim_dir):
+        if 'confout_0' in os.listdir() or 'confout_0.h5' in os.listdir():
+            print('Resuming previous run.')
         copyfile(os.path.join(alf_dir, 'Scripts_and_Parameters_files', 'Start',
                               'seeds'),
                  'seeds')
@@ -229,9 +232,25 @@ def set_param(sim_dict):
     return params
 
 
+
+def getenv(config):
+    """Get environment variables for compiling ALF."""
+    subprocess.run(
+        ['bash', '-c', '. ./configure.sh {}; env > environment'.format(config)],
+        check=True)
+    with open('environment', 'r') as f:
+        lines = f.readlines()
+    env = {}
+    for line in lines:
+        item = line.strip().split("=", 1)
+        if len(item) == 2:
+            env[item[0]] = item[1]
+    return env
+
+
 def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
                 url='git@git.physik.uni-wuerzburg.de:ALF/ALF.git'):
-    """Compiles ALF. Clones a new repository if alf_dir does not exist."""
+    """Compile ALF. Clone a new repository if alf_dir does not exist."""
 
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
@@ -240,26 +259,17 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
         try:
             subprocess.run(["git", "clone", url, alf_dir], check=True)
         except subprocess.CalledProcessError:
-            print('Error while cloning repository')
+            raise Exception('Error while cloning repository')
 
     with cd(alf_dir):
         if branch is not None:
+            print('Checking out branch {}'.format(branch))
             try:
-                subprocess.run(["git", "checkout", branch], check=True)
+                subprocess.run(['git', 'checkout', branch], check=True)
             except subprocess.CalledProcessError:
-                print('Error while checking out {}'.format(branch))
-        subprocess.run(
-            ['bash', '-c',
-             '. ./configure.sh {}; env > environment'.format(config)],
-            check=True)
-        with open('environment', 'r') as f:
-            lines = f.readlines()
-        env = {}
-        for line in lines:
-            item = line.strip().split("=", 1)
-            if len(item) == 2:
-                env[item[0]] = item[1]
-        # env = dict((line.strip().split("=", 1) for line in lines))
+                raise Exception('Error while checking out {}'.format(branch))
+        env = getenv(config)
+        print('Compiling ALF...')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
         subprocess.run(['make', model], check=True, env=env)
