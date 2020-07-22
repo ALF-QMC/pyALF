@@ -91,7 +91,7 @@ PARAMS["VAR_Max_Stoch"] = {
 
 PARAMS_MODEL["VAR_Hubbard"] = {
     # Parameters of the Hubbard hamiltonian
-    "HS"       :  "Mz" ,
+    "Mz"       :  True ,
     "ham_T"    :  1.0  ,
     "ham_chem" :  0.0  ,
     "ham_U"    :  4.0  ,
