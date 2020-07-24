@@ -81,18 +81,17 @@ if __name__ == "__main__":
             sim_R = Simulation(ham_name_R, sim_dict, alf_dir,
                                config=config,
                                branch=branch_R, mpi=mpi, n_mpi=n_mpi)
-            sim_R.compile(model=executable_R)
+            sim_R.compile(target=ham_name_R)
             sim_R.run()
             sim_R.analysis()
             obs_R = sim_R.get_obs()
         if do_T:
             print('do T')
             sim_T = Simulation(ham_name_T, sim_dict, alf_dir,
-                               executable=executable_T,
                                config=config,
                                branch=branch_T, mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
-            sim_T.compile(model=executable_T)
+            sim_T.compile(target=ham_name_R)
             sim_T.run()
             sim_T.analysis()
             obs_T = sim_T.get_obs()
