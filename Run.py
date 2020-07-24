@@ -78,7 +78,7 @@ if __name__ == "__main__":
             print('do R')
             sim_R = Simulation(sim_dict, alf_dir,
                                executable=executable_R,
-                               compile_config=config,
+                               config=config,
                                branch=branch_R, mpi=mpi, n_mpi=n_mpi)
             sim_R.compile(model=executable_R)
             sim_R.run()
@@ -88,7 +88,7 @@ if __name__ == "__main__":
             print('do T')
             sim_T = Simulation(sim_dict, alf_dir,
                                executable=executable_T,
-                               compile_config=config,
+                               config=config,
                                branch=branch_T, mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
             sim_T.compile(model=executable_T)
