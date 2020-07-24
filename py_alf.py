@@ -65,6 +65,7 @@ class Simulation:
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
         self.n_omp = kwargs.pop('n_omp', 1)
+        self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
         if kwargs:
             raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
@@ -107,7 +108,7 @@ class Simulation:
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    command = ['mpiexec', '-n', str(self.n_mpi), executable]
+                    command = [self.mpiexec, '-n', str(self.n_mpi), executable]
                 else:
                     command = executable
                 subprocess.run(command, check=True, env=env)
@@ -270,10 +271,11 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
             except subprocess.CalledProcessError:
                 raise Exception('Error while checking out {}'.format(branch))
         env = getenv(config)
-        print('Compiling ALF...')
+        print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
         subprocess.run(['make', target], check=True, env=env)
+        print('Done.')
 
 
 def out_to_in(verbose=False):
