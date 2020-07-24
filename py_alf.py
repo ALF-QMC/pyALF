@@ -79,12 +79,12 @@ class Simulation:
             raise Exception('You have to specify n_mpi if you use MPI.')
 
         if self.mpi:
-            self.compile_config = self.compile_config.replace('NOMPI', 'MPI')
-            self.compile_config = self.compile_config.replace('SERIAL', 'MPI')
-            if 'MPI' not in self.compile_config:
-                self.compile_config += ' MPI'
-        if self.tempering and 'TEMPERING' not in self.compile_config:
-            self.compile_config += ' TEMPERING'
+            self.config = self.config.replace('NOMPI', 'MPI')
+            self.config = self.config.replace('SERIAL', 'MPI')
+            if 'MPI' not in self.config:
+                self.config += ' MPI'
+        if self.tempering and 'TEMPERING' not in self.config:
+            self.config += ' TEMPERING'
 
     def compile(self, model='all'):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
@@ -111,9 +111,7 @@ class Simulation:
                     command = ['mpiexec', '-n', str(self.n_mpi), executable]
                 else:
                     command = executable
-                print(command)
                 subprocess.run(command, check=True, env=env)
-                # subprocess.run(command, check=True)
             except subprocess.CalledProcessError:
                 print('Error while running {}.'.format(executable))
                 print('parameters:')
