@@ -60,13 +60,12 @@ class Simulation:
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
-        # self.executable = kwargs.pop("executable", sim_dict['Model'])
         self.config = kwargs.pop('config', 'GNU NOMPI').upper()
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
         self.n_omp = kwargs.pop('n_omp', 1)
-        if len(kwargs) > 0:
+        if kwargs:
             raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
         if isinstance(sim_dict, list):
@@ -237,7 +236,8 @@ def getenv(config, alf_dir='.'):
     with cd(alf_dir):
         subprocess.run(
             ['bash', '-c',
-             '. ./configure.sh {}; env > environment'.format(config)],
+             '. ./configure.sh {} || exit 1 && env > environment'
+             .format(config)],
             check=True)
         with open('environment', 'r') as f:
             lines = f.readlines()
