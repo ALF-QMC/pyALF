@@ -1,6 +1,6 @@
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
-# pylint: disable=invalid-name, too-many-arguments, too-many-branches
+# pylint: disable=invalid-name, too-many-branches
 # pylint: disable=too-many-instance-attributes
 
 __author__ = "Jonas Schwab"
@@ -34,9 +34,7 @@ class Simulation:
     Provides functions for preparing, running, and postprocessing a simulation.
     """
 
-    def __init__(self, sim_dict, alf_dir='./ALF', sim_dir=None,
-                 executable=None, compile_config='GNU noMPI', branch=None,
-                 mpi=False, n_mpi=None):
+    def __init__(self, sim_dict, alf_dir='./ALF', **kwargs):
         """Initialize the Simulation object.
 
         Required argument:
@@ -57,37 +55,35 @@ class Simulation:
         branch -- If specified, this will be checked out, prior to compilation.
         mpi    -- Employ MPI (default: False)
         n_mpi  -- Number of MPI processes
+        n_omp  -- Number of OpenMP threads per process
         """
-        self.mpi = mpi
+        self.sim_dict = sim_dict
+        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
+        self.sim_dir = os.path.abspath(
+            kwargs.pop("sim_dir", directory_name(sim_dict)))
+        self.executable = kwargs.pop("executable", sim_dict['Model'])
+        self.compile_config = kwargs.pop('compile_config', 'GNU NOMPI').upper()
+        self.branch = kwargs.pop('branch', None)
+        self.mpi = kwargs.pop("mpi", False)
+        self.n_mpi = kwargs.pop("n_mpi", None)
+        self.n_omp = kwargs.pop('n_omp', 1)
+
         if isinstance(sim_dict, list):
             self.tempering = True
             self.mpi = True
         else:
             self.tempering = False
 
-        if self.mpi and n_mpi is None:
+        if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
-        self.n_mpi = n_mpi
 
-        self.sim_dict = sim_dict
-        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
-        if sim_dir is None:
-            self.sim_dir = os.path.abspath(directory_name(sim_dict))
-        else:
-            self.sim_dir = os.path.abspath(sim_dir)
-
-        if executable is None:
-            executable = sim_dict['Model']
-        self.executable = executable
-        self.compile_config = compile_config.upper()
         if self.mpi:
             self.compile_config = self.compile_config.replace('NOMPI', 'MPI')
             self.compile_config = self.compile_config.replace('SERIAL', 'MPI')
             if 'MPI' not in self.compile_config:
-                self.compile_config = self.compile_config + ' MPI'
+                self.compile_config += ' MPI'
         if self.tempering and 'TEMPERING' not in self.compile_config:
-            self.compile_config = self.compile_config + ' TEMPERING'
-        self.branch = branch
+            self.compile_config += ' TEMPERING'
 
     def compile(self, model='all'):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
@@ -232,11 +228,11 @@ def set_param(sim_dict):
     return params
 
 
-
 def getenv(config):
     """Get environment variables for compiling ALF."""
     subprocess.run(
-        ['bash', '-c', '. ./configure.sh {}; env > environment'.format(config)],
+        ['bash', '-c',
+         '. ./configure.sh {}; env > environment'.format(config)],
         check=True)
     with open('environment', 'r') as f:
         lines = f.readlines()
