@@ -34,10 +34,11 @@ class Simulation:
     Provides functions for preparing, running, and postprocessing a simulation.
     """
 
-    def __init__(self, sim_dict, alf_dir='./ALF', **kwargs):
+    def __init__(self, ham_name, sim_dict, alf_dir='./ALF', **kwargs):
         """Initialize the Simulation object.
 
         Required argument:
+        ham_name -- Name of the hamiltonian
         sim_dict -- Dictionary specfying parameters owerwriting defaults.
                     Can be a list of dictionaries to enable parallel tempering.
 
@@ -47,8 +48,6 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
-        executable -- Name of ALF executable to run.
-                      If not specified, executable will be the model name.
         config -- Arguments to hand over to configure script prior to compiling
                   or running ALF (default: 'GNU noMPI')
         branch -- If specified, this will be checked out, prior to compilation.
@@ -56,11 +55,12 @@ class Simulation:
         n_mpi  -- Number of MPI processes
         n_omp  -- Number of OpenMP threads per process
         """
+        self.ham_name = ham_name
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(
-            kwargs.pop("sim_dir", directory_name(sim_dict))))
-        self.executable = kwargs.pop("executable", sim_dict['Model'])
+            kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
+        # self.executable = kwargs.pop("executable", sim_dict['Model'])
         self.config = kwargs.pop('config', 'GNU NOMPI').upper()
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
@@ -86,9 +86,9 @@ class Simulation:
         if self.tempering and 'TEMPERING' not in self.config:
             self.config += ' TEMPERING'
 
-    def compile(self, model='all'):
+    def compile(self, target='all'):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
-        compile_alf(self.alf_dir, self.branch, self.config, model)
+        compile_alf(self.alf_dir, self.branch, self.config, target)
 
     def run(self):
         """Prepares simulation directory and runs ALF."""
@@ -103,7 +103,7 @@ class Simulation:
 
         env = getenv(self.config, self.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
-        executable = os.path.join(self.alf_dir, 'Prog', self.executable+'.out')
+        executable = os.path.join(self.alf_dir, 'Prog', self.ham_name+'.out')
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
@@ -182,13 +182,13 @@ def write_parameters(params):
             file.write("/\n\n")
 
 
-def directory_name(sim_dict):
+def directory_name(ham_name, sim_dict):
     """Returns name of directory for simulations, given a set of simulation
     parameters.
 
     TODO: Automatically generate a list of all parameters to use.
     """
-    dirname = ''
+    dirname = '{}_'.format(ham_name)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
         dirname = 'temper_'
@@ -249,7 +249,7 @@ def getenv(config, alf_dir='.'):
     return env
 
 
-def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
+def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
                 url='git@git.physik.uni-wuerzburg.de:ALF/ALF.git'):
     """Compile ALF. Clone a new repository if alf_dir does not exist."""
 
@@ -273,7 +273,7 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
         print('Compiling ALF...')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
-        subprocess.run(['make', model], check=True, env=env)
+        subprocess.run(['make', target], check=True, env=env)
 
 
 def out_to_in(verbose=False):

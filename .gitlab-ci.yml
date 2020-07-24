@@ -12,7 +12,7 @@ types:
       - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
       - pylint3 -E Run.py default_variables.py py_alf.py
       - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.physik.uni-wuerzburg.de/ALF/ALF.git
-      - ./Run.py -RT --alfdir ./ALF --config "GNU noMPI" --branch_R master --executable_T Examples --executable_R Examples
+      - ./Run.py -RT --alfdir ./ALF --config "GNU noMPI" --branch_R master --ham_name_R Examples
 
 
 Test_Buster:
