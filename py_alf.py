@@ -11,7 +11,7 @@ import os
 import subprocess
 from shutil import copyfile
 import numpy as np
-import default_variables
+from default_variables import default_params
 
 
 class cd:
@@ -93,13 +93,15 @@ class Simulation:
     def run(self):
         """Prepares simulation directory and runs ALF."""
         if self.tempering:
-            _prep_sim_dir(self.alf_dir, self.sim_dir, self.sim_dict[0])
+            _prep_sim_dir(self.alf_dir, self.sim_dir,
+                          self.ham_name, self.sim_dict[0])
             for i, sim_dict in enumerate(self.sim_dict):
                 _prep_sim_dir(self.alf_dir,
                               os.path.join(self.sim_dir, "Temp_{}".format(i)),
-                              sim_dict)
+                              self.ham_name, sim_dict)
         else:
-            _prep_sim_dir(self.alf_dir, self.sim_dir, self.sim_dict)
+            _prep_sim_dir(self.alf_dir, self.sim_dir,
+                          self.ham_name, self.sim_dict)
 
         env = getenv(self.config, self.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
@@ -137,7 +139,7 @@ class Simulation:
         return get_obs(self.sim_dir, names)
 
 
-def _prep_sim_dir(alf_dir, sim_dir, sim_dict):
+def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
     print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
     if not os.path.exists(sim_dir):
         print('Create new directory.')
@@ -149,7 +151,7 @@ def _prep_sim_dir(alf_dir, sim_dir, sim_dict):
         copyfile(os.path.join(alf_dir, 'Scripts_and_Parameters_files', 'Start',
                               'seeds'),
                  'seeds')
-        params = set_param(sim_dict)
+        params = set_param(ham_name, sim_dict)
         write_parameters(params)
         out_to_in(verbose=False)
 
@@ -216,16 +218,13 @@ def _update_var(params, var, value):
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 
 
-def set_param(sim_dict):
+def set_param(ham_name, sim_dict):
     """Returns dictionary containing all parameters needed by ALF.
 
     Input: Dictionary with chosen set of <parameter: value> pairs.
     Output: Dictionary containing all namelists needed by ALF.
     """
-    model = sim_dict['Model']
-    params = default_variables.PARAMS
-    params_model = default_variables.PARAMS_MODEL
-    params['VAR_'+model] = params_model['VAR_'+model]
+    params = default_params(ham_name)
 
     for name, value in sim_dict.items():
         params = _update_var(params, name, value)
