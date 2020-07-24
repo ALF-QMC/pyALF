@@ -269,10 +269,11 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
             except subprocess.CalledProcessError:
                 raise Exception('Error while checking out {}'.format(branch))
         env = getenv(config)
-        print('Compiling ALF...')
+        print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
         subprocess.run(['make', model], check=True, env=env)
+        print('Done.')
 
 
 def out_to_in(verbose=False):
