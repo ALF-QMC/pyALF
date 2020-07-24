@@ -1,7 +1,10 @@
 """
 Defines dictionaries containing all ALF parameters with default values.
-PARAMS contains all generic parameters independent from the choice of model.
-PARAMS_MODEL contains a dictionary for each model.
+
+PARAMS_GENERIC -- contains all generic parameters independent from the choice
+                  of hamiltonian.
+PARAMS_MODEL -- contains namelists dependant on hamiltonian
+IN_HAM -- defines which elements of PARAMS_MODEL are needed by a hamiltonian
 """
 # pylint: disable=bad-whitespace
 
@@ -12,34 +15,24 @@ __license__ = "GPL"
 from collections import OrderedDict
 
 
-PARAMS = OrderedDict()
+def default_params(ham_name):
+    """Return full set of default parameters for hamiltonian."""
+    params = OrderedDict()
+    for name in IN_HAM[ham_name]:
+        params[name] = PARAMS_MODEL[name].copy()
+    params.update(PARAMS_GENERIC)
+    return params
+
+
+PARAMS_GENERIC = OrderedDict()
 PARAMS_MODEL = OrderedDict()
 
-PARAMS["VAR_Lattice"] = {
-    # Parameters that define the Bravais lattice
-    "L1": 6,
-    "L2": 6,
-    "Lattice_type": "Square",
-    "Model": "Hubbard",
+IN_HAM = {
+    'Hubbard': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
+    'Examples': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
     }
 
-PARAMS["VAR_Model_Generic"] = {
-    # General parameters concerning any model
-    "Checkerboard": True,
-    "Symm"        : True,
-    "N_SUN"       : 2,
-    "N_FL"        : 1,
-    "Phi_X"       : 0.0,
-    "Phi_Y"       : 0.0,
-    "Bulk"        : True,
-    "N_Phi"       : 0,
-    "Dtau"        : 0.1,
-    "Beta"        : 5.0,
-    "Projector"   : False,
-    "Theta"       : 10.0,
-    }
-
-PARAMS["VAR_QMC"] = {
+PARAMS_GENERIC["VAR_QMC"] = {
     # General parameters for the Monte Carlo algorithm
     "Nwrap"              : 10 ,
     "NSweep"             : 20 ,
@@ -57,14 +50,14 @@ PARAMS["VAR_QMC"] = {
     "Nt_sequential_end"  : -1 ,
     }
 
-PARAMS["VAR_errors"] = {
+PARAMS_GENERIC["VAR_errors"] = {
     # Post-processing parameters
     "n_skip" : 1,
     "N_rebin": 1,
     "N_Cov"  : 0,
     }
 
-PARAMS["VAR_TEMP"] = {
+PARAMS_GENERIC["VAR_TEMP"] = {
     # Parallel tempering parameters
     "N_exchange_steps"      : 6   ,
     "N_Tempering_frequency" : 10  ,
@@ -72,7 +65,7 @@ PARAMS["VAR_TEMP"] = {
     "Tempering_calc_det"    : True,
     }
 
-PARAMS["VAR_Max_Stoch"] = {
+PARAMS_GENERIC["VAR_Max_Stoch"] = {
     # MaxEnt parameters
     "NGamma"     : 400  ,
     "Om_st"      : -10.0,
@@ -87,6 +80,30 @@ PARAMS["VAR_Max_Stoch"] = {
     "Channel"    : "P"  ,
     "Checkpoint" : False,
     "Tolerance"  : 0.1  ,
+    }
+
+PARAMS_MODEL["VAR_Lattice"] = {
+    # Parameters that define the Bravais lattice
+    "L1": 6,
+    "L2": 6,
+    "Lattice_type": "Square",
+    "Model": "Hubbard",
+    }
+
+PARAMS_MODEL["VAR_Model_Generic"] = {
+    # General parameters concerning any model
+    "Checkerboard": True,
+    "Symm"        : True,
+    "N_SUN"       : 2,
+    "N_FL"        : 1,
+    "Phi_X"       : 0.0,
+    "Phi_Y"       : 0.0,
+    "Bulk"        : True,
+    "N_Phi"       : 0,
+    "Dtau"        : 0.1,
+    "Beta"        : 5.0,
+    "Projector"   : False,
+    "Theta"       : 10.0,
     }
 
 PARAMS_MODEL["VAR_Hubbard"] = {
