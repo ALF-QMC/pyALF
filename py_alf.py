@@ -59,14 +59,16 @@ class Simulation:
         """
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
-        self.sim_dir = os.path.abspath(
-            kwargs.pop("sim_dir", directory_name(sim_dict)))
+        self.sim_dir = os.path.abspath(os.path.expanduser(
+            kwargs.pop("sim_dir", directory_name(sim_dict))))
         self.executable = kwargs.pop("executable", sim_dict['Model'])
         self.compile_config = kwargs.pop('compile_config', 'GNU NOMPI').upper()
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
         self.n_omp = kwargs.pop('n_omp', 1)
+        if len(kwargs) > 0:
+            raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
         if isinstance(sim_dict, list):
             self.tempering = True
