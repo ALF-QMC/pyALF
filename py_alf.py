@@ -1,6 +1,6 @@
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
-# pylint: disable=invalid-name, too-many-arguments, too-many-branches
+# pylint: disable=invalid-name, too-many-branches
 # pylint: disable=too-many-instance-attributes
 
 __author__ = "Jonas Schwab"
@@ -34,12 +34,11 @@ class Simulation:
     Provides functions for preparing, running, and postprocessing a simulation.
     """
 
-    def __init__(self, sim_dict, alf_dir='./ALF', sim_dir=None,
-                 executable=None, compile_config='GNU noMPI', branch=None,
-                 mpi=False, n_mpi=None):
+    def __init__(self, ham_name, sim_dict, alf_dir='./ALF', **kwargs):
         """Initialize the Simulation object.
 
         Required argument:
+        ham_name -- Name of the hamiltonian
         sim_dict -- Dictionary specfying parameters owerwriting defaults.
                     Can be a list of dictionaries to enable parallel tempering.
 
@@ -49,49 +48,47 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
-        executable -- Name of ALF executable to run.
-                      If not specified, executable will be the model name.
-        compile_config
-            -- Arguments to hand over to configure script prior to compilation.
-               (default: 'GNU noMPI')
+        config -- Arguments to hand over to configure script prior to compiling
+                  or running ALF (default: 'GNU noMPI')
         branch -- If specified, this will be checked out, prior to compilation.
         mpi    -- Employ MPI (default: False)
         n_mpi  -- Number of MPI processes
+        n_omp  -- Number of OpenMP threads per process
         """
-        self.mpi = mpi
+        self.ham_name = ham_name
+        self.sim_dict = sim_dict
+        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
+        self.sim_dir = os.path.abspath(os.path.expanduser(
+            kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
+        self.config = kwargs.pop('config', 'GNU NOMPI').upper()
+        self.branch = kwargs.pop('branch', None)
+        self.mpi = kwargs.pop("mpi", False)
+        self.n_mpi = kwargs.pop("n_mpi", None)
+        self.n_omp = kwargs.pop('n_omp', 1)
+        self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
+        if kwargs:
+            raise Exception('Unused keyword arguments: {}'.format(kwargs))
+
         if isinstance(sim_dict, list):
             self.tempering = True
             self.mpi = True
         else:
             self.tempering = False
 
-        if self.mpi and n_mpi is None:
+        if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
-        self.n_mpi = n_mpi
 
-        self.sim_dict = sim_dict
-        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
-        if sim_dir is None:
-            self.sim_dir = os.path.abspath(directory_name(sim_dict))
-        else:
-            self.sim_dir = os.path.abspath(sim_dir)
-
-        if executable is None:
-            executable = sim_dict['Model']
-        self.executable = executable
-        self.compile_config = compile_config.upper()
         if self.mpi:
-            self.compile_config = self.compile_config.replace('NOMPI', 'MPI')
-            self.compile_config = self.compile_config.replace('SERIAL', 'MPI')
-            if 'MPI' not in self.compile_config:
-                self.compile_config = self.compile_config + ' MPI'
-        if self.tempering and 'TEMPERING' not in self.compile_config:
-            self.compile_config = self.compile_config + ' TEMPERING'
-        self.branch = branch
+            self.config = self.config.replace('NOMPI', 'MPI')
+            self.config = self.config.replace('SERIAL', 'MPI')
+            if 'MPI' not in self.config:
+                self.config += ' MPI'
+        if self.tempering and 'TEMPERING' not in self.config:
+            self.config += ' TEMPERING'
 
-    def compile(self, model='all'):
+    def compile(self, target='all'):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
-        compile_alf(self.alf_dir, self.branch, self.compile_config, model)
+        compile_alf(self.alf_dir, self.branch, self.config, target)
 
     def run(self):
         """Prepares simulation directory and runs ALF."""
@@ -104,20 +101,23 @@ class Simulation:
         else:
             _prep_sim_dir(self.alf_dir, self.sim_dir, self.sim_dict)
 
-        executable = os.path.join(self.alf_dir, 'Prog', self.executable+'.out')
+        env = getenv(self.config, self.alf_dir)
+        env['OMP_NUM_THREADS'] = str(self.n_omp)
+        executable = os.path.join(self.alf_dir, 'Prog', self.ham_name+'.out')
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    subprocess.run(
-                        ['mpiexec', '-n', str(self.n_mpi), executable],
-                        check=True)
+                    command = [self.mpiexec, '-n', str(self.n_mpi), executable]
                 else:
-                    subprocess.run(executable, check=True)
+                    command = executable
+                subprocess.run(command, check=True, env=env)
             except subprocess.CalledProcessError:
                 print('Error while running {}.'.format(executable))
+                print('parameters:')
                 with open('parameters') as f:
                     print(f.read())
+                raise Exception('Error while running {}.'.format(executable))
 
     def analysis(self):
         """Performs default analysis on Monte Carlo data."""
@@ -182,13 +182,13 @@ def write_parameters(params):
             file.write("/\n\n")
 
 
-def directory_name(sim_dict):
+def directory_name(ham_name, sim_dict):
     """Returns name of directory for simulations, given a set of simulation
     parameters.
 
     TODO: Automatically generate a list of all parameters to use.
     """
-    dirname = ''
+    dirname = '{}_'.format(ham_name)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
         dirname = 'temper_'
@@ -232,14 +232,16 @@ def set_param(sim_dict):
     return params
 
 
-
-def getenv(config):
+def getenv(config, alf_dir='.'):
     """Get environment variables for compiling ALF."""
-    subprocess.run(
-        ['bash', '-c', '. ./configure.sh {}; env > environment'.format(config)],
-        check=True)
-    with open('environment', 'r') as f:
-        lines = f.readlines()
+    with cd(alf_dir):
+        subprocess.run(
+            ['bash', '-c',
+             '. ./configure.sh {} || exit 1 && env > environment'
+             .format(config)],
+            check=True)
+        with open('environment', 'r') as f:
+            lines = f.readlines()
     env = {}
     for line in lines:
         item = line.strip().split("=", 1)
@@ -248,7 +250,7 @@ def getenv(config):
     return env
 
 
-def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
+def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
                 url='git@git.physik.uni-wuerzburg.de:ALF/ALF.git'):
     """Compile ALF. Clone a new repository if alf_dir does not exist."""
 
@@ -272,7 +274,7 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', model='all',
         print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
-        subprocess.run(['make', model], check=True, env=env)
+        subprocess.run(['make', target], check=True, env=env)
         print('Done.')
 
 
@@ -292,6 +294,8 @@ def analysis(alf_dir, sim_dir='.'):
     """Perform the default analysis on all files ending in _scal, _eq or _tau
     in directory sim_dir.
     """
+    env = os.environ.copy()
+    env['OMP_NUM_THREADS'] = '1'
     with cd(sim_dir):
         if os.path.exists('Var_scal'):
             os.remove('Var_scal')
@@ -300,7 +304,7 @@ def analysis(alf_dir, sim_dir='.'):
                 print('Analysing {}'.format(name))
                 os.symlink(name, 'Var_scal')
                 executable = os.path.join(alf_dir, 'Analysis', 'cov_scal.out')
-                subprocess.run(executable, check=True)
+                subprocess.run(executable, check=True, env=env)
                 os.remove('Var_scal')
                 os.replace('Var_scalJ', name+'J')
 
@@ -316,7 +320,7 @@ def analysis(alf_dir, sim_dir='.'):
                 print('Analysing {}'.format(name))
                 os.symlink(name, 'ineq')
                 executable = os.path.join(alf_dir, 'Analysis', 'cov_eq.out')
-                subprocess.run(executable, check=True)
+                subprocess.run(executable, check=True, env=env)
                 os.remove('ineq')
                 os.replace('equalJ', name+'JK')
                 os.replace('equalJR', name+'JR')
@@ -333,7 +337,7 @@ def analysis(alf_dir, sim_dir='.'):
                 print('Analysing {}'.format(name))
                 os.symlink(name, 'intau')
                 executable = os.path.join(alf_dir, 'Analysis', 'cov_tau.out')
-                subprocess.run(executable, check=True)
+                subprocess.run(executable, check=True, env=env)
                 os.remove('intau')
                 os.replace('SuscepJ', name+'JK')
 

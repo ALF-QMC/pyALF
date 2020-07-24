@@ -25,6 +25,9 @@ if __name__ == "__main__":
         '--alfdir', required=True,
         help="Path to ALF directory")
     parser.add_argument(
+        '--ham_name_R', required=True,
+        help='Name of hamiltonian')
+    parser.add_argument(
         '-R', action='store_true',
         help='Do a run')
     parser.add_argument(
@@ -40,18 +43,14 @@ if __name__ == "__main__":
         '--config', default='GNU noMPI',
         help='Will run ./configure.sh CONFIG       (default: GNU noMPI)')
     parser.add_argument(
-        '--executable_R',
-        help='Name of  ref executable.             (default: <Model>.out)')
-    parser.add_argument(
-        '--executable_T',
-        help='Name of test executable.             (default: <Model>.out)')
+        '--ham_name_T',
+        help='Name of test hamiltonian             (default: ham_name_R)')
     parser.add_argument(
         '--mpi', default=False,
         help='mpi run                              (default: False)')
     parser.add_argument(
         '--n_mpi', default=4,
         help='number of mpi processes              (default: 4)')
-
 
     args = parser.parse_args()
 
@@ -61,8 +60,11 @@ if __name__ == "__main__":
     branch_R = args.branch_R
     branch_T = args.branch_T
     config = args.config
-    executable_R = args.executable_R
-    executable_T = args.executable_T
+    ham_name_R = args.ham_name_R
+    if args.ham_name_T is not None:
+        ham_name_T = args.ham_name_T
+    else:
+        ham_name_T = args.ham_name_R
     mpi = args.mpi
     n_mpi = args.n_mpi
 
@@ -76,22 +78,20 @@ if __name__ == "__main__":
         sim_dict = json.loads(sim, object_pairs_hook=OrderedDict)
         if do_R:
             print('do R')
-            sim_R = Simulation(sim_dict, alf_dir,
-                               executable=executable_R,
-                               compile_config=config,
+            sim_R = Simulation(ham_name_R, sim_dict, alf_dir,
+                               config=config,
                                branch=branch_R, mpi=mpi, n_mpi=n_mpi)
-            sim_R.compile(model=executable_R)
+            sim_R.compile(target=ham_name_R)
             sim_R.run()
             sim_R.analysis()
             obs_R = sim_R.get_obs()
         if do_T:
             print('do T')
-            sim_T = Simulation(sim_dict, alf_dir,
-                               executable=executable_T,
-                               compile_config=config,
+            sim_T = Simulation(ham_name_T, sim_dict, alf_dir,
+                               config=config,
                                branch=branch_T, mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
-            sim_T.compile(model=executable_T)
+            sim_T.compile(target=ham_name_R)
             sim_T.run()
             sim_T.analysis()
             obs_T = sim_T.get_obs()
