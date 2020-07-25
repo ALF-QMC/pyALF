@@ -24,6 +24,15 @@ def default_params(ham_name):
     return params
 
 
+def params_list(ham_name):
+    # params = default_params(ham_name)
+    p_list = []
+    for name in IN_HAM[ham_name]:
+        p_list += list(PARAMS_MODEL[name])
+
+    return p_list
+
+
 PARAMS_GENERIC = OrderedDict()
 PARAMS_MODEL = OrderedDict()
 

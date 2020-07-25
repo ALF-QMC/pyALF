@@ -11,7 +11,7 @@ import os
 import subprocess
 from shutil import copyfile
 import numpy as np
-from default_variables import default_params
+from default_variables import default_params, params_list
 
 
 class cd:
@@ -203,19 +203,15 @@ def write_parameters(params):
 def directory_name(ham_name, sim_dict):
     """Returns name of directory for simulations, given a set of simulation
     parameters.
-
-    TODO: Automatically generate a list of all parameters to use.
     """
-    dirname = '{}_'.format(ham_name)
+    p_list = params_list(ham_name)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
-        dirname = 'temper_'
+        dirname = 'temper_{}_'.format(ham_name)
+    else:
+        dirname = '{}_'.format(ham_name)
     for name in sim_dict:
-        if name in ["L1", "L2", "Lattice_type", "Model",
-                    "Checkerboard", "Symm", "N_SUN", "N_FL", "Phi_X", "N_Phi",
-                    "Dtau", "Beta", "Projector",
-                    "Theta", "ham_T", "ham_chem", "ham_U",
-                    "ham_T2", "ham_U2", "ham_Tperp"]:
+        if name in p_list:
             if name in ["Lattice_type", "Model"]:
                 dirname = '{}{}_'.format(dirname, sim_dict[name])
             else:
