@@ -92,7 +92,7 @@ class Simulation:
         if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
             raise Exception('Illegal value stab={}'.format(stab))
 
-        self.config = '{} {}'.format(machine, stab)
+        self.config = '{} {}'.format(machine, stab).strip()
 
         if self.mpi:
             self.config += ' MPI'
