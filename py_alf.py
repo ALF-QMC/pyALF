@@ -48,42 +48,58 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
-        config -- Arguments to hand over to configure script prior to compiling
-                  or running ALF (default: 'GNU noMPI')
         branch -- If specified, this will be checked out, prior to compilation.
         mpi    -- Employ MPI (default: False)
         n_mpi  -- Number of MPI processes
         n_omp  -- Number of OpenMP threads per process
+        mpiexec -- Command used for starting a MPI run (default: "mpiexec")
+        machine -- Possible values: GNU, INTEL, PGI, JUWELS, SUPERMUC,
+                                    SUPERMUC-NG, DEVELOPMENT, FAKHERSMAC
+                   default: GNU
+                   TODO: Add some details
+        stab    -- Which version of stabilisation to employ
+                   Possible values: STAB1, STAB2, STAB3, LOG
+                   TODO: Add some details
+        machine and stab are not case sensitive.
         """
         self.ham_name = ham_name
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
-        self.config = kwargs.pop('config', 'GNU NOMPI').upper()
+        # self.config = kwargs.pop('config', 'GNU NOMPI').upper()
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
         self.n_omp = kwargs.pop('n_omp', 1)
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
+        stab = kwargs.pop('stab', '').upper()
+        machine = kwargs.pop('machine', 'GNU').upper()
         if kwargs:
             raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
-        if isinstance(sim_dict, list):
-            self.tempering = True
+        self.tempering = isinstance(sim_dict, list)
+        if self.tempering:
             self.mpi = True
-        else:
-            self.tempering = False
 
         if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
 
+        if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC',
+                           'SUPERMUC-NG', 'DEVELOPMENT', 'FAKHERSMAC']:
+            raise Exception('Illegal value machine={}'.format(machine))
+
+        if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
+            raise Exception('Illegal value stab={}'.format(stab))
+
+        self.config = '{} {}'.format(machine, stab)
+
         if self.mpi:
-            self.config = self.config.replace('NOMPI', 'MPI')
-            self.config = self.config.replace('SERIAL', 'MPI')
-            if 'MPI' not in self.config:
-                self.config += ' MPI'
-        if self.tempering and 'TEMPERING' not in self.config:
+            self.config += ' MPI'
+        else:
+            self.config += ' NOMPI'
+
+        if self.tempering:
             self.config += ' TEMPERING'
 
     def compile(self, target='all'):

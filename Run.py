@@ -40,8 +40,8 @@ if __name__ == "__main__":
         '--branch_T', default="master",
         help='Branch to test against Runbranch.    (default: master)')
     parser.add_argument(
-        '--config', default='GNU noMPI',
-        help='Will run ./configure.sh CONFIG       (default: GNU noMPI)')
+        '--machine', default='GNU',
+        help='Machine configuration                (default: GNU)')
     parser.add_argument(
         '--ham_name_T',
         help='Name of test hamiltonian             (default: ham_name_R)')
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     alf_dir = os.path.abspath(args.alfdir)
     branch_R = args.branch_R
     branch_T = args.branch_T
-    config = args.config
+    machine = args.machine
     ham_name_R = args.ham_name_R
     if args.ham_name_T is not None:
         ham_name_T = args.ham_name_T
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         if do_R:
             print('do R')
             sim_R = Simulation(ham_name_R, sim_dict, alf_dir,
-                               config=config,
+                               machine=machine,
                                branch=branch_R, mpi=mpi, n_mpi=n_mpi)
             sim_R.compile(target=ham_name_R)
             sim_R.run()
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         if do_T:
             print('do T')
             sim_T = Simulation(ham_name_T, sim_dict, alf_dir,
-                               config=config,
+                               machine=machine,
                                branch=branch_T, mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
             sim_T.compile(target=ham_name_R)
