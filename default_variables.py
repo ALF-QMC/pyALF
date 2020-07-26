@@ -1,6 +1,8 @@
 """
 Defines dictionaries containing all ALF parameters with default values.
 
+default_params -- Return full set of default parameters for hamiltonian.
+params_list -- Return list of parameter names for hamiltonian.
 PARAMS_GENERIC -- contains all generic parameters independent from the choice
                   of hamiltonian.
 PARAMS_MODEL -- contains namelists dependant on hamiltonian
@@ -25,7 +27,7 @@ def default_params(ham_name):
 
 
 def params_list(ham_name):
-    # params = default_params(ham_name)
+    """Return list of parameter names for hamiltonian."""
     p_list = []
     for name in IN_HAM[ham_name]:
         p_list += list(PARAMS_MODEL[name])
