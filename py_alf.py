@@ -176,10 +176,12 @@ def _convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be
     written into a parameter file.
     """
-    if isinstance(parameter, (float, int)):
-        return str(parameter)
+    if isinstance(parameter, float):
+        return '{}d0'.format(parameter)
+    if isinstance(parameter, int):
+        return '{}'.format(parameter)
     if isinstance(parameter, str):
-        return '"' + parameter + '"'
+        return '"{}"'.format(parameter)
     if isinstance(parameter, bool):
         if parameter:
             return '.T.'
@@ -194,9 +196,11 @@ def write_parameters(params):
         for namespace in params:
             file.write("&{}\n".format(namespace))
             for var in params[namespace]:
-                file.write(var + ' = '
-                           + _convert_par_to_str(params[namespace][var])
-                           + '\n')
+                file.write('{} = {}  ! {}\n'.format(
+                    var,
+                    _convert_par_to_str(params[namespace][var][0]),
+                    params[namespace][var][1]
+                    ))
             file.write("/\n\n")
 
 
@@ -225,7 +229,7 @@ def _update_var(params, var, value):
     for name in params:
         for var2 in params[name]:
             if var2.lower() == var.lower():
-                params[name][var2] = value
+                params[name][var2][0] = value
                 return params
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 
