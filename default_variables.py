@@ -1,12 +1,14 @@
 """
 Defines dictionaries containing all ALF parameters with default values.
 
+default_params -- Return full set of default parameters for hamiltonian.
+params_list -- Return list of parameter names for hamiltonian.
 PARAMS_GENERIC -- contains all generic parameters independent from the choice
                   of hamiltonian.
 PARAMS_MODEL -- contains namelists dependant on hamiltonian
 IN_HAM -- defines which elements of PARAMS_MODEL are needed by a hamiltonian
 """
-# pylint: disable=bad-whitespace
+# pylint: disable=bad-whitespace, line-too-long
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
@@ -24,6 +26,15 @@ def default_params(ham_name):
     return params
 
 
+def params_list(ham_name):
+    """Return list of parameter names for hamiltonian."""
+    p_list = []
+    for name in IN_HAM[ham_name]:
+        p_list += list(PARAMS_MODEL[name])
+
+    return p_list
+
+
 PARAMS_GENERIC = OrderedDict()
 PARAMS_MODEL = OrderedDict()
 
@@ -34,85 +45,88 @@ IN_HAM = {
 
 PARAMS_GENERIC["VAR_QMC"] = {
     # General parameters for the Monte Carlo algorithm
-    "Nwrap"              : 10 ,
-    "NSweep"             : 20 ,
-    "NBin"               : 5  ,
-    "Ltau"               : 1  ,
-    "LOBS_ST"            : 0  ,
-    "LOBS_EN"            : 0  ,
-    "CPU_MAX"            : 0.0,
-    "Propose_S0"         : False,
-    "Global_moves"       : False,
-    "N_Global"           : 1  ,
-    "Global_tau_moves"   : False,
-    "N_Global_tau"       : 1  ,
-    "Nt_sequential_start": 0  ,
-    "Nt_sequential_end"  : -1 ,
+    "Nwrap"              : [10, "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],
+    "Nsweep"             : [20, "Number of sweeps per bin."],
+    "Nbin"               : [5, "Number of bins."],
+    "Ltau"               : [1, "1 to calculate time-displaced Green functions; 0 otherwise."],
+    "LOBS_ST"            : [0, "Start measurements at time slice LOBS_ST"],
+    "LOBS_EN"            : [0, "End measurements at time slice LOBS_EN"],
+    "CPU_MAX"            : [0.0, "Code stops after CPU_MAX hours, if 0 or not specified, the code stops after Nbin bins"],
+    "Propose_S0"         : [False, "Proposes single spin flip moves with probability exp(-S0)."],
+    "Global_moves"       : [False, "Allows for global moves in space and time."],
+    "N_global"           : [1, "Number of global moves per sweep."],
+    "Global_tau_moves"   : [False, "Allows for global moves on a single time slice."],
+    "N_global_tau"       : [1, "Number of global moves that will be carried out on a single time slice."],
+    "Nt_sequential_start": [0, ""],
+    "Nt_sequential_end"  : [-1, ""],
     }
 
 PARAMS_GENERIC["VAR_errors"] = {
     # Post-processing parameters
-    "n_skip" : 1,
-    "N_rebin": 1,
-    "N_Cov"  : 0,
+    "N_skip" : [1, "Number of bins to be skipped."],
+    "N_rebin": [1, "Rebinning: Number of bins to combine into one."],
+    "N_Cov"  : [0, "If set to 1, covariance computed for time-displaced correlation functions."],
     }
 
 PARAMS_GENERIC["VAR_TEMP"] = {
     # Parallel tempering parameters
-    "N_exchange_steps"      : 6   ,
-    "N_Tempering_frequency" : 10  ,
-    "mpi_per_parameter_set" : 2   ,
-    "Tempering_calc_det"    : True,
+    "N_exchange_steps"      : [6, "Number of exchange moves."],
+    "N_Tempering_frequency" : [10, "The frequency, in units of sweeps, at which the exchange moves are carried out."],
+    "mpi_per_parameter_set" : [2, "Number of mpi-processes per parameter set."],
+    "Tempering_calc_det"    :
+        [True, "Specifies whether the fermion weight has to be taken into \
+         account while tempering. Can be set to .F. if the parameters that \
+         get varied only enter the Ising action S_0"],
     }
 
 PARAMS_GENERIC["VAR_Max_Stoch"] = {
     # MaxEnt parameters
-    "NGamma"     : 400  ,
-    "Om_st"      : -10.0,
-    "Om_en"      :  10.0,
-    "Ndis"       : 2000 ,
-    "NBins"      : 250  ,
-    "NSweeps"    : 70   ,
-    "NWarm"      : 20   ,
-    "N_alpha"    : 14   ,
-    "alpha_st"   : 1.0  ,
-    "R"          : 1.2  ,
-    "Channel"    : "P"  ,
-    "Checkpoint" : False,
-    "Tolerance"  : 0.1  ,
+    "Ngamma"     : [400, "Number of Dirac delta-functions for parametrization."],
+    "Om_st"      : [-10.0, "Frequency range lower bound."],
+    "Om_en"      : [10.0, "Frequency range upper bound."],
+    "Ndis"       : [2000, "Number of boxes for histogram."],
+    "NBins"      : [250, "Number of bins for Monte Carlo."],
+    "NSweeps"    : [70, "Number of sweeps per bin."],
+    "Nwarm"      : [20, "The Nwarm first bins will be ommitted."],
+    "N_alpha"    : [14, "Number of temperatures."],
+    "alpha_st"   : [1.0, ""],
+    "R"          : [1.2, ""],
+    "Channel"    : ["P", ""],
+    "Checkpoint" : [False, ""],
+    "Tolerance"  : [0.1, ""],
     }
 
 PARAMS_MODEL["VAR_Lattice"] = {
     # Parameters that define the Bravais lattice
-    "L1": 6,
-    "L2": 6,
-    "Lattice_type": "Square",
-    "Model": "Hubbard",
+    "L1": [6, ""],
+    "L2": [6, ""],
+    "Lattice_type": ["Square", ""],
+    "Model": ["Hubbard", ""],
     }
 
 PARAMS_MODEL["VAR_Model_Generic"] = {
     # General parameters concerning any model
-    "Checkerboard": True,
-    "Symm"        : True,
-    "N_SUN"       : 2,
-    "N_FL"        : 1,
-    "Phi_X"       : 0.0,
-    "Phi_Y"       : 0.0,
-    "Bulk"        : True,
-    "N_Phi"       : 0,
-    "Dtau"        : 0.1,
-    "Beta"        : 5.0,
-    "Projector"   : False,
-    "Theta"       : 10.0,
+    "Checkerboard": [True, ""],
+    "Symm"        : [True, ""],
+    "N_SUN"       : [2, ""],
+    "N_FL"        : [1, ""],
+    "Phi_X"       : [0.0, ""],
+    "Phi_Y"       : [0.0, ""],
+    "Bulk"        : [True, ""],
+    "N_Phi"       : [0, ""],
+    "Dtau"        : [0.1, ""],
+    "Beta"        : [5.0, ""],
+    "Projector"   : [False, ""],
+    "Theta"       : [10.0, ""],
     }
 
 PARAMS_MODEL["VAR_Hubbard"] = {
     # Parameters of the Hubbard hamiltonian
-    "Mz"       :  True ,
-    "ham_T"    :  1.0  ,
-    "ham_chem" :  0.0  ,
-    "ham_U"    :  4.0  ,
-    "ham_T2"   :  1.0  ,
-    "ham_U2"   :  4.0  ,
-    "ham_Tperp":  1.0  ,
+    "Mz"       :  [True, ""] ,
+    "ham_T"    :  [1.0, ""]  ,
+    "ham_chem" :  [0.0, ""]  ,
+    "ham_U"    :  [4.0, ""]  ,
+    "ham_T2"   :  [1.0, ""]  ,
+    "ham_U2"   :  [4.0, ""]  ,
+    "ham_Tperp":  [1.0, ""]  ,
     }

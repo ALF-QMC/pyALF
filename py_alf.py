@@ -11,7 +11,7 @@ import os
 import subprocess
 from shutil import copyfile
 import numpy as np
-from default_variables import default_params
+from default_variables import default_params, params_list
 
 
 class cd:
@@ -48,10 +48,10 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
-        branch -- If specified, this will be checked out, prior to compilation.
-        mpi    -- Employ MPI (default: False)
-        n_mpi  -- Number of MPI processes
-        n_omp  -- Number of OpenMP threads per process
+        branch  -- If specified, this will be checked out prior to compilation.
+        mpi     -- Employ MPI (default: False)
+        n_mpi   -- Number of MPI processes
+        n_omp   -- Number of OpenMP threads per process (default: 1)
         mpiexec -- Command used for starting a MPI run (default: "mpiexec")
         machine -- Possible values: GNU, INTEL, PGI, JUWELS, SUPERMUC,
                                     SUPERMUC-NG, DEVELOPMENT, FAKHERSMAC
@@ -67,7 +67,6 @@ class Simulation:
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
-        # self.config = kwargs.pop('config', 'GNU NOMPI').upper()
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
@@ -176,10 +175,12 @@ def _convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be
     written into a parameter file.
     """
-    if isinstance(parameter, (float, int)):
-        return str(parameter)
+    if isinstance(parameter, float):
+        return '{}d0'.format(parameter)
+    if isinstance(parameter, int):
+        return '{}'.format(parameter)
     if isinstance(parameter, str):
-        return '"' + parameter + '"'
+        return '"{}"'.format(parameter)
     if isinstance(parameter, bool):
         if parameter:
             return '.T.'
@@ -194,28 +195,26 @@ def write_parameters(params):
         for namespace in params:
             file.write("&{}\n".format(namespace))
             for var in params[namespace]:
-                file.write(var + ' = '
-                           + _convert_par_to_str(params[namespace][var])
-                           + '\n')
+                file.write('{} = {}  ! {}\n'.format(
+                    var,
+                    _convert_par_to_str(params[namespace][var][0]),
+                    params[namespace][var][1]
+                    ))
             file.write("/\n\n")
 
 
 def directory_name(ham_name, sim_dict):
     """Returns name of directory for simulations, given a set of simulation
     parameters.
-
-    TODO: Automatically generate a list of all parameters to use.
     """
-    dirname = '{}_'.format(ham_name)
+    p_list = params_list(ham_name)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
-        dirname = 'temper_'
+        dirname = 'temper_{}_'.format(ham_name)
+    else:
+        dirname = '{}_'.format(ham_name)
     for name in sim_dict:
-        if name in ["L1", "L2", "Lattice_type", "Model",
-                    "Checkerboard", "Symm", "N_SUN", "N_FL", "Phi_X", "N_Phi",
-                    "Dtau", "Beta", "Projector",
-                    "Theta", "ham_T", "ham_chem", "ham_U",
-                    "ham_T2", "ham_U2", "ham_Tperp"]:
+        if name in p_list:
             if name in ["Lattice_type", "Model"]:
                 dirname = '{}{}_'.format(dirname, sim_dict[name])
             else:
@@ -229,7 +228,7 @@ def _update_var(params, var, value):
     for name in params:
         for var2 in params[name]:
             if var2.lower() == var.lower():
-                params[name][var2] = value
+                params[name][var2][0] = value
                 return params
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 

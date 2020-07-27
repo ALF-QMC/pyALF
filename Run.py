@@ -91,7 +91,7 @@ if __name__ == "__main__":
                                machine=machine,
                                branch=branch_T, mpi=mpi, n_mpi=n_mpi)
             sim_T.sim_dir = sim_T.sim_dir + '_test'
-            sim_T.compile(target=ham_name_R)
+            sim_T.compile(target=ham_name_T)
             sim_T.run()
             sim_T.analysis()
             obs_T = sim_T.get_obs()
