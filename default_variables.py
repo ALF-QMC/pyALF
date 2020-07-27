@@ -8,7 +8,7 @@ PARAMS_GENERIC -- contains all generic parameters independent from the choice
 PARAMS_MODEL -- contains namelists dependant on hamiltonian
 IN_HAM -- defines which elements of PARAMS_MODEL are needed by a hamiltonian
 """
-# pylint: disable=bad-whitespace
+# pylint: disable=bad-whitespace, line-too-long
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"

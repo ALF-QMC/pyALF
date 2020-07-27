@@ -48,10 +48,10 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
-        branch -- If specified, this will be checked out, prior to compilation.
-        mpi    -- Employ MPI (default: False)
-        n_mpi  -- Number of MPI processes
-        n_omp  -- Number of OpenMP threads per process
+        branch  -- If specified, this will be checked out prior to compilation.
+        mpi     -- Employ MPI (default: False)
+        n_mpi   -- Number of MPI processes
+        n_omp   -- Number of OpenMP threads per process (default: 1)
         mpiexec -- Command used for starting a MPI run (default: "mpiexec")
         machine -- Possible values: GNU, INTEL, PGI, JUWELS, SUPERMUC,
                                     SUPERMUC-NG, DEVELOPMENT, FAKHERSMAC
@@ -67,7 +67,6 @@ class Simulation:
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
-        # self.config = kwargs.pop('config', 'GNU NOMPI').upper()
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
