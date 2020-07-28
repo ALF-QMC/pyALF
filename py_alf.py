@@ -68,7 +68,7 @@ class Simulation:
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(os.path.join(
-            kwargs.pop("sim_root", '.'),
+            kwargs.pop("sim_root", ''),
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict)))))
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
