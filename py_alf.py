@@ -8,6 +8,7 @@ __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
 import os
+import re
 import subprocess
 from shutil import copyfile
 import numpy as np
@@ -258,9 +259,12 @@ def getenv(config, alf_dir='.'):
             lines = f.readlines()
     env = {}
     for line in lines:
-        item = line.strip().split("=", 1)
-        if len(item) == 2:
-            env[item[0]] = item[1]
+        if (not re.search(r"^BASH_FUNC.*%%=()", line)) and '=' in line:
+            item = line.strip().split("=", 1)
+            if len(item) == 2:
+                env[item[0]] = item[1]
+            else:
+                env[item[0]] = ''
     return env
 
 
