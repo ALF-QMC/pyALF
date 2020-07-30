@@ -8,6 +8,7 @@ __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
 import os
+import re
 import subprocess
 from shutil import copyfile
 import numpy as np
@@ -48,6 +49,7 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
+        sim_root-- Directory to prepend to sim_dir. (default: '.')
         branch  -- If specified, this will be checked out prior to compilation.
         mpi     -- Employ MPI (default: False)
         n_mpi   -- Number of MPI processes
@@ -65,8 +67,9 @@ class Simulation:
         self.ham_name = ham_name
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
-        self.sim_dir = os.path.abspath(os.path.expanduser(
-            kwargs.pop("sim_dir", directory_name(ham_name, sim_dict))))
+        self.sim_dir = os.path.abspath(os.path.expanduser(os.path.join(
+            kwargs.pop("sim_root", ''),
+            kwargs.pop("sim_dir", directory_name(ham_name, sim_dict)))))
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
@@ -258,9 +261,12 @@ def getenv(config, alf_dir='.'):
             lines = f.readlines()
     env = {}
     for line in lines:
-        item = line.strip().split("=", 1)
-        if len(item) == 2:
-            env[item[0]] = item[1]
+        if (not re.search(r"^BASH_FUNC.*%%=()", line)) and '=' in line:
+            item = line.strip().split("=", 1)
+            if len(item) == 2:
+                env[item[0]] = item[1]
+            else:
+                env[item[0]] = ''
     return env
 
 
