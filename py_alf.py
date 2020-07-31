@@ -216,7 +216,7 @@ def directory_name(ham_name, sim_dict):
     #     dirname = 'temper_{}_'.format(ham_name)
     # else:
     #     dirname = '{}_'.format(ham_name)
-    dirname=''
+    dirname = ''
     for name in sim_dict:
         if name in p_list:
             if name in ["Lattice_type", "Model"]:
