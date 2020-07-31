@@ -1,1 +1,2 @@
 ./Run.py -R -T --alfdir /Users/assaad_home/ALF/Work --machine FakhersMAC --branch_R master --branch_T master --ham_name_T Hubbard --ham_name_R Examples
+./Run.py -R --alfdir /Users/assaad_home/ALF/Work --machine FakhersMAC  --branch_T 145-improve-predefined-hopping-and-hubbard-hamiltonian --ham_name_T Hubbard
