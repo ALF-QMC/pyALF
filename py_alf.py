@@ -223,7 +223,7 @@ def directory_name(ham_name, sim_dict):
             elif name.upper() == "LATTICE_TYPE":
                 dirname = '{}{}_'.format(dirname, value)
             else:
-                if name.upper.startswith('HAM_'):
+                if name.upper().startswith('HAM_'):
                     name_temp = name[4:]
                 else:
                     name_temp = name
