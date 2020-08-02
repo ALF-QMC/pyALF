@@ -211,19 +211,19 @@ def directory_name(ham_name, sim_dict):
     parameters.
     """
     p_list = params_list(ham_name)
-    # if isinstance(sim_dict, list):
-    #     sim_dict = sim_dict[0]
-    #     dirname = 'temper_{}_'.format(ham_name)
-    # else:
-    #     dirname = '{}_'.format(ham_name)
-    dirname = ''
-    for name in sim_dict:
+    if isinstance(sim_dict, list):
+        sim_dict = sim_dict[0]
+        dirname = 'temper_{}_'.format(ham_name)
+    else:
+        dirname = '{}_'.format(ham_name)
+    for name, value in sim_dict.items():
         if name in p_list:
-            if name in ["Lattice_type", "Model"]:
-                dirname = '{}{}_'.format(dirname, sim_dict[name])
+            if name.upper() == 'MODEL' and value != ham_name:
+                dirname = '{}{}_'.format(dirname, value)
+            elif name.upper() == "LATTICE_TYPE":
+                dirname = '{}{}_'.format(dirname, value)
             else:
-                dirname = '{}{}={}_'.format(dirname, name.strip("ham_"),
-                                            sim_dict[name])
+                dirname = '{}{}={}_'.format(dirname, name.strip("ham_"), value)
     return dirname[:-1]
 
 
