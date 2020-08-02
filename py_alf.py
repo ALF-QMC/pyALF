@@ -217,13 +217,17 @@ def directory_name(ham_name, sim_dict):
     else:
         dirname = '{}_'.format(ham_name)
     for name, value in sim_dict.items():
-        if name in p_list:
+        if name.upper() in p_list:
             if name.upper() == 'MODEL' and value != ham_name:
                 dirname = '{}{}_'.format(dirname, value)
             elif name.upper() == "LATTICE_TYPE":
                 dirname = '{}{}_'.format(dirname, value)
             else:
-                dirname = '{}{}={}_'.format(dirname, name.strip("ham_"), value)
+                if name.upper.startswith('HAM_'):
+                    name_temp = name[4:]
+                else:
+                    name_temp = name
+                dirname = '{}{}={}_'.format(dirname, name_temp, value)
     return dirname[:-1]
 
 

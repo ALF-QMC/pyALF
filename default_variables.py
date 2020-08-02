@@ -27,12 +27,14 @@ def default_params(ham_name):
 
 
 def params_list(ham_name):
-    """Return list of parameter names for hamiltonian."""
+    """Return list of parameter names for hamiltonian,
+    transformed in all upper case.
+    """
     p_list = []
     for name in IN_HAM[ham_name]:
         p_list += list(PARAMS_MODEL[name])
 
-    return p_list
+    return [i.upper() for i in p_list]
 
 
 PARAMS_GENERIC = OrderedDict()
@@ -141,5 +143,5 @@ PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
     "Beta"        : [5.0, ""],
     "Projector"   : [False, ""],
     "Theta"       : [10.0, ""],
-    "Symm"        : [True, ""],      
+    "Symm"        : [True, ""],
     }
