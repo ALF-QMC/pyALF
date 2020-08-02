@@ -96,9 +96,9 @@ if __name__ == "__main__":
             sim_T.analysis()
             obs_T = sim_T.get_obs()
 
-        with open(sim_R.sim_dir + ".txt", "w") as f:
-            f.write('Run:  {} +- {}\n'.format(*obs_R['Kin_scalJ']['obs'][0]))
-            f.write('Test: {} +- {}\n'.format(*obs_T['Kin_scalJ']['obs'][0]))
-            f.write('Diff: {} +- {}\n'.format(
-                *(obs_R['Kin_scalJ']['obs'][0] - obs_T['Kin_scalJ']['obs'][0])
-                ))
+        # with open(sim_R.sim_dir + ".txt", "w") as f:
+        #     f.write('Run:  {} +- {}\n'.format(*obs_R['Kin_scalJ']['obs'][0]))
+        #     f.write('Test: {} +- {}\n'.format(*obs_T['Kin_scalJ']['obs'][0]))
+        #     f.write('Diff: {} +- {}\n'.format(
+        #         *(obs_R['Kin_scalJ']['obs'][0] - obs_T['Kin_scalJ']['obs'][0])
+        #         ))

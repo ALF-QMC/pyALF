@@ -40,6 +40,7 @@ PARAMS_MODEL = OrderedDict()
 
 IN_HAM = {
     'Hubbard': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
+    'Hubbard_Plain_Vanilla': ["VAR_Lattice","VAR_Hubbard_Plain_Vanilla"],
     'Examples': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
     }
 
@@ -129,4 +130,16 @@ PARAMS_MODEL["VAR_Hubbard"] = {
     "ham_T2"   :  [1.0, ""]  ,
     "ham_U2"   :  [4.0, ""]  ,
     "ham_Tperp":  [1.0, ""]  ,
+    }
+
+PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
+    # Parameters of the Hubbard hamiltonian
+    "ham_T"       : [1.0, ""]  ,
+    "ham_chem"    : [0.0, ""]  ,
+    "ham_U"       : [4.0, ""]  ,
+    "Dtau"        : [0.1, ""],
+    "Beta"        : [5.0, ""],
+    "Projector"   : [False, ""],
+    "Theta"       : [10.0, ""],
+    "Symm"        : [True, ""],      
     }
