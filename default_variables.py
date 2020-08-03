@@ -43,6 +43,7 @@ PARAMS_MODEL = OrderedDict()
 IN_HAM = {
     'Hubbard': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
     'Hubbard_Plain_Vanilla': ["VAR_Lattice","VAR_Hubbard_Plain_Vanilla"],
+    'Kondo': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Kondo"],
     'Examples': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
     }
 
@@ -135,7 +136,7 @@ PARAMS_MODEL["VAR_Hubbard"] = {
     }
 
 PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
-    # Parameters of the Hubbard hamiltonian
+    # Parameters of the Plain Vanilla Hubbard hamiltonian
     "ham_T"       : [1.0, ""]  ,
     "ham_chem"    : [0.0, ""]  ,
     "ham_U"       : [4.0, ""]  ,
@@ -144,4 +145,14 @@ PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
     "Projector"   : [False, ""],
     "Theta"       : [10.0, ""],
     "Symm"        : [True, ""],
+    }
+
+
+PARAMS_MODEL["VAR_Kondo"] = {
+    # Parameters of the SU(N) Kondo lattice
+    "ham_T"    :  [1.0, ""]  ,
+    "ham_chem" :  [0.0, ""]  ,
+    "ham_U"    :  [0.0, ""]  ,
+    "ham_U2"   :  [2.0, ""]  ,
+    "ham_JK"   :  [2.0, ""]  ,
     }
