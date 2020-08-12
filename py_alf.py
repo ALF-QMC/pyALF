@@ -179,6 +179,8 @@ def _convert_par_to_str(parameter):
     written into a parameter file.
     """
     if isinstance(parameter, float):
+        if 'e' in '{}'.format(parameter):
+            return '{}'.format(parameter).replace('e', 'd')
         return '{}d0'.format(parameter)
     if isinstance(parameter, int):
         return '{}'.format(parameter)
