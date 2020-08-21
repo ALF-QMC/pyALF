@@ -41,7 +41,10 @@ However, pyALF can also be used to start a simulation from the command line, wit
 ```bash
 python3.7 Run.py -R  --alfdir /home/debian/ALF-1.2/ --config "Intel"  --executable_R Hubbard --mpi True  &
 ```
-which requires the file `Sims` (see bellow) to be present.
+Notice that `Run.py` assumes the existence of the configuration file `Sims`, which defines the simulation parameters. A line of `Sims` might read as:
+```bash
+{"Model": "Hubbard", "Lattice_type": "Square", "L1": 4 , "L2": 4, "NBin": 5, "ham_T": 0.0, "Nsweep" : 2000, "Beta": 1.0, "ham_chem": -1.0 }
+```
 
 ## Files and directories
 
