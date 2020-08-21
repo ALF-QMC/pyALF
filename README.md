@@ -23,7 +23,7 @@ export PYTHONPATH="/local/path/to/pyALF:$PYTHONPATH"
 ```
 
 
-## Starting
+## Usage
 
 Jupyter notebooks [are run](https://jupyter.readthedocs.io/en/latest/running.html) through a Jupyter server started, e.g., from the command line:
 
@@ -41,6 +41,7 @@ However, pyALF can also be used to start a simulation from the command line, wit
 ```bash
 python3.7 Run.py -R  --alfdir /home/debian/ALF-1.2/ --config "Intel"  --executable_R Hubbard --mpi True  &
 ```
+which requires the file `Sims` (see bellow) to be present.
 
 ## Files and directories
 
