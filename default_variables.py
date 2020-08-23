@@ -44,6 +44,7 @@ IN_HAM = {
     'Hubbard': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
     'Hubbard_Plain_Vanilla': ["VAR_Lattice","VAR_Hubbard_Plain_Vanilla"],
     'Kondo': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Kondo"],
+    'tV': ["VAR_Lattice", "VAR_Model_Generic", "VAR_tV"],
     'Examples': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
     }
 
@@ -133,6 +134,16 @@ PARAMS_MODEL["VAR_Hubbard"] = {
     "ham_T2"   :  [1.0, ""]  ,
     "ham_U2"   :  [4.0, ""]  ,
     "ham_Tperp":  [1.0, ""]  ,
+    }
+
+PARAMS_MODEL["VAR_tV"] = {
+    "ham_T"    :  [1.0, ""]  ,
+    "ham_chem" :  [0.0, ""]  ,
+    "ham_V"    :  [4.0, ""]  ,
+    "ham_T2"   :  [1.0, ""]  ,
+    "ham_V2"   :  [4.0, ""]  ,
+    "ham_Tperp":  [1.0, ""]  ,
+    "ham_Vperp":  [1.0, ""]  ,
     }
 
 PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
