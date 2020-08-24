@@ -49,7 +49,7 @@ class Simulation:
                    fetched from a server.
         sim_dir -- Directory in which the Monte Carlo will be run.
                    If not specified, sim_dir will be generated from sim_dict.
-        sim_root-- Directory to prepend to sim_dir. (default: '.')
+        sim_root-- Directory to prepend to sim_dir. (default: "ALF_data")
         branch  -- If specified, this will be checked out prior to compilation.
         mpi     -- Employ MPI (default: False)
         n_mpi   -- Number of MPI processes
@@ -68,7 +68,7 @@ class Simulation:
         self.sim_dict = sim_dict
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(os.path.join(
-            kwargs.pop("sim_root", ''),
+            kwargs.pop("sim_root", "ALF_data"),
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict)))))
         self.branch = kwargs.pop('branch', None)
         self.mpi = kwargs.pop("mpi", False)
@@ -161,7 +161,7 @@ def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
     print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
     if not os.path.exists(sim_dir):
         print('Create new directory.')
-        os.mkdir(sim_dir)
+        os.makedirs(sim_dir)
 
     with cd(sim_dir):
         if 'confout_0' in os.listdir() or 'confout_0.h5' in os.listdir():
