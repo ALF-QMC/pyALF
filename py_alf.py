@@ -161,7 +161,7 @@ def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
     print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
     if not os.path.exists(sim_dir):
         print('Create new directory.')
-        os.mkdir(sim_dir)
+        os.makedirs(sim_dir)
 
     with cd(sim_dir):
         if 'confout_0' in os.listdir() or 'confout_0.h5' in os.listdir():
