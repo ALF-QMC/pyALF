@@ -152,7 +152,7 @@ PARAMS_MODEL["VAR_Kondo"] = {
     # Parameters of the SU(N) Kondo lattice
     "ham_T"    :  [1.0, ""]  ,
     "ham_chem" :  [0.0, ""]  ,
-    "ham_U"    :  [0.0, ""]  ,
-    "ham_U2"   :  [2.0, ""]  ,
+    "ham_Uc"   :  [0.0, ""]  ,
+    "ham_Uf"   :  [2.0, ""]  ,
     "ham_JK"   :  [2.0, ""]  ,
     }
