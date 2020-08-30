@@ -1,5 +1,0 @@
-Currently, each notebook pdf is created in two steps:
-
-1) Download as html from the jupyter notebook menu: File > Download as > HTML
-2) convert to pdf using the command-line tool wkhtmltopdf, e.g.:
-   $ wkhtmltopdf minimal_ALF_run.html minimal_ALF_run.pdf
