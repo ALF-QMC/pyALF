@@ -51,8 +51,8 @@ IN_HAM = {
 
 PARAMS_GENERIC["VAR_QMC"] = {
     # General parameters for the Monte Carlo algorithm
-    "Nwrap"              : [10, "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],
-    "Nsweep"             : [20, "Number of sweeps per bin."],
+    "Nwrap"              : [10,  "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],
+    "Nsweep"             : [100, "Number of sweeps per bin."],
     "Nbin"               : [5, "Number of bins."],
     "Ltau"               : [1, "1 to calculate time-displaced Green functions; 0 otherwise."],
     "LOBS_ST"            : [0, "Start measurements at time slice LOBS_ST"],
