@@ -46,6 +46,7 @@ IN_HAM = {
     'Kondo': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Kondo"],
     'tV': ["VAR_Lattice", "VAR_Model_Generic", "VAR_tV"],
     'LRC': ["VAR_Lattice", "VAR_Model_Generic", "VAR_LRC"],
+    'Z2_Matter': ["VAR_Lattice",  "VAR_Z2_Matter"],
     'Examples': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard", "VAR_LRC"],
     }
 
@@ -170,7 +171,7 @@ PARAMS_MODEL["VAR_Kondo"] = {
     }
 
 PARAMS_MODEL["VAR_LRC"] = {
-    # Parameters of the Hubbard hamiltonian
+    # Parameters  for the long-ranged Coulomb model
     "ham_T"            :  [1.0, ""]  ,
     "ham_T2"           :  [1.0, ""]  ,
     "ham_Tperp"        :  [1.0, ""]  ,  
@@ -178,4 +179,18 @@ PARAMS_MODEL["VAR_LRC"] = {
     "ham_U"            :  [4.0, ""]  ,
     "ham_alpha"        :  [0.1, ""]  ,
     "Percent_change"   :  [0.1, ""]  ,
+    }
+
+PARAMS_MODEL["VAR_Z2_Matter"] = {
+    # Parameters Z2 gauged theories coupled to Z2 matter   
+    "ham_T"            :  [1.0, "Hopping for fermions"]  ,
+    "ham_TZ2"          :  [1.0, "Hopping for orthogonal fermions"]  , 
+    "ham_chem"         :  [0.0, "Chemical potential for fermions"]  ,
+    "ham_U"            :  [0.0, "Hubbard for fermions"]  ,
+    "Ham_J"            :  [1.0, "Hopping Z2 matter fields"]  ,
+    "Ham_K"            :  [1.0, "Plaquette term for gauge fields"]  ,
+    "Ham_h"            :  [1.0, "sigma^x-term for matter"]  ,
+    "Ham_g"            :  [1.0, "tau^x-term for gauge"]  ,
+    "Dtau"             :  [0.1,  ""]  ,
+    "Beta"             :  [10.0, ""]  ,
     }
