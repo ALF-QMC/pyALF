@@ -11,19 +11,28 @@ import numpy as np                       # Numerical library
 sims = []                                # Vector of Simulation instances
 sim_dict = {"Model": "Z2_Matter", 
             "Lattice_type": "Square", 
-            "L1": 4 , "L2": 4, 
-            "Beta": 5.0, 
+            "L1": 6 , "L2": 6, 
+            "Beta": 40.0, 
+            "Dtau": 0.05, 
             "Nsweep": 10, 
             "NBin": 5,
             "Ltau": 0,
+            "Ham_T": 1.0,
+            "Ham_h": 1.0,
+            "Ham_TZ2" : 0.0, 
+            "Ham_K"   : 0.0, 
+            "Ham_J"   : 0.0,
+            "Ham_g"   : 0.0,
             "Global_tau_moves"   : True,
             }
 sim = Simulation('Z2_Matter', sim_dict,
-                 #alf_dir = '/home/debian/Work/',
+                 alf_dir = '/home/debian/Work/',
                  #alf_dir = '/Users/fassaad/Programs/ALF/Work',
-                 alf_dir =  '/Users/assaad_home/ALF/Work', 
+                 #alf_dir =  '/Users/assaad_home/ALF/Work', 
                  branch = '156-z2_matter_code',
-                 machine= 'FakhersMAC',
+                 machine= 'Intel',
+                 mpi    = True,
+                 n_mpi  = 12
                  )
 sims.append(sim)
 
