@@ -1,6 +1,6 @@
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
-# pylint: disable=invalid-name, too-many-branches
+# pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
 
 __author__ = "Jonas Schwab"
@@ -325,56 +325,23 @@ def analysis(alf_dir, sim_dir='.'):
     env = os.environ.copy()
     env['OMP_NUM_THREADS'] = '1'
     with cd(sim_dir):
-        if os.path.exists('Var_scal'):
-            os.remove('Var_scal')
         for name in os.listdir():
             if name.endswith('_scal'):
                 print('Analysing {}'.format(name))
-                os.symlink(name, 'Var_scal')
-                executable = os.path.join(alf_dir, 'Analysis', 'cov_scal.out')
-                subprocess.run(executable, check=True, env=env)
-                os.remove('Var_scal')
-                os.replace('Var_scalJ', name+'J')
+                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                subprocess.run([executable, name], check=True, env=env)
 
-                for name2 in os.listdir():
-                    if name2.startswith('Var_scal_Auto_'):
-                        name3 = name + name2[8:]
-                        os.replace(name2, name3)
-
-        if os.path.exists('ineq'):
-            os.remove('ineq')
         for name in os.listdir():
             if name.endswith('_eq'):
                 print('Analysing {}'.format(name))
-                os.symlink(name, 'ineq')
-                executable = os.path.join(alf_dir, 'Analysis', 'cov_eq.out')
-                subprocess.run(executable, check=True, env=env)
-                os.remove('ineq')
-                os.replace('equalJ', name+'JK')
-                os.replace('equalJR', name+'JR')
+                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                subprocess.run([executable, name], check=True, env=env)
 
-                for name2 in os.listdir():
-                    if name2.startswith('Var_eq_Auto_Tr'):
-                        name3 = name + name2[6:]
-                        os.replace(name2, name3)
-
-        if os.path.exists('intau'):
-            os.remove('intau')
         for name in os.listdir():
             if name.endswith('_tau'):
                 print('Analysing {}'.format(name))
-                os.symlink(name, 'intau')
-                executable = os.path.join(alf_dir, 'Analysis', 'cov_tau.out')
-                subprocess.run(executable, check=True, env=env)
-                os.remove('intau')
-                os.replace('SuscepJ', name+'JK')
-
-                for name2 in os.listdir():
-                    if name2.startswith('g_'):
-                        directory = name[:-4] + name2[1:]
-                        if not os.path.exists(directory):
-                            os.mkdir(directory)
-                        os.replace(name2, os.path.join(directory, name2))
+                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                subprocess.run([executable, name], check=True, env=env)
 
 
 def get_obs(sim_dir, names=None):
