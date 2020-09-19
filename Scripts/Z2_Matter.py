@@ -11,30 +11,30 @@ import numpy as np                       # Numerical library
 sims = []                                # Vector of Simulation instances
 sim_dict = {"Model": "Z2_Matter", 
             "Lattice_type": "Square", 
-            "L1": 4 , "L2": 4, 
+            "L1": 6 , "L2": 6, 
             "Beta": 5.0, 
             "Dtau": 0.05, 
-            "Nsweep": 10, 
+            "Nsweep": 5, 
             "NBin": 5,
             "Ltau": 0,
             "Ham_T": 1.0,
             "Ham_h": 1.0,
-            "Ham_TZ2" : 0.0, 
-            "Ham_K"   : 0.0, 
-            "Ham_J"   : 0.0,
-            "Ham_g"   : 0.0,
+            "Ham_TZ2" : 1.0, 
+            "Ham_K"   : 1.0, 
+            "Ham_J"   : 1.0,
+            "Ham_g"   : 3.0,
             "Global_tau_moves"   : True,
             }
 sim = Simulation('Z2_Matter', sim_dict,
                  #alf_dir = '/home/debian/Work/',
                  #alf_dir = '/Users/fassaad/Programs/ALF/Work',
-                 alf_dir =  '/Users/assaad_home/ALF/Work', 
-                 branch = '156-z2_matter_code',
+                 alf_dir =  '/Users/fassaad/Programs/ALF/Work', 
+                 branch = '158-improve_z2_matter_code_and_doc',
                  machine= 'FakhersMAC',
                  )
 sims.append(sim)
 
-#sims[0].compile(target = "Z2_Matter")
+sims[0].compile(target = "Z2_Matter")
 #Con = np.empty((len(sims), 2))         # Matrix for storing energy values
 #Uf  = np.empty((len(sims),))
 #Spin= np.empty((len(sims),16,2,2,4))

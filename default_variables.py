@@ -195,5 +195,7 @@ PARAMS_MODEL["VAR_Z2_Matter"] = {
     "Ham_g"            :  [1.0, "tau^x-term for gauge"]  ,
     "Dtau"             :  [0.1,  ""]  ,
     "Beta"             :  [10.0, ""]  ,
-    "N_SUN"            :  [2, ""], 
+    "N_SUN"            :  [2, ""],
+    "Projector"        : [False, ""],
+    "Theta"            : [10.0, ""],
     }
