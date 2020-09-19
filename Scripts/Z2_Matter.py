@@ -11,32 +11,35 @@ import numpy as np                       # Numerical library
 sims = []                                # Vector of Simulation instances
 sim_dict = {"Model": "Z2_Matter", 
             "Lattice_type": "Square", 
-            "L1": 6 , "L2": 6, 
-            "Beta": 40.0, 
+            "L1": 8 , "L2": 8, 
+            "Beta": 20.0, 
             "Dtau": 0.05, 
-            "Nsweep": 10, 
-            "NBin": 5,
+            "Nsweep": 200, 
+            "NBin": 100,
             "Ltau": 0,
-            "Ham_T": 1.0,
-            "Ham_h": 1.0,
-            "Ham_TZ2" : 0.0, 
+            "Ham_T": 0.0,
+            "Ham_h": 0.0,
+            "Ham_TZ2" : 1.0, 
             "Ham_K"   : 0.0, 
             "Ham_J"   : 0.0,
-            "Ham_g"   : 0.0,
+            "Ham_g"   : 1.0,
+            "Ham_U"   : -0.0625,
             "Global_tau_moves"   : True,
+            "Propose_S0"         : False, 
+            "Nwrap"   : 10,
             }
 sim = Simulation('Z2_Matter', sim_dict,
                  alf_dir = '/home/debian/Work/',
                  #alf_dir = '/Users/fassaad/Programs/ALF/Work',
                  #alf_dir =  '/Users/assaad_home/ALF/Work', 
-                 branch = '156-z2_matter_code',
+                 branch = '158-improve_z2_matter_code_and_doc', 
                  machine= 'Intel',
                  mpi    = True,
-                 n_mpi  = 12
+                 n_mpi  = 12 ,
                  )
 sims.append(sim)
 
-#sims[0].compile(target = "Z2_Matter")
+sims[0].compile(target = "Z2_Matter")
 #Con = np.empty((len(sims), 2))         # Matrix for storing energy values
 #Uf  = np.empty((len(sims),))
 #Spin= np.empty((len(sims),16,2,2,4))
