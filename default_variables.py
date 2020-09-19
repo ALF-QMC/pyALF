@@ -73,6 +73,8 @@ PARAMS_GENERIC["VAR_errors"] = {
     "N_skip" : [1, "Number of bins to be skipped."],
     "N_rebin": [1, "Rebinning: Number of bins to combine into one."],
     "N_Cov"  : [0, "If set to 1, covariance computed for time-displaced correlation functions."],
+    "N_Back" : [1, "If set to 1, substract background in correlation functions."],
+    "N_auto" : [0, "If > 0, calculate autocorrelation."]
     }
 
 PARAMS_GENERIC["VAR_TEMP"] = {
@@ -193,5 +195,7 @@ PARAMS_MODEL["VAR_Z2_Matter"] = {
     "Ham_g"            :  [1.0, "tau^x-term for gauge"]  ,
     "Dtau"             :  [0.1,  ""]  ,
     "Beta"             :  [10.0, ""]  ,
-    "N_SUN"            :  [2, ""], 
+    "N_SUN"            :  [2, ""],
+    "Projector"        : [False, ""],
+    "Theta"            : [10.0, ""],
     }
