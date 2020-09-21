@@ -100,7 +100,6 @@ PARAMS_GENERIC["VAR_Max_Stoch"] = {
     "N_alpha"    : [14, "Number of temperatures."],
     "alpha_st"   : [1.0, ""],
     "R"          : [1.2, ""],
-    "Channel"    : ["P", ""],
     "Checkpoint" : [False, ""],
     "Tolerance"  : [0.1, ""],
     }
