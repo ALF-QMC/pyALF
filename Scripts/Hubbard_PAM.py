@@ -39,13 +39,13 @@ for Ham_V in [0.5,0.6,0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4,1.5]:           # V
                      n_mpi  = 24)
     sims.append(sim)
 
-#sims[0].compile(target = "Hubbard")
+sims[0].compile(target = "Hubbard")
 V   = np.empty((len(sims)))
 Spin= np.empty((len(sims),L*L,2,2,4))
 K   = np.empty((len(sims),L*L,2))           
 for i, sim in enumerate(sims):
     print (sim.sim_dir)
-    #sim.run()
+    sim.run()
     print (sim.sim_dir)
     sim.analysis() 
     V[i] = sim.sim_dict['ham_Tperp']                             # Store V value
