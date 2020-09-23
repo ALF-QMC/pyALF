@@ -10,32 +10,48 @@ from py_alf import Simulation            # Interface with ALF
 import numpy as np                       # Numerical library
 sims = []                                # Vector of Simulation instances
 sim_dict = {"Model": "LRC", 
-            "Lattice_type": "Honeycomb", 
-            "L1": 3 , "L2": 3
-            , 
+            "Lattice_type": "Square", 
+            "L1": 4 , "L2": 4, 
             "Beta": 5.0, 
-            "Nsweep": 10, 
-            "NBin": 5,
+            "Nsweep": 200, 
+            "NBin": 50,
             "Ltau": 0,
-            "Global_tau_moves" : True, 
+            "Global_tau_moves" : True,
+            "ham_U"            : 4.0 ,  
+            "ham_alpha"        : 0.0 ,
+            "Percent_change"   : 0.1      
             }
 sim = Simulation('LRC', sim_dict,
                  #alf_dir = '/home/debian/Work/',
-                 alf_dir = '/Users/fassaad/Programs/ALF/Work',
-                 branch = '155-introduce-lrc-code-for-su-n-models',
-                 machine= 'FakhersMAC',
+                 alf_dir = '/Users/fassaad/Programs/ALF/ALF',
+                 branch = 'master',
+                 machine= 'gnu',
                  )
 sims.append(sim)
-#sims[0].compile(target = "Examples")
+sims[0].compile(target = "LRC")
+
+En = np.empty((len(sims), 2))
+        
+for i, sim in enumerate(sims):
+    print (sim.sim_dir)
+    sim.run()
+    sim.analysis() 
+    En[i] = sim.get_obs(['Ener_scalJ'])['Ener_scalJ']['obs']  # Store 
+
+
+with open('Ener_LRC.dat', 'w') as file:   
+    file.write('%6.6f\t' % (En[i,0])) 
+    file.write('%6.6f\t' % (En[i,1]))
+
 #Con = np.empty((len(sims), 2))         # Matrix for storing energy values
 #Uf  = np.empty((len(sims),))
 #Spin= np.empty((len(sims),16,2,2,4))
 #K   = np.empty((len(sims),16,2))           
-for i, sim in enumerate(sims):
-    print (sim.sim_dir)
-    sim.run()
+#for i, sim in enumerate(sims):
 #    print (sim.sim_dir)
-    sim.analysis() 
+#    sim.run()
+#    print (sim.sim_dir)
+#    sim.analysis() 
 #    Uf[i] = sim.sim_dict['Ham_Uf']                             # Store Uf value
 #    Con[i] = sim.get_obs(['Constraint_scalJ'])['Constraint_scalJ']['obs']  # Store constraint
 #    Spin[i]= sim.get_obs(['SpinZ_eqJK'])['SpinZ_eqJK']['dat']

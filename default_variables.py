@@ -184,15 +184,17 @@ PARAMS_MODEL["VAR_LRC"] = {
 
 PARAMS_MODEL["VAR_Z2_Matter"] = {
     # Parameters Z2 gauged theories coupled to Z2 matter
-    "ham_T"            :  [1.0, "Hopping for fermions"],
-    "ham_TZ2"          :  [1.0, "Hopping for orthogonal fermions"],
-    "ham_chem"         :  [0.0, "Chemical potential for fermions"],
-    "ham_U"            :  [0.0, "Hubbard for fermions"],
-    "Ham_J"            :  [1.0, "Hopping Z2 matter fields"],
-    "Ham_K"            :  [1.0, "Plaquette term for gauge fields"],
-    "Ham_h"            :  [1.0, "sigma^x-term for matter"],
-    "Ham_g"            :  [1.0, "tau^x-term for gauge"],
-    "Dtau"             :  [0.1,  ""],
-    "Beta"             :  [10.0, ""],
-    "N_SUN"            :  [2, ""],
+    "ham_T"            : [1.0, "Hopping for fermions"],
+    "ham_TZ2"          : [1.0, "Hopping for orthogonal fermions"],
+    "ham_chem"         : [0.0, "Chemical potential for fermions"],
+    "ham_U"            : [0.0, "Hubbard for fermions"],
+    "Ham_J"            : [1.0, "Hopping Z2 matter fields"],
+    "Ham_K"            : [1.0, "Plaquette term for gauge fields"],
+    "Ham_h"            : [1.0, "sigma^x-term for matter"],
+    "Ham_g"            : [1.0, "tau^x-term for gauge"],
+    "Dtau"             : [0.1,  ""],
+    "Beta"             : [10.0, ""],
+    "N_SUN"            : [2, ""],
+    "Projector"        : [False, ""],
+    "Theta"            : [10.0, ""],
     }
