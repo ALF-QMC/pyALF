@@ -1,6 +1,6 @@
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
-# pylint: disable=invalid-name, too-many-branches
+# pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
 
 __author__ = "Jonas Schwab"
@@ -139,14 +139,22 @@ class Simulation:
                     print(f.read())
                 raise Exception('Error while running {}.'.format(executable))
 
-    def analysis(self):
+    def analysis(self, legacy=False):
         """Performs default analysis on Monte Carlo data."""
         if self.tempering:
             for i in range(len(self.sim_dict)):
-                analysis(self.alf_dir,
-                         os.path.join(self.sim_dir, "Temp_{}".format(i)))
+                if legacy:
+                    analysis_legacy(
+                        self.alf_dir,
+                        os.path.join(self.sim_dir, "Temp_{}".format(i)))
+                else:
+                    analysis(self.alf_dir,
+                             os.path.join(self.sim_dir, "Temp_{}".format(i)))
         else:
-            analysis(self.alf_dir, self.sim_dir)
+            if legacy:
+                analysis_legacy(self.alf_dir, self.sim_dir)
+            else:
+                analysis(self.alf_dir, self.sim_dir)
 
     def get_obs(self, names=None):
         """Returns dictionary containing anaysis results from observables.
@@ -325,6 +333,32 @@ def analysis(alf_dir, sim_dir='.'):
     env = os.environ.copy()
     env['OMP_NUM_THREADS'] = '1'
     with cd(sim_dir):
+        for name in os.listdir():
+            if name.endswith('_scal'):
+                print('Analysing {}'.format(name))
+                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                subprocess.run([executable, name], check=True, env=env)
+
+        for name in os.listdir():
+            if name.endswith('_eq'):
+                print('Analysing {}'.format(name))
+                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                subprocess.run([executable, name], check=True, env=env)
+
+        for name in os.listdir():
+            if name.endswith('_tau'):
+                print('Analysing {}'.format(name))
+                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                subprocess.run([executable, name], check=True, env=env)
+
+
+def analysis_legacy(alf_dir, sim_dir='.'):
+    """Perform the default analysis on all files ending in _scal, _eq or _tau
+    in directory sim_dir.
+    """
+    env = os.environ.copy()
+    env['OMP_NUM_THREADS'] = '1'
+    with cd(sim_dir):
         if os.path.exists('Var_scal'):
             os.remove('Var_scal')
         for name in os.listdir():
@@ -364,7 +398,12 @@ def analysis(alf_dir, sim_dir='.'):
             if name.endswith('_tau'):
                 print('Analysing {}'.format(name))
                 os.symlink(name, 'intau')
-                executable = os.path.join(alf_dir, 'Analysis', 'cov_tau.out')
+                if name == "Green_tau":
+                    executable = os.path.join(alf_dir, 'Analysis',
+                                              'cov_tau.out')
+                else:
+                    executable = os.path.join(alf_dir, 'Analysis',
+                                              'cov_tau_ph.out')
                 subprocess.run(executable, check=True, env=env)
                 os.remove('intau')
                 os.replace('SuscepJ', name+'JK')
@@ -399,13 +438,14 @@ def _read_scalJ(name):
     """
     with open(name) as f:
         lines = f.readlines()
-    N_obs = int((len(lines)-3)/2)
+    N_obs = int((len(lines)-2)/2)
 
     sign = np.loadtxt(lines[-1].split()[-2:])
+    print(name, N_obs)
 
     obs = np.zeros([N_obs, 2])
     for iobs in range(N_obs):
-        obs[iobs] = lines[iobs+2].split()[-2:]
+        obs[iobs] = lines[2*iobs+2].split()[-2:]
 
     return {'sign': sign, 'obs': obs}
 

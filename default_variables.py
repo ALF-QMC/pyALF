@@ -74,7 +74,7 @@ PARAMS_GENERIC["VAR_errors"] = {
     "N_rebin": [1, "Rebinning: Number of bins to combine into one."],
     "N_Cov"  : [0, "If set to 1, covariance computed for time-displaced correlation functions."],
     "N_Back" : [1, "If set to 1, substract background in correlation functions."],
-    "N_auto" : [0, "If > 0, calculate autocorrelation."]
+    "N_auto" : [0, "If > 0, calculate autocorrelation."],
     }
 
 PARAMS_GENERIC["VAR_TEMP"] = {
@@ -100,7 +100,6 @@ PARAMS_GENERIC["VAR_Max_Stoch"] = {
     "N_alpha"    : [14, "Number of temperatures."],
     "alpha_st"   : [1.0, ""],
     "R"          : [1.2, ""],
-    "Channel"    : ["P", ""],
     "Checkpoint" : [False, ""],
     "Tolerance"  : [0.1, ""],
     }
@@ -176,7 +175,7 @@ PARAMS_MODEL["VAR_LRC"] = {
     # Parameters  for the long-ranged Coulomb model
     "ham_T"            :  [1.0, ""]  ,
     "ham_T2"           :  [1.0, ""]  ,
-    "ham_Tperp"        :  [1.0, ""]  ,  
+    "ham_Tperp"        :  [1.0, ""]  ,
     "ham_chem"         :  [0.0, ""]  ,
     "ham_U"            :  [4.0, ""]  ,
     "ham_alpha"        :  [0.1, ""]  ,
@@ -184,18 +183,18 @@ PARAMS_MODEL["VAR_LRC"] = {
     }
 
 PARAMS_MODEL["VAR_Z2_Matter"] = {
-    # Parameters Z2 gauged theories coupled to Z2 matter   
-    "ham_T"            :  [1.0, "Hopping for fermions"]  ,
-    "ham_TZ2"          :  [1.0, "Hopping for orthogonal fermions"]  , 
-    "ham_chem"         :  [0.0, "Chemical potential for fermions"]  ,
-    "ham_U"            :  [0.0, "Hubbard for fermions"]  ,
-    "Ham_J"            :  [1.0, "Hopping Z2 matter fields"]  ,
-    "Ham_K"            :  [1.0, "Plaquette term for gauge fields"]  ,
-    "Ham_h"            :  [1.0, "sigma^x-term for matter"]  ,
-    "Ham_g"            :  [1.0, "tau^x-term for gauge"]  ,
-    "Dtau"             :  [0.1,  ""]  ,
-    "Beta"             :  [10.0, ""]  ,
-    "N_SUN"            :  [2, ""],
+    # Parameters Z2 gauged theories coupled to Z2 matter
+    "ham_T"            : [1.0, "Hopping for fermions"],
+    "ham_TZ2"          : [1.0, "Hopping for orthogonal fermions"],
+    "ham_chem"         : [0.0, "Chemical potential for fermions"],
+    "ham_U"            : [0.0, "Hubbard for fermions"],
+    "Ham_J"            : [1.0, "Hopping Z2 matter fields"],
+    "Ham_K"            : [1.0, "Plaquette term for gauge fields"],
+    "Ham_h"            : [1.0, "sigma^x-term for matter"],
+    "Ham_g"            : [1.0, "tau^x-term for gauge"],
+    "Dtau"             : [0.1,  ""],
+    "Beta"             : [10.0, ""],
+    "N_SUN"            : [2, ""],
     "Projector"        : [False, ""],
     "Theta"            : [10.0, ""],
     }
