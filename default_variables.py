@@ -142,11 +142,11 @@ PARAMS_MODEL["VAR_Hubbard"] = {
 PARAMS_MODEL["VAR_tV"] = {
     "ham_T"    :  [1.0, ""]  ,
     "ham_chem" :  [0.0, ""]  ,
-    "ham_V"    :  [4.0, ""]  ,
+    "ham_V"    :  [0.5, ""]  ,
     "ham_T2"   :  [1.0, ""]  ,
-    "ham_V2"   :  [4.0, ""]  ,
+    "ham_V2"   :  [0.5, ""]  ,
     "ham_Tperp":  [1.0, ""]  ,
-    "ham_Vperp":  [1.0, ""]  ,
+    "ham_Vperp":  [0.5, ""]  ,
     }
 
 PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
