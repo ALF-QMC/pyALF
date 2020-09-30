@@ -287,7 +287,7 @@ def getenv(config, alf_dir='.'):
 
 
 def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
-                url='git@git.physik.uni-wuerzburg.de:ALF/ALF.git'):
+                url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
     """Compile ALF. Clone a new repository if alf_dir does not exist."""
 
     alf_dir = os.path.abspath(alf_dir)
