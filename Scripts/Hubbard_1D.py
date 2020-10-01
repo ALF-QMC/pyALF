@@ -6,6 +6,7 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
+import os
 from py_alf import Simulation            # Interface with ALF
 import numpy as np                       # Numerical library
 
@@ -26,10 +27,10 @@ sim_dict = {"Model": "Hubbard",
             "Ltau"      : 1,
             "Mz"        : False,
             }
-        
 
-sim = Simulation('Hubbard', sim_dict,                                    
-                 #alf_dir = '',
+
+sim = Simulation('Hubbard', sim_dict,
+                 alf_dir= os.getenv('ALF_DIR', './ALF'),
                  branch = 'master',
                  machine= 'gnu',
                  mpi    = False,

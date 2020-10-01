@@ -6,6 +6,7 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
+import os
 from py_alf import Simulation            # Interface with ALF
 import numpy as np                       # Numerical library
 sims = []                                # Vector of Simulation instances
@@ -29,7 +30,7 @@ sim_dict = {"Model": "Z2_Matter",
             "Nwrap"   : 10,
             }
 sim = Simulation('Z2_Matter', sim_dict,
-                 #alf_dir = '/home/debian/Work/',
+                 alf_dir= os.getenv('ALF_DIR', './ALF'),
                  branch = 'master', 
                  machine= 'Intel',
                  mpi    = True,

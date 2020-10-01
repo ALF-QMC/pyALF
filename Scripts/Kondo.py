@@ -6,6 +6,7 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
+import os
 from py_alf import Simulation            # Interface with ALF
 import numpy as np                       # Numerical library
 sims = []                                # Vector of Simulation instances
@@ -21,7 +22,7 @@ for Ham_Uf in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 
                 "NBin": 400,
                 "Ltau": 0}
     sim = Simulation('Kondo', sim_dict,
-                     #alf_dir = '/home/debian/Work/',
+                     alf_dir= os.getenv('ALF_DIR', './ALF'),
                      branch = 'master',
                      machine= 'Intel',
                      mpi    = True,

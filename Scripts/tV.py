@@ -6,6 +6,7 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
+import os
 from py_alf import Simulation            # Interface with ALF
 import numpy as np                       # Numerical library
 
@@ -30,7 +31,7 @@ sim_dict = {"Model": "tV",
         
 
 sim = Simulation('tV', sim_dict,                                    
-                 #alf_dir = '/Users/fassaad/Programs/ALF/Work',
+                 alf_dir= os.getenv('ALF_DIR', './ALF'),
                  branch = 'master',
                  machine= 'gnu',
                  mpi    = False,

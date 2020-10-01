@@ -16,7 +16,7 @@ from py_alf import Simulation
 
 def test_branch(alf_dir, ham_name, sim_dict, branch_R, branch_T,
                 machine="DEVELOPMENT", mpi=False, n_mpi=4):
-    sim_R = Simulation(ham_name, {"Model": ham_name}, alf_dir,
+    sim_R = Simulation(ham_name, sim_dict, alf_dir,
                        machine=machine,
                        branch=branch_R,
                        mpi=mpi,
@@ -26,7 +26,7 @@ def test_branch(alf_dir, ham_name, sim_dict, branch_R, branch_T,
     sim_R.analysis(legacy=True)
     obs_R = sim_R.get_obs()
 
-    sim_T = Simulation(ham_name, {"Model": ham_name}, alf_dir,
+    sim_T = Simulation(ham_name, sim_dict, alf_dir,
                        machine=machine,
                        branch=branch_T,
                        mpi=mpi,
@@ -49,7 +49,7 @@ def test_branch(alf_dir, ham_name, sim_dict, branch_R, branch_T,
 
 
 if __name__ == "__main__":
-    alf_dir = os.path.expanduser("~/Programs/ALF")
+    alf_dir = os.getenv('ALF_DIR', './ALF')
     branch_R = "master"
     branch_T = "122-embedding-lattice-information-in-observables"
     machine = "DEVELOPMENT"

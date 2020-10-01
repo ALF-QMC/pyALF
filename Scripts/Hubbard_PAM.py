@@ -6,6 +6,7 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
+import os
 from py_alf import Simulation            # Interface with ALF
 import numpy as np   
 L=8                    # Numerical library
@@ -31,7 +32,7 @@ for Ham_V in [0.5,0.6,0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4,1.5]:           # V
         
 
     sim = Simulation('Hubbard', sim_dict,                                    
-                     #alf_dir = '/Users/assaad_home/ALF/ALF',
+                     alf_dir= os.getenv('ALF_DIR', './ALF'),
                      branch = 'master',
                      machine= 'Intel',
                      mpi    = True,
