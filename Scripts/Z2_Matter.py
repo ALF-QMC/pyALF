@@ -29,7 +29,7 @@ sim_dict = {"Model": "Z2_Matter",
             "Nwrap"   : 10,
             }
 sim = Simulation('Z2_Matter', sim_dict,
-                 alf_dir = '/home/debian/Work/',
+                 #alf_dir = '/home/debian/Work/',
                  branch = 'master', 
                  machine= 'Intel',
                  mpi    = True,

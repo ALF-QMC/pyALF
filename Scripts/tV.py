@@ -30,7 +30,6 @@ sim_dict = {"Model": "tV",
         
 
 sim = Simulation('tV', sim_dict,                                    
-                 alf_dir = '/Users/assaad_home/ALF/ALF/',
                  #alf_dir = '/Users/fassaad/Programs/ALF/Work',
                  branch = 'master',
                  machine= 'gnu',

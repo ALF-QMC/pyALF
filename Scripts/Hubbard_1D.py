@@ -29,9 +29,8 @@ sim_dict = {"Model": "Hubbard",
         
 
 sim = Simulation('Hubbard', sim_dict,                                    
-                 alf_dir = '/Users/assaad_home/ALF/Work/',
-                 #alf_dir = '/Users/fassaad/Programs/ALF/Work',
-                 branch = '122-embedding-lattice-information-in-observables',
+                 #alf_dir = '',
+                 branch = 'master',
                  machine= 'gnu',
                  mpi    = False,
                  n_mpi  = 24)

@@ -20,9 +20,8 @@ sim_dict = {"Model": "Hubbard_Plain_Vanilla",
             "Projector" : True,
             }
 sim = Simulation('Hubbard_Plain_Vanilla', sim_dict,
-                 #alf_dir = '/home/debian/Work/',
-                 alf_dir = '/Users/assaad_home/ALF/Work',
-                 branch = '122-embedding-lattice-information-in-observables',
+                 #alf_dir = 'assaad_home/ALF/Work',
+                 branch = 'master',
                  machine= 'gnu',
                  )
 sims.append(sim)

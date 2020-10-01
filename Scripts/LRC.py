@@ -23,7 +23,6 @@ sim_dict = {"Model": "LRC",
             }
 sim = Simulation('LRC', sim_dict,
                  #alf_dir = '/home/debian/Work/',
-                 alf_dir = '/Users/fassaad/Programs/ALF/ALF',
                  branch = 'master',
                  machine= 'gnu',
                  )

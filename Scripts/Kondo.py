@@ -21,9 +21,8 @@ for Ham_Uf in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 
                 "NBin": 400,
                 "Ltau": 0}
     sim = Simulation('Kondo', sim_dict,
-                     alf_dir = '/home/debian/Work/',
-                     #alf_dir = '/Users/fassaad/Programs/ALF/Work',
-                     branch = '151-introduce-sun-kondo-hamiltonian-for-bilayer-lattices',
+                     #alf_dir = '/home/debian/Work/',
+                     branch = 'master',
                      machine= 'Intel',
                      mpi    = True,
                      n_mpi  = 12)
