@@ -186,6 +186,10 @@ def _convert_par_to_str(parameter):
     """Converts a given parameter value to a string that can be
     written into a parameter file.
     """
+    if isinstance(parameter, bool):
+        if parameter:
+            return '.T.'
+        return '.F.'
     if isinstance(parameter, float):
         if 'e' in '{}'.format(parameter):
             return '{}'.format(parameter).replace('e', 'd')
@@ -194,10 +198,6 @@ def _convert_par_to_str(parameter):
         return '{}'.format(parameter)
     if isinstance(parameter, str):
         return '"{}"'.format(parameter)
-    if isinstance(parameter, bool):
-        if parameter:
-            return '.T.'
-        return '.F.'
 
     raise Exception('Error in "_convert_par_to_str": unrecognized type')
 
