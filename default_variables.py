@@ -52,20 +52,23 @@ IN_HAM = {
 
 PARAMS_GENERIC["VAR_QMC"] = {
     # General parameters for the Monte Carlo algorithm
-    "Nwrap"              : [10,  "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],
-    "Nsweep"             : [100, "Number of sweeps per bin."],
-    "Nbin"               : [5, "Number of bins."],
-    "Ltau"               : [1, "1 to calculate time-displaced Green functions; 0 otherwise."],
-    "LOBS_ST"            : [0, "Start measurements at time slice LOBS_ST"],
-    "LOBS_EN"            : [0, "End measurements at time slice LOBS_EN"],
-    "CPU_MAX"            : [0.0, "Code stops after CPU_MAX hours, if 0 or not specified, the code stops after Nbin bins"],
-    "Propose_S0"         : [False, "Proposes single spin flip moves with probability exp(-S0)."],
-    "Global_moves"       : [False, "Allows for global moves in space and time."],
-    "N_global"           : [1, "Number of global moves per sweep."],
-    "Global_tau_moves"   : [False, "Allows for global moves on a single time slice."],
-    "N_global_tau"       : [1, "Number of global moves that will be carried out on a single time slice."],
-    "Nt_sequential_start": [0, ""],
-    "Nt_sequential_end"  : [-1, ""],
+    "Nwrap"                : [10,  "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],
+    "Nsweep"               : [100, "Number of sweeps per bin."],
+    "Nbin"                 : [5, "Number of bins."],
+    "Ltau"                 : [1, "1 to calculate time-displaced Green functions; 0 otherwise."],
+    "LOBS_ST"              : [0, "Start measurements at time slice LOBS_ST"],
+    "LOBS_EN"              : [0, "End measurements at time slice LOBS_EN"],
+    "CPU_MAX"              : [0.0, "Code stops after CPU_MAX hours, if 0 or not specified, the code stops after Nbin bins"],
+    "Propose_S0"           : [False, "Proposes single spin flip moves with probability exp(-S0)."],
+    "Global_moves"         : [False, "Allows for global moves in space and time."],
+    "N_global"             : [1, "Number of global moves per sweep."],
+    "Global_tau_moves"     : [False, "Allows for global moves on a single time slice."],
+    "N_global_tau"         : [1, "Number of global moves that will be carried out on a single time slice."],
+    "Nt_sequential_start"  : [0, ""],
+    "Nt_sequential_end"    : [-1, ""],
+    "Global_update_scheme" : ["None", "Langevin or HMC"],
+    "Delta_t_Langevin_HMC" : [0.01, "Time step for Langevin or HMC"],
+    "Max_Force"            : [1.5,  "Max Force for Langevin" ],
     }
 
 PARAMS_GENERIC["VAR_errors"] = {
@@ -130,13 +133,14 @@ PARAMS_MODEL["VAR_Model_Generic"] = {
 
 PARAMS_MODEL["VAR_Hubbard"] = {
     # Parameters of the Hubbard hamiltonian
-    "Mz"       :  [True, ""] ,
-    "ham_T"    :  [1.0, ""]  ,
-    "ham_chem" :  [0.0, ""]  ,
-    "ham_U"    :  [4.0, ""]  ,
-    "ham_T2"   :  [1.0, ""]  ,
-    "ham_U2"   :  [4.0, ""]  ,
-    "ham_Tperp":  [1.0, ""]  ,
+    "Mz"         :  [True, ""] ,
+    "ham_T"      :  [1.0, ""]  ,
+    "ham_chem"   :  [0.0, ""]  ,
+    "ham_U"      :  [4.0, ""]  ,
+    "ham_T2"     :  [1.0, ""]  ,
+    "ham_U2"     :  [4.0, ""]  ,
+    "ham_Tperp"  :  [1.0, ""]  ,
+    "Continuous" :  [False, "Continuous HS transformation"], 
     }
 
 PARAMS_MODEL["VAR_tV"] = {
