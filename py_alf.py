@@ -139,22 +139,14 @@ class Simulation:
                     print(f.read())
                 raise Exception('Error while running {}.'.format(executable))
 
-    def analysis(self, legacy=False):
+    def analysis(self):
         """Performs default analysis on Monte Carlo data."""
         if self.tempering:
             for i in range(len(self.sim_dict)):
-                if legacy:
-                    analysis_legacy(
-                        self.alf_dir,
-                        os.path.join(self.sim_dir, "Temp_{}".format(i)))
-                else:
-                    analysis(self.alf_dir,
-                             os.path.join(self.sim_dir, "Temp_{}".format(i)))
+                analysis(self.alf_dir,
+                         os.path.join(self.sim_dir, "Temp_{}".format(i)))
         else:
-            if legacy:
-                analysis_legacy(self.alf_dir, self.sim_dir)
-            else:
-                analysis(self.alf_dir, self.sim_dir)
+            analysis(self.alf_dir, self.sim_dir)
 
     def get_obs(self, names=None):
         """Returns dictionary containing anaysis results from observables.
@@ -350,70 +342,6 @@ def analysis(alf_dir, sim_dir='.'):
                 print('Analysing {}'.format(name))
                 executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
                 subprocess.run([executable, name], check=True, env=env)
-
-
-def analysis_legacy(alf_dir, sim_dir='.'):
-    """Perform the default analysis on all files ending in _scal, _eq or _tau
-    in directory sim_dir.
-    """
-    env = os.environ.copy()
-    env['OMP_NUM_THREADS'] = '1'
-    with cd(sim_dir):
-        if os.path.exists('Var_scal'):
-            os.remove('Var_scal')
-        for name in os.listdir():
-            if name.endswith('_scal'):
-                print('Analysing {}'.format(name))
-                os.symlink(name, 'Var_scal')
-                executable = os.path.join(alf_dir, 'Analysis', 'cov_scal.out')
-                subprocess.run(executable, check=True, env=env)
-                os.remove('Var_scal')
-                os.replace('Var_scalJ', name+'J')
-
-                for name2 in os.listdir():
-                    if name2.startswith('Var_scal_Auto_'):
-                        name3 = name + name2[8:]
-                        os.replace(name2, name3)
-
-        if os.path.exists('ineq'):
-            os.remove('ineq')
-        for name in os.listdir():
-            if name.endswith('_eq'):
-                print('Analysing {}'.format(name))
-                os.symlink(name, 'ineq')
-                executable = os.path.join(alf_dir, 'Analysis', 'cov_eq.out')
-                subprocess.run(executable, check=True, env=env)
-                os.remove('ineq')
-                os.replace('equalJ', name+'JK')
-                os.replace('equalJR', name+'JR')
-
-                for name2 in os.listdir():
-                    if name2.startswith('Var_eq_Auto_Tr'):
-                        name3 = name + name2[6:]
-                        os.replace(name2, name3)
-
-        if os.path.exists('intau'):
-            os.remove('intau')
-        for name in os.listdir():
-            if name.endswith('_tau'):
-                print('Analysing {}'.format(name))
-                os.symlink(name, 'intau')
-                if name == "Green_tau":
-                    executable = os.path.join(alf_dir, 'Analysis',
-                                              'cov_tau.out')
-                else:
-                    executable = os.path.join(alf_dir, 'Analysis',
-                                              'cov_tau_ph.out')
-                subprocess.run(executable, check=True, env=env)
-                os.remove('intau')
-                os.replace('SuscepJ', name+'JK')
-
-                for name2 in os.listdir():
-                    if name2.startswith('g_'):
-                        directory = name[:-4] + name2[1:]
-                        if not os.path.exists(directory):
-                            os.mkdir(directory)
-                        os.replace(name2, os.path.join(directory, name2))
 
 
 def get_obs(sim_dir, names=None):

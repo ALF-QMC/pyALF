@@ -26,7 +26,7 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
                        n_mpi=n_mpi)
     sim_R.compile(target=ham_name)
     sim_R.run()
-    sim_R.analysis(legacy=True)
+    sim_R.analysis()
     obs_R = sim_R.get_obs()
 
     sim_T = Simulation(ham_name, sim_dict, alf_dir,
@@ -39,7 +39,7 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
     sim_T.run()
     sim_T.analysis()
     obs_T = sim_T.get_obs()
-    
+
     test_all = True
     with open(f'{sim_R.sim_dir}.txt', 'w') as f:
         for name in obs_R:
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     for sim_name, sim_dict in sim_pars.items():
         test = test_branch(alf_dir, sim_dict, branch_R, branch_T, machine, mpi, n_mpi)
         with open('test.txt', 'w+') as f:
-            f.write(f'{sim_name}: {test}\n') 
+            f.write(f'{sim_name}: {test}\n')
         if not test:
             test_all = False
     with open('test.txt', 'w+') as f:
@@ -230,6 +230,3 @@ if __name__ == "__main__":
         with open('test.txt', 'r') as f:
             print(f.read())
         sys.exit(0)
-
-
-
