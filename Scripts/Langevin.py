@@ -16,7 +16,7 @@ for Time_step in [0.0, 0.01]:            # Vector of Simulation instances
                     "Lattice_type": "N_leg_ladder", 
                     "L1": 1 , "L2": 6, 
                     "Beta": 4.0, 
-                    "Nsweep": 100, 
+                    "Nsweep": 1000, 
                     "NBin": 10,
                     "Ltau": 0,
                     "Dtau": 0.1,
@@ -27,7 +27,7 @@ for Time_step in [0.0, 0.01]:            # Vector of Simulation instances
                     "Lattice_type": "N_leg_ladder", 
                     "L1": 1 , "L2": 6, 
                     "Beta": 4.0, 
-                    "Nsweep": 100, 
+                    "Nsweep": 1000, 
                     "NBin": 10,
                     "Ltau": 0,
                     "Dtau": 0.1,
@@ -37,13 +37,13 @@ for Time_step in [0.0, 0.01]:            # Vector of Simulation instances
                     }    
     sim = Simulation('Hubbard', sim_dict,
                      #alf_dir= os.getenv('ALF_DIR', './ALF'),
-                     alf_dir='/Users/fassaad/Programs/ALF/Work',
+                     #alf_dir='/Users/fassaad/Programs/ALF/Work',
                      branch = '165-introduce_langevin_updating_in_alf_2-0',
-                     machine= 'gnu',
-                     #alf_dir='/home/debian/Work',
-                     #machine= 'Intel',
-                     #mpi    = True,
-                     #n_mpi  = 12,
+                     #machine= 'gnu',
+                     alf_dir='/home/debian/Work',
+                     machine= 'Intel',
+                     mpi    = True,
+                     n_mpi  = 12,
                      )
     #sim.sim_dir += 'Time_step=' + str(dict["Time_step"])
     sim.sim_dir += "_TL={}".format(sim_dict["Delta_t_Langevin_HMC"])        
