@@ -228,7 +228,7 @@ if __name__ == "__main__":
     else:
         print("Test failed")
         with open('test.txt', 'r') as f:
-            print(f.readlines())
+            print(f.read())
         sys.exit(0)
 
 
