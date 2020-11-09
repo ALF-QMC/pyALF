@@ -208,7 +208,7 @@ if __name__ == "__main__":
     branch_T = args.branch_T
     machine = args.machine
     mpi = args.mpi
-    n_mpi = args.n_mpia
+    n_mpi = args.n_mpi
 
     if os.path.exists("test.txt"):
         os.remove("test.txt")
