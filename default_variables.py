@@ -14,6 +14,7 @@ __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
+import copy
 from collections import OrderedDict
 
 
@@ -21,8 +22,9 @@ def default_params(ham_name):
     """Return full set of default parameters for hamiltonian."""
     params = OrderedDict()
     for name in IN_HAM[ham_name]:
-        params[name] = PARAMS_MODEL[name].copy()
-    params.update(PARAMS_GENERIC)
+        params[name] = copy.deepcopy(PARAMS_MODEL[name])
+    for name, namelist in PARAMS_GENERIC.items():
+        params[name] = copy.deepcopy(namelist)
     return params
 
 
