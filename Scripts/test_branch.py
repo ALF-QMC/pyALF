@@ -10,6 +10,7 @@ __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
 import os
+import sys
 import argparse
 import numpy as np
 from py_alf import Simulation
@@ -39,6 +40,7 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
     sim_T.analysis()
     obs_T = sim_T.get_obs()
 
+    test_all = True
     with open(f'{sim_R.sim_dir}.txt', 'w') as f:
         for name in obs_R:
             if name.endswith('_scalJ'):
@@ -48,10 +50,15 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
                 f.write(f'{name}: {test}\n')
                 f.write(f'    reference: {x_R}\n')
                 f.write(f'         test: {x_T}\n')
+                if not test:
+                    test_all = False
         for name in obs_R:
             if name.endswith('_eqJK') or name.endswith('_eqJR'):
                 test = np.allclose(obs_R[name]['dat'], obs_T[name]['dat'])
                 f.write(f'{name}: {test}\n')
+                if not test:
+                    test_all = False
+    return test_all
 
 
 sim_pars = {
@@ -203,5 +210,23 @@ if __name__ == "__main__":
     mpi = args.mpi
     n_mpi = args.n_mpi
 
+    if os.path.exists("test.txt"):
+        os.remove("test.txt")
+
+    test_all = True
     for sim_name, sim_dict in sim_pars.items():
-        test_branch(alf_dir, sim_dict, branch_R, branch_T, machine, mpi, n_mpi)
+        test = test_branch(alf_dir, sim_dict, branch_R, branch_T, machine, mpi, n_mpi)
+        with open('test.txt', 'w+') as f:
+            f.write(f'{sim_name}: {test}\n')
+        if not test:
+            test_all = False
+    with open('test.txt', 'w+') as f:
+        f.write(f'\tTotal: {test_all}\n')
+    if test_all:
+        print("Test sucessful")
+        sys.exit(0)
+    else:
+        print("Test failed")
+        with open('test.txt', 'r') as f:
+            print(f.read())
+        sys.exit(0)
