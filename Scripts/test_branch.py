@@ -25,7 +25,7 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
                        n_mpi=n_mpi)
     sim_R.compile(target=ham_name)
     sim_R.run()
-    sim_R.analysis(legacy=True)
+    sim_R.analysis()
     obs_R = sim_R.get_obs()
 
     sim_T = Simulation(ham_name, sim_dict, alf_dir,
@@ -59,7 +59,7 @@ sim_pars = {
         "ham_name": "Hubbard",
         "Model": "Hubbard",
         "Lattice_type": "Square",
-        "L1": 6, "L2": 1,
+        "L1": 6, "L2": 2,
         "Beta": 10.0,
         "Projector": False,
         "Theta": 10.0,
@@ -155,7 +155,7 @@ sim_pars = {
         "Beta": 20.0,
         "Dtau": 0.05,
         "Nsweep": 20,
-        "NBin": 50,
+        "NBin": 10,
         "Ltau": 0,
         "Ham_T": 0.0,
         "Ham_h": 0.0,
