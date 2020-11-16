@@ -139,7 +139,7 @@ sim_pars = {
         "ham_name": "tV",
         "Model": "tV",
         "Lattice_type": "Square",
-        "L1": 6, "L2": 1,
+        "L1": 4, "L2": 4,
         "Beta": 10.0,
         "Projector": False,
         "Theta": 10.0,
