@@ -32,7 +32,7 @@ for Time_step in [0.0, 0.01]:            # Vector of Simulation instances
                     "Ltau": 0,
                     "Dtau": 0.1,
                     "Continuous" : True, 
-                    "Global_update_scheme" : "Langevin",
+                    "Langevin" : True,
                     "Delta_t_Langevin_HMC" :  Time_step, 
                     }    
     sim = Simulation('Hubbard', sim_dict,
