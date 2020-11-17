@@ -14,6 +14,7 @@ __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
 __license__ = "GPL"
 
+import copy
 from collections import OrderedDict
 
 
@@ -21,8 +22,9 @@ def default_params(ham_name):
     """Return full set of default parameters for hamiltonian."""
     params = OrderedDict()
     for name in IN_HAM[ham_name]:
-        params[name] = PARAMS_MODEL[name].copy()
-    params.update(PARAMS_GENERIC)
+        params[name] = copy.deepcopy(PARAMS_MODEL[name])
+    for name, namelist in PARAMS_GENERIC.items():
+        params[name] = copy.deepcopy(namelist)
     return params
 
 
@@ -66,9 +68,11 @@ PARAMS_GENERIC["VAR_QMC"] = {
     "N_global_tau"         : [1, "Number of global moves that will be carried out on a single time slice."],
     "Nt_sequential_start"  : [0, ""],
     "Nt_sequential_end"    : [-1, ""],
-    "Global_update_scheme" : ["None", "Langevin or HMC"],
+    "Langevin"             : [False, Langevin update],
     "Delta_t_Langevin_HMC" : [0.01, "Time step for Langevin or HMC"],
     "Max_Force"            : [1.5,  "Max Force for Langevin" ],
+    "HMC"                  : [False, HMC update],
+    "Leapfrog_steps"       : [0, Number of leapfrog steps],
     }
 
 PARAMS_GENERIC["VAR_errors"] = {
