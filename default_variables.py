@@ -68,11 +68,11 @@ PARAMS_GENERIC["VAR_QMC"] = {
     "N_global_tau"         : [1, "Number of global moves that will be carried out on a single time slice."],
     "Nt_sequential_start"  : [0, ""],
     "Nt_sequential_end"    : [-1, ""],
-    "Langevin"             : [False, Langevin update],
+    "Langevin"             : [False, "Langevin update"],
     "Delta_t_Langevin_HMC" : [0.01, "Time step for Langevin or HMC"],
     "Max_Force"            : [1.5,  "Max Force for Langevin" ],
-    "HMC"                  : [False, HMC update],
-    "Leapfrog_steps"       : [0, Number of leapfrog steps],
+    "HMC"                  : [False, "HMC update"],
+    "Leapfrog_steps"       : [0, "Number of leapfrog steps"],
     }
 
 PARAMS_GENERIC["VAR_errors"] = {
