@@ -8,6 +8,14 @@ types:
       - export PYTHONPATH="$PWD:$PYTHONPATH"
       - cd Scripts
       - ./test_branch.py --branch_T 131-introduce-an-op_t-container
+  
+.test_template-PGI: &test_definition-PGI
+    type: test
+    script:
+      - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
+      - export PYTHONPATH="$PWD:$PYTHONPATH"
+      - cd Scripts
+      - ./test_branch.py --branch_T 131-introduce-an-op_t-container --machine PGI
 
 
 Test_Buster:
@@ -17,3 +25,7 @@ Test_Buster:
 Test_Stretch:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
   <<: *test_definition
+
+Test_Buster-PGI:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-pgi1910
+  <<: *test_definition-PGI
