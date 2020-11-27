@@ -10,9 +10,8 @@ types:
         - py_alf.py
     script:
       - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
-      - pylint3 -E Run.py default_variables.py py_alf.py
-      - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.physik.uni-wuerzburg.de/ALF/ALF.git
-      - ./Run.py -R --alfdir ./ALF --machine "GNU" --branch_R master --ham_name_R Hubbard_Plain_Vanilla
+      - cd Scripts
+      - ./test_branch.py --branch_T 131-introduce-an-op_t-container
 
 
 Test_Buster:
@@ -22,16 +21,3 @@ Test_Buster:
 Test_Stretch:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
   <<: *test_definition
-
-Warn_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
-  allow_failure: true
-  stage: build
-  only:
-    changes:
-      - Run.py
-      - default_variables.py
-      - py_alf.py
-  script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama
-    - pylint3 Run.py default_variables.py py_alf.py
