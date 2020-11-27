@@ -1,13 +1,8 @@
 types:
-    - build
+    - test
   
 .test_template: &test_definition
-    type: build
-    only:
-      changes:
-        - Run.py
-        - default_variables.py
-        - py_alf.py
+    type: test
     script:
       - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
       - cd Scripts
