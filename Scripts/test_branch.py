@@ -289,11 +289,11 @@ if __name__ == "__main__":
     test_all = True
     for sim_name, sim_dict in sim_pars.items():
         test = test_branch(alf_dir, sim_dict, branch_R, branch_T, machine, mpi, n_mpi)
-        with open('test.txt', 'w+') as f:
+        with open('test.txt', 'a') as f:
             f.write('{}: {}\n'.format(sim_name, test))
         if not test:
             test_all = False
-    with open('test.txt', 'w+') as f:
+    with open('test.txt', 'a') as f:
         f.write('\tTotal: {}\n'.format(test_all))
     if test_all:
         print("Test sucessful")
