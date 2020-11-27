@@ -235,6 +235,19 @@ sim_pars = {
         "Propose_S0": False,
         "Nwrap": 10,
         },
+    "Langevin": 
+        {"ham_name": "Hubbard", 
+         "Lattice_type": "N_leg_ladder", 
+         "L1": 1 , "L2": 6, 
+         "Beta": 4.0, 
+         "Nsweep": 50, 
+         "NBin": 10,
+         "Ltau": 0,
+         "Dtau": 0.1,
+         "Continuous" : True, 
+         "Langevin" : True,
+         "Delta_t_Langevin_HMC" :  0.05, 
+         }
     }
 
 
