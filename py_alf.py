@@ -391,10 +391,13 @@ def _read_eqJ(name):
         x_name = 'r'
 
     N_lines = len(lines)
+    N_orb = None
     for i in range(1, N_lines):
         if len(lines[i].split()) == 2:
             N_orb = int(np.sqrt(i-1))
             break
+    if N_orb is None:
+        N_orb = int(np.sqrt(i-1))
 
     N_x = int(N_lines / (1 + N_orb**2))
 

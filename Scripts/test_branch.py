@@ -18,7 +18,7 @@ from py_alf import Simulation
 
 def test_branch(alf_dir, sim_dict, branch_R, branch_T,
                 machine="DEVELOPMENT", mpi=False, n_mpi=4):
-    ham_name = sim_dict.pop("ham_name", sim_dict["Model"])
+    ham_name = sim_dict.pop("ham_name", sim_dict.get("Model"))
     sim_R = Simulation(ham_name, sim_dict, alf_dir,
                        machine=machine,
                        branch=branch_R,
@@ -41,21 +41,21 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
     obs_T = sim_T.get_obs()
 
     test_all = True
-    with open(f'{sim_R.sim_dir}.txt', 'w') as f:
+    with open('{}.txt'.format(sim_R.sim_dir), 'w') as f:
         for name in obs_R:
             if name.endswith('_scalJ'):
                 x_R = obs_R[name]['obs']
                 x_T = obs_T[name]['obs']
                 test = np.allclose(x_R, x_T)
-                f.write(f'{name}: {test}\n')
-                f.write(f'    reference: {x_R}\n')
-                f.write(f'         test: {x_T}\n')
+                f.write('{}: {}\n'.format(name, test))
+                f.write('    reference: {}\n'.format(x_R))
+                f.write('         test: {}\n'.format(x_T))
                 if not test:
                     test_all = False
         for name in obs_R:
             if name.endswith('_eqJK') or name.endswith('_eqJR'):
                 test = np.allclose(obs_R[name]['dat'], obs_T[name]['dat'])
-                f.write(f'{name}: {test}\n')
+                f.write('{}: {}\n'.format(name, test))
                 if not test:
                     test_all = False
     return test_all
@@ -112,7 +112,7 @@ sim_pars = {
         "Ltau": 1,
         "Mz": True,
         },
-     "Hubbard_PAM_1": {
+    "Hubbard_PAM_1": {
         "ham_name": "Hubbard",
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
@@ -131,7 +131,7 @@ sim_pars = {
         "N_Phi": 1,
         "Mz": False,
         },
-     "Hubbard_Bilayer": {
+    "Hubbard_Bilayer": {
         "ham_name": "Hubbard",
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
@@ -150,7 +150,7 @@ sim_pars = {
         "N_Phi": 1,
         "Mz": False,
         },
-     "Hubbard_PAM_2": {
+    "Hubbard_PAM_2": {
         "ham_name": "Hubbard",
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
@@ -168,7 +168,7 @@ sim_pars = {
         "NBin": 5,
         "Ltau": 1,
         "N_Phi": 1,
-        "N_SUN": 4, 
+        "N_SUN": 4,
         "Mz": False,
         },
     "Hubbard_Plain_Vanilla": {
@@ -290,12 +290,12 @@ if __name__ == "__main__":
     test_all = True
     for sim_name, sim_dict in sim_pars.items():
         test = test_branch(alf_dir, sim_dict, branch_R, branch_T, machine, mpi, n_mpi)
-        with open('test.txt', 'w+') as f:
-            f.write(f'{sim_name}: {test}\n')
+        with open('test.txt', 'a') as f:
+            f.write('{}: {}\n'.format(sim_name, test))
         if not test:
             test_all = False
-    with open('test.txt', 'w+') as f:
-        f.write(f'\tTotal: {test_all}\n')
+    with open('test.txt', 'a') as f:
+        f.write('\tTotal: {}\n'.format(test_all))
     if test_all:
         print("Test sucessful")
         sys.exit(0)

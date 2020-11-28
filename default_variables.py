@@ -144,7 +144,7 @@ PARAMS_MODEL["VAR_Hubbard"] = {
     "ham_T2"     :  [1.0, ""]  ,
     "ham_U2"     :  [4.0, ""]  ,
     "ham_Tperp"  :  [1.0, ""]  ,
-    "Continuous" :  [False, "Continuous HS transformation"], 
+    "Continuous" :  [False, "Continuous HS transformation"],
     }
 
 PARAMS_MODEL["VAR_tV"] = {
