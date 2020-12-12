@@ -7,7 +7,7 @@ types:
       - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
       - export PYTHONPATH="$PWD:$PYTHONPATH"
       - cd Scripts
-      - ./test_branch.py --branch_R master --branch_T 154-n_non_zero-may-depend-on-nf
+      - ./test_branch.py --branch_R master --branch_T 83-add-module-for-entanglement-mutual-information
   
 .test_template-PGI: &test_definition-PGI
     type: test
@@ -16,7 +16,7 @@ types:
       - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"
       - export PYTHONPATH="$PWD:$PYTHONPATH"
       - cd Scripts
-      - ./test_branch.py --branch_R master --branch_T 154-n_non_zero-may-depend-on-nf --machine PGI
+      - ./test_branch.py --branch_R master --branch_T 83-add-module-for-entanglement-mutual-information --machine PGI
 
 
 Test_Buster:
