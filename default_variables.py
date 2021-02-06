@@ -52,6 +52,10 @@ IN_HAM = {
     'Examples': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard", "VAR_LRC"],
     }
 
+PARAMS_GENERIC["VAR_ham_name"] = {
+    "ham_name": ["Hubbard", "Name of Hamiltonian"]
+    }
+
 PARAMS_GENERIC["VAR_QMC"] = {
     # General parameters for the Monte Carlo algorithm
     "Nwrap"                : [10,  "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],

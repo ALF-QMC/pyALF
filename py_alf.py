@@ -66,6 +66,7 @@ class Simulation:
         """
         self.ham_name = ham_name
         self.sim_dict = sim_dict
+        self.sim_dict["ham_name"] = str(ham_name)
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(os.path.join(
             kwargs.pop("sim_root", "ALF_data"),
@@ -123,7 +124,9 @@ class Simulation:
 
         env = getenv(self.config, self.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
-        executable = os.path.join(self.alf_dir, 'Prog', self.ham_name+'.out')
+        executable = os.path.join(self.alf_dir, 'Prog', 'ALF.out')
+        if not os.path.isfile(executable):
+            executable = os.path.join(self.alf_dir, 'Prog', self.ham_name+'.out')
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
@@ -239,8 +242,14 @@ def _update_var(params, var, value):
     for name in params:
         for var2 in params[name]:
             if var2.lower() == var.lower():
-                params[name][var2][0] = value
-                return params
+                try:
+                    params[name][var2][0] = value
+                    return params
+                except TypeError:
+                    print("TypeError in _update_var")
+                    print(params)
+                    print(var, value)
+                    raise Exception("TypeError in _update_var")
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 
 
@@ -302,7 +311,10 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
         print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
-        subprocess.run(['make', target], check=True, env=env)
+        try:
+            subprocess.run(['make', target], check=True, env=env)
+        except subprocess.CalledProcessError:
+            subprocess.run(['make', 'program'], check=True, env=env)
         print('Done.')
 
 
