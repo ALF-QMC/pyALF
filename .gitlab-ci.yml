@@ -3,6 +3,8 @@ variables:
   
 .test_template: &test_definition
   rules:
+    - if: '$BRANCH_T'
+      when: never
     - changes:
       - Run.py
       - default_variables.py
@@ -15,6 +17,8 @@ variables:
     
 .test_template-PGI: &test_definition-PGI
   rules:
+    - if: '$BRANCH_T'
+      when: never
     - changes:
       - Run.py
       - default_variables.py
@@ -29,6 +33,8 @@ variables:
 .warn_template: &warn_definition
   allow_failure: true
   rules:
+    - if: '$BRANCH_T'
+      when: never
     - changes:
       - Run.py
       - default_variables.py
