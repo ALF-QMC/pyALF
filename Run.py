@@ -102,3 +102,4 @@ if __name__ == "__main__":
         #     f.write('Diff: {} +- {}\n'.format(
         #         *(obs_R['Kin_scalJ']['obs'][0] - obs_T['Kin_scalJ']['obs'][0])
         #         ))
+
