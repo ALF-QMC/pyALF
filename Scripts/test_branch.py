@@ -317,4 +317,4 @@ if __name__ == "__main__":
         print("Test failed")
         with open('test.txt', 'r') as f:
             print(f.read())
-        sys.exit(0)
+        sys.exit(1)
