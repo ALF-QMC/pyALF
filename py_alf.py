@@ -310,6 +310,9 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
         env = getenv(config)
         print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
+        for file in os.listdir('Prog'):
+            if file.endswith('.out'):
+                os.remove(os.path.join('Prog', file))
         subprocess.run(['make', 'ana'], check=True, env=env)
         try:
             subprocess.run(['make', target], check=True, env=env)
