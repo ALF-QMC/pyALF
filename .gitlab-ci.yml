@@ -53,8 +53,8 @@ Test_Stretch:
     MACHINE: "GNU"
   <<: *test_definition
   
-Test_Buster-PGI:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-pgi1910
+Test-PGI:
+  image: nvcr.io/nvidia/nvhpc:20.11-devel-cuda_multi-ubuntu20.04
   variables:
     MACHINE: "PGI"
   <<: *test_definition
@@ -77,8 +77,8 @@ Test_branch_Stretch:
     MACHINE: "GNU"
   <<: *test_branch_definition
   
-Test_branch_Buster-PGI:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-pgi1910
+Test_branch-PGI:
+  image: nvcr.io/nvidia/nvhpc:20.11-devel-cuda_multi-ubuntu20.04
   variables:
     MACHINE: "PGI"
   <<: *test_branch_definition
