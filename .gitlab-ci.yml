@@ -48,7 +48,7 @@ variables:
     - if: '$BRANCH_T'
       when: always
   script:
-    - apt-get update && apt-get install -y python3-numpy git
+    - apt-get update && apt-get install -y python3-numpy python3-h5py python3-numba git
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - cd Scripts
     - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T
@@ -58,7 +58,7 @@ variables:
     - if: '$BRANCH_T'
       when: always
   script:
-    - apt-get update && apt-get install -y python3-numpy git
+    - apt-get update && apt-get install -y python3-numpy python3-h5py python3-numba git
     - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - cd Scripts

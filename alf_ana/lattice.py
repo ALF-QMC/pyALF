@@ -1,9 +1,8 @@
-import os
-import pickle
 import numpy as np
 from numba import jit
 
-# from alf_f2py import alf_f2py  # pylint: disable=E0611
+
+_cache = {}
 
 
 class Lattice:
@@ -19,14 +18,12 @@ class Lattice:
             self.a1 = np.array(args[2], dtype=float)
             self.a2 = np.array(args[3], dtype=float)
 
-        name = os.path.expanduser(
-            f'~/lattices/L1={self.L1}L2={self.L2}a1={self.a1}a2={self.a2}')
-        if os.path.exists(name):
-            with open(name, 'rb') as f:
-                (self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
-                 self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
-                 self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
-                 self.nnlistk, self.imj, self.r, self.k) = pickle.load(f)
+        s = 'L1={}L2={}a1={}a2={}'.format(self.L1, self.L2, self.a1, self.a2)
+        if s in _cache:
+            (self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
+             self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
+             self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
+             self.nnlistk, self.imj, self.r, self.k) = _cache[s]
         else:
             if init_version == 0:
                 init = _init0(self.L1, self.L2, self.a1, self.a2)
@@ -43,12 +40,12 @@ class Lattice:
             for n in range(self.N):
                 self.r[n] = self.listr[n, 0]*self.a1 + self.listr[n, 1]*self.a2
                 self.k[n] = self.listk[n, 0]*self.b1 + self.listk[n, 1]*self.b2
-            with open(name, 'wb') as f:
-                x = (self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
-                 self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
-                 self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
-                 self.nnlistk, self.imj, self.r, self.k)
-                pickle.dump(x, f)
+
+            _cache[s] = (
+                self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
+                self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
+                self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
+                self.nnlistk, self.imj, self.r, self.k)
 
     def NNr(self, n):
         return(self.nnlistr[n, 1, 0], self.nnlistr[n, 0, 1],
@@ -130,6 +127,7 @@ def _periodic_boundary(r, L1, L2):
 
 
 def _init0(L1, L2, a1, a2):
+    from alf_f2py import alf_f2py  # pylint: disable=E0611
     alf_f2py.lattice_out(L1, L2, a1, a2)
 
     b1 = np.copy(alf_f2py.la_b1_p)

@@ -168,8 +168,7 @@ class Simulation:
             with open(os.path.join(self.sim_dir, 'res.pkl'), 'rb') as f:
                 dic = pickle.load(f)
             return dic
-        else:
-            return get_obs(self.sim_dir, names)
+        return get_obs(self.sim_dir, names)
 
 
 def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
