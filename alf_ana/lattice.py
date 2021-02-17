@@ -3,11 +3,11 @@ import pickle
 import numpy as np
 from numba import jit
 
-from alf_f2py import alf_f2py  # pylint: disable=E0611
+# from alf_f2py import alf_f2py  # pylint: disable=E0611
 
 
 class Lattice:
-    def __init__(self, *args, init_version=0):
+    def __init__(self, *args, init_version=1):
         if len(args) == 1:
             self.L1 = np.array(args[0]["L1"], dtype=float)
             self.L2 = np.array(args[0]["L2"], dtype=float)
