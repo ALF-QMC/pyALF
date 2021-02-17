@@ -16,7 +16,7 @@ import pickle
 import numpy as np
 
 from default_variables import default_params, params_list
-from analysis import ana
+from alf_ana.ana import ana
 
 
 class cd:
