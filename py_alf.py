@@ -11,8 +11,12 @@ import os
 import re
 import subprocess
 from shutil import copyfile
+import pickle
+
 import numpy as np
+
 from default_variables import default_params, params_list
+from analysis import ana
 
 
 class cd:
@@ -139,22 +143,33 @@ class Simulation:
                     print(f.read())
                 raise Exception('Error while running {}.'.format(executable))
 
-    def analysis(self):
+    def analysis(self, python_version=False):
         """Performs default analysis on Monte Carlo data."""
         if self.tempering:
             for i in range(len(self.sim_dict)):
-                analysis(self.alf_dir,
-                         os.path.join(self.sim_dir, "Temp_{}".format(i)))
+                if python_version:
+                    ana(os.path.join(self.sim_dir, "Temp_{}".format(i)))
+                else:
+                    analysis(self.alf_dir,
+                             os.path.join(self.sim_dir, "Temp_{}".format(i)))
         else:
-            analysis(self.alf_dir, self.sim_dir)
+            if python_version:
+                ana(self.sim_dir)
+            else:
+                analysis(self.alf_dir, self.sim_dir)
 
-    def get_obs(self, names=None):
+    def get_obs(self, names=None, python_version=False):
         """Returns dictionary containing anaysis results from observables.
 
         Currently only scalar and equal time correlators.
         If names is None: gets all observables, else the ones listed in names.
         """
-        return get_obs(self.sim_dir, names)
+        if python_version:
+            with open(os.path.join(self.sim_dir, 'res.pkl'), 'rb') as f:
+                dic = pickle.load(f)
+            return dic
+        else:
+            return get_obs(self.sim_dir, names)
 
 
 def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
