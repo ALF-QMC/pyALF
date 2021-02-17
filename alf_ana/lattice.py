@@ -1,3 +1,10 @@
+"""Implamemts bravais lattice object."""
+# pylint: disable=invalid-name
+# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
+
 import numpy as np
 from numba import jit
 
@@ -6,6 +13,8 @@ _cache = {}
 
 
 class Lattice:
+    """Bravais lattice object."""
+
     def __init__(self, *args, init_version=1):
         if len(args) == 1:
             self.L1 = np.array(args[0]["L1"], dtype=float)
@@ -57,9 +66,9 @@ class Lattice:
 
     def NNk2(self, n):
         return(self.nnlistk[n, 1, 0], self.nnlistk[n, 0, 1],
-               self.nnlistk[n,-1, 0], self.nnlistk[n, 0,-1],
-               self.nnlistk[n, 1, 1], self.nnlistk[n, 1,-1],
-               self.nnlistk[n,-1,-1], self.nnlistk[n,-1, 1])
+               self.nnlistk[n, -1, 0], self.nnlistk[n, 0, -1],
+               self.nnlistk[n, 1, 1], self.nnlistk[n, 1, -1],
+               self.nnlistk[n, -1, -1], self.nnlistk[n, -1, 1])
 
     def periodic_boundary_k(self, k):
         return _periodic_boundary(np.array(k), self.BZ1, self.BZ2)
@@ -127,7 +136,7 @@ def _periodic_boundary(r, L1, L2):
 
 
 def _init0(L1, L2, a1, a2):
-    from alf_f2py import alf_f2py  # pylint: disable=E0611
+    from alf_f2py import alf_f2py  # pylint: disable=E0611,C0415
     alf_f2py.lattice_out(L1, L2, a1, a2)
 
     b1 = np.copy(alf_f2py.la_b1_p)
