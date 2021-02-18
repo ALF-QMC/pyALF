@@ -481,7 +481,7 @@ def ana_tau(filename, obs_name=None, sym=None):
     return sign, m_K, e_K, m_R0, e_R0, dtau, latt
 
 
-def ana(directory, sym_spec=None, custom_obs=None):
+def ana(directory, sym_spec=None, custom_obs=None, do_tau=True):
     """
     Performs analysis in given directory.
     """
@@ -621,10 +621,6 @@ def ana(directory, sym_spec=None, custom_obs=None):
                 *sign, *above, *below)
             )
 
-    # with open(os.path.join(directory,'res.pkl'), 'wb') as f:
-        # pickle.dump(dic, f)
-    # return
-
     print("Equal time observables:")
     for obs_name in list_eq:
         print(obs_name)
@@ -654,28 +650,30 @@ def ana(directory, sym_spec=None, custom_obs=None):
             'a2': latt.a2
             }
 
-    print("Time displaced observables:")
-    for obs_name in list_tau:
-        print(obs_name)
-        if sym_spec is not None:
-            symmetry = sym_spec(obs_name, par)
-        else:
-            symmetry = None
-        sign, m_k, e_k, m_r0, e_r0, dtau, latt = \
-            ana_tau(directory, obs_name, sym=symmetry)
+    if do_tau:
+        print("Time displaced observables:")
+        for obs_name in list_tau:
+            print(obs_name)
+            if sym_spec is not None:
+                symmetry = sym_spec(obs_name, par)
+            else:
+                symmetry = None
+            sign, m_k, e_k, m_r0, e_r0, dtau, latt = \
+                ana_tau(directory, obs_name, sym=symmetry)
 
-        write_res_tau(directory, obs_name, m_k, e_k, m_r0, e_r0, dtau, latt)
+            write_res_tau(directory, obs_name,
+                          m_k, e_k, m_r0, e_r0, dtau, latt)
 
-        dic[obs_name+'K'] = m_k
-        dic[obs_name+'K_err'] = e_k
-        dic[obs_name+'R0'] = m_r0
-        dic[obs_name+'R0_err'] = e_r0
-        dic[obs_name+'_lattice'] = {
-            'L1': latt.L1,
-            'L2': latt.L2,
-            'a1': latt.a1,
-            'a2': latt.a2
-            }
+            dic[obs_name+'K'] = m_k
+            dic[obs_name+'K_err'] = e_k
+            dic[obs_name+'R0'] = m_r0
+            dic[obs_name+'R0_err'] = e_r0
+            dic[obs_name+'_lattice'] = {
+                'L1': latt.L1,
+                'L2': latt.L2,
+                'a1': latt.a1,
+                'a2': latt.a2
+                }
 
     with open(os.path.join(directory, 'res.pkl'), 'wb') as f:
         pickle.dump(dic, f)
