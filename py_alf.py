@@ -11,12 +11,12 @@ import os
 import re
 import subprocess
 from shutil import copyfile
-import pickle
 
 import numpy as np
+import pandas as pd
 
 from default_variables import default_params, params_list
-from alf_ana.ana import ana
+from alf_ana.ana import ana, load_res
 
 
 class cd:
@@ -146,17 +146,16 @@ class Simulation:
     def analysis(self, python_version=False):
         """Performs default analysis on Monte Carlo data."""
         if self.tempering:
-            for i in range(len(self.sim_dict)):
-                if python_version:
-                    ana(os.path.join(self.sim_dir, "Temp_{}".format(i)))
-                else:
-                    analysis(self.alf_dir,
-                             os.path.join(self.sim_dir, "Temp_{}".format(i)))
+            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
+                           for i in range(len(self.sim_dict))]
         else:
+            directories = [self.sim_dir]
+
+        for directory in directories:
             if python_version:
-                ana(self.sim_dir)
+                ana(directory)
             else:
-                analysis(self.alf_dir, self.sim_dir)
+                analysis(self.alf_dir, directory)
 
     def get_obs(self, names=None, python_version=False):
         """Returns dictionary containing anaysis results from observables.
@@ -164,11 +163,18 @@ class Simulation:
         Currently only scalar and equal time correlators.
         If names is None: gets all observables, else the ones listed in names.
         """
+        if self.tempering:
+            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
+                           for i in range(len(self.sim_dict))]
+        else:
+            directories = [self.sim_dir]
         if python_version:
-            with open(os.path.join(self.sim_dir, 'res.pkl'), 'rb') as f:
-                dic = pickle.load(f)
-            return dic
-        return get_obs(self.sim_dir, names)
+            return load_res(directories)
+
+        li = []
+        for directory in directories:
+            li.append(get_obs(self.sim_dir, names))
+        return pd.DataFrame(li, index=directories)
 
 
 def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):

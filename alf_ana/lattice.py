@@ -216,7 +216,7 @@ def _init1(L1, L2, a1, a2):
     N2 = abs(int(round(np.dot(BZ2, L1) / (2.*np.pi))))
     N3 = abs(int(round(np.dot(BZ1, L2) / (2.*np.pi))))
     N4 = abs(int(round(np.dot(BZ2, L2) / (2.*np.pi))))
-    L = max([N1, N2, N3, N4])
+    L = np.array([N1, N2, N3, N4]).max()
 
     invlistr = np.full((2*L+1, 2*L+1), fill_value=-1, dtype=np.int32)
     N = 0

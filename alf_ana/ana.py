@@ -7,6 +7,7 @@ import pickle
 
 import h5py
 import numpy as np
+import pandas as pd
 
 from alf_ana.lattice import Lattice
 
@@ -765,3 +766,17 @@ def write_res_tau(directory, obs_name, m_k, e_k, m_r0, e_r0, dtau, latt):
                np.column_stack([taus, m_r0, e_r0]),
                fmt=['%14.7f', '%16.8f', '%16.8f']
                )
+
+
+def load_res(directories):
+    if not isinstance(directories, list):
+        directories = [directories]
+    li = []
+    for directory in directories:
+        print(directory)
+        with open(os.path.join(directory, 'res.pkl'), 'rb') as f:
+            dictionary = pickle.load(f)
+        li.append(dictionary)
+
+    df = pd.DataFrame(li, index=directories)
+    return df

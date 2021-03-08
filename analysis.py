@@ -33,7 +33,7 @@ if __name__ == '__main__':
         '--userspec', default=os.getenv('ALF_USERSPEC', None),
         help='File that defines custom observables and symmetries.')
     parser.add_argument(
-        'directories', default=None, nargs='*',
+        'directories', nargs='*',
         help='Directories to analyze. If empty, analyzes all \
             directories containing file "data.h5" it can find.')
     args = parser.parse_args()
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     if RANK == 0:
         print('comm={}, size={}, rank={}'.format(COMM, SIZE, RANK))
-        if args.directories is not None:
+        if args.directories:
             directories = args.directories
         else:
             directories = []
