@@ -1,6 +1,6 @@
 ## pyALF
 
-The package implements ALF's python interface. `pyALF` greatly simplifies using the code, making it ideal for:
+The package implements ALF's python interface for [ALF 2.0](https://git.physik.uni-wuerzburg.de/ALF/ALF/-/tree/ALF-2.0). `pyALF` greatly simplifies using the code, making it ideal for:
 
 * *obtaining benchmark* results for established models;
 * *getting started* with QMC and ALF;
