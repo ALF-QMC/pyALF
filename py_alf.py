@@ -70,7 +70,7 @@ class Simulation:
         self.sim_dir = os.path.abspath(os.path.expanduser(os.path.join(
             kwargs.pop("sim_root", "ALF_data"),
             kwargs.pop("sim_dir", directory_name(ham_name, sim_dict)))))
-        self.branch = kwargs.pop('branch', None)
+        self.branch = kwargs.pop('branch', 'ALF-2.0')
         self.mpi = kwargs.pop("mpi", False)
         self.n_mpi = kwargs.pop("n_mpi", None)
         self.n_omp = kwargs.pop('n_omp', 1)
