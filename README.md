@@ -14,7 +14,7 @@ The package implements ALF's python interface for [ALF 2.0](https://git.physik.u
 * the libraries Lapack and Blas
 * a Fortran compiler, such as gfortran or ifort,
 
-where the last two are required by the main package [ALF](https://git.physik.uni-wuerzburg.de/ALF/ALF).
+where the last two are required by the main package ALF.
 
 Also, add pyALF's path to your environment variable `PYTHONPATH`. In Linux, this can be achieved, e.g., by adding the following line to `.bashrc`:
 
