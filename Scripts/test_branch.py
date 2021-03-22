@@ -24,7 +24,7 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
                        branch=branch_R,
                        mpi=mpi,
                        n_mpi=n_mpi)
-    sim_R.compile(target=ham_name)
+    sim_R.compile()
     sim_R.run()
     sim_R.analysis()
     obs_R = sim_R.get_obs()
@@ -35,7 +35,7 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
                        mpi=mpi,
                        n_mpi=n_mpi)
     sim_T.sim_dir = sim_T.sim_dir + '_test'
-    sim_T.compile(target=ham_name)
+    sim_T.compile()
     sim_T.run()
     sim_T.analysis()
     obs_T = sim_T.get_obs()

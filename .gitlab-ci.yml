@@ -10,25 +10,12 @@ variables:
       - default_variables.py
       - py_alf.py
   script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
-    - pylint3 -E Run.py default_variables.py py_alf.py
+    - apt-get update && apt-get install -y pylint3 python3-numpy git
+    - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
+    - $linter -E Run.py default_variables.py py_alf.py
+    - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"  # Only relevant for images with PGI compiler
     - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
-    - ./Run.py -R --alfdir ./ALF --machine "GNU" --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
-    
-.test_template-PGI: &test_definition-PGI
-  rules:
-    - if: '$BRANCH_T'
-      when: never
-    - changes:
-      - Run.py
-      - default_variables.py
-      - py_alf.py
-  script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama git
-    - pylint3 -E Run.py default_variables.py py_alf.py
-    - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"
-    - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
-    - ./Run.py -R --alfdir ./ALF --machine "PGI" --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
+    - ./Run.py -R --alfdir ./ALF --machine $MACHINE --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
 
 .warn_template: &warn_definition
   allow_failure: true
@@ -40,7 +27,7 @@ variables:
       - default_variables.py
       - py_alf.py
   script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-colorama
+    - apt-get update && apt-get install -y pylint3 python3-numpy
     - pylint3 Run.py default_variables.py py_alf.py
     
 .test_branch_template: &test_branch_definition
@@ -49,33 +36,29 @@ variables:
       when: always
   script:
     - apt-get update && apt-get install -y python3-numpy git
+    - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"  # Only relevant for images with PGI compiler
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - cd Scripts
-    - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T
-  
-.test_branch_template-PGI: &test_branch_definition-PGI
-  rules:
-    - if: '$BRANCH_T'
-      when: always
-  script:
-    - apt-get update && apt-get install -y python3-numpy git
-    - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"
-    - export PYTHONPATH="$PWD:$PYTHONPATH"
-    - cd Scripts
-    - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine PGI
+    - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE
 
 
 Test_Buster:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+  variables:
+    MACHINE: "GNU"
   <<: *test_definition
 
 Test_Stretch:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
+  variables:
+    MACHINE: "GNU"
   <<: *test_definition
   
-Test_Buster-PGI:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-pgi1910
-  <<: *test_definition-PGI
+Test-PGI:
+  image: nvcr.io/nvidia/nvhpc:20.11-devel-cuda_multi-ubuntu20.04
+  variables:
+    MACHINE: "PGI"
+  <<: *test_definition
 
 
 Warn_Buster:
@@ -85,12 +68,18 @@ Warn_Buster:
 
 Test_branch_Buster:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+  variables:
+    MACHINE: "GNU"
   <<: *test_branch_definition
 
 Test_branch_Stretch:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
+  variables:
+    MACHINE: "GNU"
   <<: *test_branch_definition
   
-Test_branch_Buster-PGI:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-pgi1910
-  <<: *test_branch_definition-PGI
+Test_branch-PGI:
+  image: nvcr.io/nvidia/nvhpc:20.11-devel-cuda_multi-ubuntu20.04
+  variables:
+    MACHINE: "PGI"
+  <<: *test_branch_definition

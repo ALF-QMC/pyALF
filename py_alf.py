@@ -84,6 +84,22 @@ class Simulation:
         if self.tempering:
             self.mpi = True
 
+        # Check if all parameters in sim_dict are defined in default_variables
+        p_list = params_list(self.ham_name, include_generic=True)
+        if self.tempering:
+            for sim_dict0 in self.sim_dict:
+                for par_name in sim_dict0:
+                    if par_name.upper() not in p_list:
+                        raise Exception(
+                            'Parameter {} not listet in default_variables'
+                            .format(par_name))
+        else:
+            for par_name in self.sim_dict:
+                if par_name.upper() not in p_list:
+                    raise Exception(
+                        'Parameter {} not listet in default_variables'
+                        .format(par_name))
+
         if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
 
@@ -104,9 +120,9 @@ class Simulation:
         if self.tempering:
             self.config += ' TEMPERING'
 
-    def compile(self, target='all'):
+    def compile(self):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
-        compile_alf(self.alf_dir, self.branch, self.config, target)
+        compile_alf(self.alf_dir, self.branch, self.config)
 
     def run(self):
         """Prepares simulation directory and runs ALF."""
@@ -123,7 +139,7 @@ class Simulation:
 
         env = getenv(self.config, self.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
-        executable = os.path.join(self.alf_dir, 'Prog', self.ham_name+'.out')
+        executable = os.path.join(self.alf_dir, 'Prog', 'ALF.out')
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
@@ -252,6 +268,10 @@ def set_param(ham_name, sim_dict):
     """
     params = default_params(ham_name)
 
+    params["VAR_ham_name"] = {
+        "ham_name": [ham_name, "Name of Hamiltonian"]
+    }
+
     for name, value in sim_dict.items():
         params = _update_var(params, name, value)
     return params
@@ -278,7 +298,7 @@ def getenv(config, alf_dir='.'):
     return env
 
 
-def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
+def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
                 url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
     """Compile ALF. Clone a new repository if alf_dir does not exist."""
 
@@ -302,7 +322,7 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI', target='all',
         print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
         subprocess.run(['make', 'ana'], check=True, env=env)
-        subprocess.run(['make', target], check=True, env=env)
+        subprocess.run(['make', 'program'], check=True, env=env)
         print('Done.')
 
 
