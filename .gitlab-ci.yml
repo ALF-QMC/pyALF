@@ -13,7 +13,6 @@ variables:
     - apt-get update && apt-get install -y pylint3 python3-numpy git
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
     - $linter -E Run.py default_variables.py py_alf.py
-    - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"  # Only relevant for images with PGI compiler
     - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
     - ./Run.py -R --alfdir ./ALF --machine $MACHINE --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
 
@@ -36,7 +35,6 @@ variables:
       when: always
   script:
     - apt-get update && apt-get install -y python3-numpy git
-    - export PATH="/opt/pgi/linux86-64/2019/bin:$PATH"  # Only relevant for images with PGI compiler
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - cd Scripts
     - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE
@@ -55,7 +53,7 @@ Test_Stretch:
   <<: *test_definition
   
 Test-PGI:
-  image: nvcr.io/nvidia/nvhpc:20.11-devel-cuda_multi-ubuntu20.04
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-pgi-21-03
   variables:
     MACHINE: "PGI"
   <<: *test_definition
@@ -79,7 +77,7 @@ Test_branch_Stretch:
   <<: *test_branch_definition
   
 Test_branch-PGI:
-  image: nvcr.io/nvidia/nvhpc:20.11-devel-cuda_multi-ubuntu20.04
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-pgi-21-03
   variables:
     MACHINE: "PGI"
   <<: *test_branch_definition
