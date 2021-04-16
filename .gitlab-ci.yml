@@ -11,6 +11,7 @@ variables:
       - py_alf.py
   script:
     - apt-get update && apt-get install -y pylint3 python3-numpy git
+    - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
     - $linter -E Run.py default_variables.py py_alf.py
     - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
@@ -36,18 +37,25 @@ variables:
   script:
     - apt-get update && apt-get install -y python3-numpy git
     - export PYTHONPATH="$PWD:$PYTHONPATH"
+    - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - cd Scripts
     - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE
 
 
-Test_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+Test_Stretch:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy3
   variables:
     MACHINE: "GNU"
   <<: *test_definition
 
-Test_Stretch:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
+Test_Buster:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
+  variables:
+    MACHINE: "GNU"
+  <<: *test_definition
+
+Test_Bullseye:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
   variables:
     MACHINE: "GNU"
   <<: *test_definition
@@ -58,20 +66,32 @@ Test-PGI:
     MACHINE: "PGI"
   <<: *test_definition
 
+Test-Intel-21:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort
+  variables:
+    MACHINE: "INTEL"
+  <<: *test_definition
+
 
 Warn_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
   <<: *warn_definition
 
 
-Test_branch_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy
+Test_branch_Stretch:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy3
   variables:
     MACHINE: "GNU"
   <<: *test_branch_definition
 
-Test_branch_Stretch:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy
+Test_branch_Buster:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
+  variables:
+    MACHINE: "GNU"
+  <<: *test_branch_definition
+
+Test_branch_Bullseye:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
   variables:
     MACHINE: "GNU"
   <<: *test_branch_definition
@@ -80,4 +100,10 @@ Test_branch-PGI:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-pgi-21-03
   variables:
     MACHINE: "PGI"
+  <<: *test_branch_definition
+
+Test_branch-Intel-21:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort
+  variables:
+    MACHINE: "INTEL"
   <<: *test_branch_definition
