@@ -8,7 +8,7 @@ PARAMS_GENERIC -- contains all generic parameters independent from the choice
 PARAMS_MODEL -- contains namelists dependant on hamiltonian
 IN_HAM -- defines which elements of PARAMS_MODEL are needed by a hamiltonian
 """
-# pylint: disable=bad-whitespace, line-too-long
+# pylint: disable = line-too-long
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020, The ALF Project"
@@ -36,8 +36,8 @@ def params_list(ham_name, include_generic=False):
     for name in IN_HAM[ham_name]:
         p_list += list(PARAMS_MODEL[name])
     if include_generic:
-        for nlist_name, nlist in PARAMS_GENERIC.items():
-            p_list += list(nlist)
+        for nlist_name in PARAMS_GENERIC:
+            p_list += list(PARAMS_GENERIC[nlist_name])
 
     return [i.upper() for i in p_list]
 
