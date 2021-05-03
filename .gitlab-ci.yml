@@ -45,7 +45,7 @@ variables:
 
 
 Test_Stretch:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy3
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5
   variables:
     MACHINE: "GNU"
   <<: *test_definition
@@ -81,7 +81,7 @@ Warn_Buster:
 
 
 Test_branch_Stretch:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy3
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5
   variables:
     MACHINE: "GNU"
   <<: *test_branch_definition
