@@ -148,12 +148,13 @@ class Simulation:
                 else:
                     command = executable
                 subprocess.run(command, check=True, env=env)
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as ALF_crash:
                 print('Error while running {}.'.format(executable))
                 print('parameters:')
                 with open('parameters') as f:
                     print(f.read())
-                raise Exception('Error while running {}.'.format(executable))
+                raise Exception('Error while running {}.'.format(executable)) \
+                    from ALF_crash
 
     def analysis(self):
         """Performs default analysis on Monte Carlo data."""
@@ -308,16 +309,18 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
               .format(alf_dir, url))
         try:
             subprocess.run(["git", "clone", url, alf_dir], check=True)
-        except subprocess.CalledProcessError:
-            raise Exception('Error while cloning repository')
+        except subprocess.CalledProcessError as git_clone_failed:
+            raise Exception('Error while cloning repository') \
+                from git_clone_failed
 
     with cd(alf_dir):
         if branch is not None:
             print('Checking out branch {}'.format(branch))
             try:
                 subprocess.run(['git', 'checkout', branch], check=True)
-            except subprocess.CalledProcessError:
-                raise Exception('Error while checking out {}'.format(branch))
+            except subprocess.CalledProcessError as git_checkout_failed:
+                raise Exception('Error while checking out {}'.format(branch)) \
+                    from git_checkout_failed
         env = getenv(config)
         print('Compiling ALF... ', end='')
         subprocess.run(['make', 'clean'], check=True, env=env)
