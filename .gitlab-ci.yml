@@ -75,8 +75,8 @@ Test-Intel-21:
   <<: *test_definition
 
 
-Warn_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
+Warn_Bullseye:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
   <<: *warn_definition
 
 
