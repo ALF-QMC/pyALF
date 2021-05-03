@@ -9,6 +9,7 @@ variables:
       - Run.py
       - default_variables.py
       - py_alf.py
+      - .gitlab-ci.yml
   script:
     - apt-get update && apt-get install -y pylint3 git
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
@@ -26,6 +27,7 @@ variables:
       - Run.py
       - default_variables.py
       - py_alf.py
+      - .gitlab-ci.yml
   script:
     - apt-get update && apt-get install -y pylint3
     - pylint3 Run.py default_variables.py py_alf.py
@@ -67,7 +69,7 @@ Test-PGI:
   <<: *test_definition
 
 Test-Intel-21:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort-python3
   variables:
     MACHINE: "INTEL"
   <<: *test_definition
@@ -103,7 +105,7 @@ Test_branch-PGI:
   <<: *test_branch_definition
 
 Test_branch-Intel-21:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort-python3
   variables:
     MACHINE: "INTEL"
   <<: *test_branch_definition
