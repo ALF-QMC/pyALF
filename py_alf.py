@@ -11,7 +11,10 @@ import os
 import re
 import subprocess
 from shutil import copyfile
+
 import numpy as np
+import pandas as pd
+
 from default_variables import default_params, params_list
 
 
@@ -159,11 +162,13 @@ class Simulation:
     def analysis(self):
         """Performs default analysis on Monte Carlo data."""
         if self.tempering:
-            for i in range(len(self.sim_dict)):
-                analysis(self.alf_dir,
-                         os.path.join(self.sim_dir, "Temp_{}".format(i)))
+            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
+                           for i in range(len(self.sim_dict))]
         else:
-            analysis(self.alf_dir, self.sim_dir)
+            directories = [self.sim_dir]
+
+        for directory in directories:
+            analysis(self.alf_dir, directory)
 
     def get_obs(self, names=None):
         """Returns dictionary containing anaysis results from observables.
@@ -171,7 +176,16 @@ class Simulation:
         Currently only scalar and equal time correlators.
         If names is None: gets all observables, else the ones listed in names.
         """
-        return get_obs(self.sim_dir, names)
+        if self.tempering:
+            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
+                           for i in range(len(self.sim_dict))]
+        else:
+            directories = [self.sim_dir]
+
+        dicts = {}
+        for directory in directories:
+            dicts[directory] = get_obs(directory, names)
+        return pd.DataFrame(dicts).transpose()
 
 
 def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
@@ -378,9 +392,26 @@ def get_obs(sim_dir, names=None):
         names = os.listdir(sim_dir)
     for name in names:
         if name.endswith('_scalJ'):
-            obs[name] = _read_scalJ(os.path.join(sim_dir, name))
-        if name.endswith('_eqJK') or name.endswith('_eqJR'):
-            obs[name] = _read_eqJ(os.path.join(sim_dir, name))
+            name0 = name[:-1]
+            temp = _read_scalJ(os.path.join(sim_dir, name))
+            obs[name0+'_sign'] = temp['sign'][0]
+            obs[name0+'_sign_err'] = temp['sign'][1]
+            for i, temp2 in enumerate(temp['obs']):
+                name2 = '{}{}'.format(name0, i)
+                obs[name2] = temp['obs'][..., 0]
+                obs[name2+'_err'] = temp['obs'][..., 1]
+        if name.endswith('_eqJK'):
+            name0 = name[:-2]+name[-1]
+            temp = _read_eqJ(os.path.join(sim_dir, name))
+            obs[name0] = temp['dat'][..., 0] + 1j*temp['dat'][..., 1]
+            obs[name0+'_err'] = temp['dat'][..., 2] + 1j*temp['dat'][..., 3]
+            obs[name0+'_k'] = temp['k']
+        if name.endswith('_eqJR'):
+            name0 = name[:-2]+name[-1]
+            temp = _read_eqJ(os.path.join(sim_dir, name))
+            obs[name0] = temp['dat'][..., 0] + 1j*temp['dat'][..., 1]
+            obs[name0+'_err'] = temp['dat'][..., 2] + 1j*temp['dat'][..., 3]
+            obs[name0+'_r'] = temp['r']
     return obs
 
 
