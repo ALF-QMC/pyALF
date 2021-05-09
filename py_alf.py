@@ -398,8 +398,8 @@ def get_obs(sim_dir, names=None):
             obs[name0+'_sign_err'] = temp['sign'][1]
             for i, temp2 in enumerate(temp['obs']):
                 name2 = '{}{}'.format(name0, i)
-                obs[name2] = temp['obs'][..., 0]
-                obs[name2+'_err'] = temp['obs'][..., 1]
+                obs[name2] = temp['obs'][i, 0]
+                obs[name2+'_err'] = temp['obs'][i, 1]
         if name.endswith('_eqJK'):
             name0 = name[:-2]+name[-1]
             temp = _read_eqJ(os.path.join(sim_dir, name))
