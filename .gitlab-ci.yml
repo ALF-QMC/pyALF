@@ -1,5 +1,7 @@
 variables:
   BRANCH_R: "master"
+  OMPI_ALLOW_RUN_AS_ROOT: 1
+  OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
   
 .test_template: &test_definition
   rules:
