@@ -29,20 +29,22 @@ class Lattice:
 
         s = 'L1={}L2={}a1={}a2={}'.format(self.L1, self.L2, self.a1, self.a2)
         if s in _cache:
-            (self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
-             self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
-             self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
-             self.nnlistk, self.imj, self.r, self.k) = _cache[s]
+            (self.BZ1, self.BZ2, self.b1, self.b2,
+             self.b1_perp, self.b2_perp, self.L, self.N,
+             self.listr, self.invlistr, self.nnlistr,
+             self.listk, self.invlistk, self.nnlistk,
+             self.imj, self.r, self.k) = _cache[s]
         else:
             if init_version == 0:
                 init = _init0(self.L1, self.L2, self.a1, self.a2)
             elif init_version == 1:
                 init = _init1(self.L1, self.L2, self.a1, self.a2)
 
-            (self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
-             self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
-             self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
-             self.nnlistk, self.imj) = init
+            (self.BZ1, self.BZ2, self.b1, self.b2,
+             self.b1_perp, self.b2_perp, self.L, self.N,
+             self.listr, self.invlistr, self.nnlistr,
+             self.listk, self.invlistk, self.nnlistk,
+             self.imj) = init
 
             self.r = np.empty((self.N, 2))
             self.k = np.empty((self.N, 2))
@@ -51,10 +53,11 @@ class Lattice:
                 self.k[n] = self.listk[n, 0]*self.b1 + self.listk[n, 1]*self.b2
 
             _cache[s] = (
-                self.BZ1, self.BZ2, self.b1, self.b2, self.b1_perp, self.b2_perp,
-                self.L, self.N, self.listr, self.invlistr, self.listr, self.invlistr,
-                self.N, self.listk, self.invlistk, self.nnlistr, self.nnlistr,
-                self.nnlistk, self.imj, self.r, self.k)
+                self.BZ1, self.BZ2, self.b1, self.b2,
+                self.b1_perp, self.b2_perp, self.L, self.N,
+                self.listr, self.invlistr, self.nnlistr,
+                self.listk, self.invlistk, self.nnlistk,
+                self.imj, self.r, self.k)
 
     def NNr(self, n):
         return(self.nnlistr[n, 1, 0], self.nnlistr[n, 0, 1],
@@ -123,6 +126,38 @@ class Lattice:
         R = np.array(((c, -s), (s, c)))
         return self.k_to_n(np.matmul(R, self.k[n]))
 
+    def plot_r(self, ax, data, cmap):
+        _plot_2d(self.r, self.a1, self.a2, ax, data, cmap)
+        ax.set_xlabel(r'$r_x$')
+        ax.set_ylabel(r'$r_y$')
+
+    def plot_k(self, ax, data, cmap):
+        _plot_2d(self.k, self.b1, self.b2, ax, data, cmap)
+        ax.set_xlabel(r'$k_x$')
+        ax.set_ylabel(r'$k_y$')
+
+
+def _plot_2d(coords, vec1, vec2, ax, data, cmap):
+    import matplotlib as mpl
+    from matplotlib.path import Path
+
+    verts0 = _calc_patch(vec1, vec2)
+    codes = [Path.MOVETO] + (len(verts0)-2)*[Path.LINETO] \
+        + [Path.CLOSEPOLY]
+
+    for coord, dat in zip(coords, data):
+        verts = verts0 + coord
+        ax.add_patch(mpl.patches.PathPatch(
+            Path(verts, codes), facecolor=cmap.to_rgba(dat), lw=0))
+
+    ax.set_aspect('equal')
+    xmin = coords[:, 0].min() - abs(vec1[0]) - abs(vec2[0])
+    xmax = coords[:, 0].max() + abs(vec1[0]) + abs(vec2[0])
+    ymin = coords[:, 1].min() - abs(vec1[1]) - abs(vec2[1])
+    ymax = coords[:, 1].max() + abs(vec1[1]) + abs(vec2[1])
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+
 
 @jit(nopython=True)
 def _periodic_boundary(r, L1, L2):
@@ -133,6 +168,50 @@ def _periodic_boundary(r, L1, L2):
         if x < -0.5+1e-08:
             r = _periodic_boundary(r+L, L1, L2)
     return r
+
+
+def _find_cross(x, d, a):
+    """Solve x+l*d = a/2 + g*a_perp."""
+    mat = np.array([[d[0], d[1]], [-a[1], a[0]]])
+    if np.allclose(np.linalg.det(mat), 0):
+        return -1, -1
+    mat2 = np.linalg.inv(mat)
+
+    l, g = np.matmul(a/2-x, mat2)
+
+    return l, g
+
+
+def _calc_patch(a1, a2):
+    """Calculates the corners of the Wiger-Seitz cell defined by a1, a2."""
+    NNs = [d[0]*a1 + d[1]*a2 for d in
+           [[1, 0], [0, 1], [-1, 0], [0, -1],
+            [1, 1], [1, -1], [-1, -1], [-1, 1]]]
+
+    verts = []
+    x = 0
+    a0 = NNs.pop(0)
+    x += a0/2
+    d = np.array([-a0[1], a0[0]])
+    while NNs:
+        i_min = -1
+        l_min = np.inf
+        for i, a in enumerate(NNs):
+            l, g = _find_cross(x, d, a)
+            if 1e-8 < l < l_min and 1e-8 < abs(g):
+                i_min = i
+                l_min = l
+        l, g = _find_cross(x, d, a0)
+        if 1e-8 < l < l_min and 1e-8 < abs(g):
+            verts.append(x+l*d)
+            verts.append(np.array([0, 0]))
+            return np.array(verts)
+        x += l_min*d
+        verts.append(np.copy(x))
+        a = NNs.pop(i_min)
+        d = np.array([-a[1], a[0]])
+    verts.append([0, 0])
+    return np.array(verts)
 
 
 def _init0(L1, L2, a1, a2):
@@ -185,8 +264,11 @@ def _init0(L1, L2, a1, a2):
 
     alf_f2py.lattice_out_clean()
 
-    return(BZ1, BZ2, b1, b2, b1_perp, b2_perp, L, N, listr, invlistr, listr,
-           invlistr, N, listk, invlistk, nnlistr, nnlistr, nnlistk, imj)
+    return(BZ1, BZ2, b1, b2,
+           b1_perp, b2_perp, L, N,
+           listr, invlistr, nnlistr,
+           listk, invlistk, nnlistk,
+           imj)
 
 
 @jit(nopython=True)
@@ -308,5 +390,8 @@ def _init1(L1, L2, a1, a2):
             imj_temp = invlistr[n1, n2]
             imj[i, j] = imj_temp
 
-    return(BZ1, BZ2, b1, b2, b1_perp, b2_perp, L, N, listr, invlistr, listr,
-           invlistr, N, listk, invlistk, nnlistr, nnlistr, nnlistk, imj)
+    return(BZ1, BZ2, b1, b2,
+           b1_perp, b2_perp, L, N,
+           listr, invlistr, nnlistr,
+           listk, invlistk, nnlistk,
+           imj)
