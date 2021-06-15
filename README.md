@@ -1,3 +1,5 @@
+[![Unitary Fund](https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=for-the-badge)](http://unitary.fund)
+
 ## pyALF
 
 The package implements ALF's python interface. `pyALF` greatly simplifies using the code, making it ideal for:
