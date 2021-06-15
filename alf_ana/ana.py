@@ -183,7 +183,8 @@ class ReadObs:
             return (J_obs_temp,
                     jack(self.J_back, par, N_rebin=N_rebin),
                     jack(self.J_sign, par, N_rebin=N_rebin),
-                    N*[self.N_orb], N*[self.N_tau], N*[self.dtau], N*[self.latt])
+                    N*[self.N_orb], N*[self.N_tau], N*[self.dtau],
+                    N*[self.latt])
         elif self.obs_name.endswith('_hist'):
             return (J_obs_temp,
                     jack(self.J_sign, par, N_rebin=N_rebin),
@@ -321,7 +322,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         filename = os.path.join(directory, obs_name)
         with open(filename+'_info', 'r') as f:
             lines = f.readlines()
-        Channel = lines[1].split(':')[1].strip()
+        # Channel = lines[1].split(':')[1].strip()
         N_tau = int(lines[2].split(':')[1])
         dtau = float(lines[3].split(':')[1])
         L1_p = np.fromstring(lines[6].split(':')[1], sep=' ')
@@ -363,7 +364,9 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
                         for i_orb1 in range(N_orb):
                             obs_c[i_bin, i_orb1, i_orb, i_tau, i_unit] = \
                                 complex(lines[i_line]
-                                    .replace(',', '+').replace('+-', '-').replace(')', 'j)'))
+                                        .replace(',', '+')
+                                        .replace('+-', '-')
+                                        .replace(')', 'j)'))
                             i_line += 1
 
     if bare_bins:
@@ -386,7 +389,8 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         for no in range(N_orb):
             for no1 in range(N_orb):
                 for nt in range(N_tau):
-                    J_obs[:, no1, no, nt, n] -= latt.N*J_back[:, no1]*J_back[:, no]
+                    J_obs[:, no1, no, nt, n] \
+                        -= latt.N*J_back[:, no1]*J_back[:, no]
     return J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt
 
 
@@ -558,21 +562,21 @@ def ana(directory, sym_spec=None, custom_obs=None, do_tau=True):
 
     if custom_obs is not None:
         print("Custom observables:")
-        for obs_name in custom_obs:
+        for obs_name, (func, o_in, kwargs) in custom_obs.items():
             func = custom_obs[obs_name][0]
             o_in = custom_obs[obs_name][1]
-            kwarg = custom_obs[obs_name][2]
+            kwargs = custom_obs[obs_name][2]
             if all(x in list_obs for x in o_in):
                 print('custom', obs_name, o_in)
                 jacks = [ReadObs(directory, obs_name) for obs_name in o_in]
 
                 N_bins = jacks[0].N_bins
                 dtype = func(*[x for j in jacks for x in j.slice(0)],
-                             **kwarg).dtype
+                             **kwargs).dtype
                 J = np.empty(N_bins, dtype=dtype)
                 for i in range(N_bins):
-                    J[i] = custom_obs[obs_name][0](
-                        *[x for j in jacks for x in j.slice(i)], **kwarg)
+                    J[i] = func(
+                        *[x for j in jacks for x in j.slice(i)], **kwargs)
 
                 dat = error(J)
 
