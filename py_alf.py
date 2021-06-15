@@ -188,10 +188,10 @@ class Simulation:
         if python_version:
             return load_res(directories)
 
-        li = []
+        dicts = {}
         for directory in directories:
-            li.append(get_obs(self.sim_dir, names))
-        return pd.DataFrame(li, index=directories)
+            dicts[directory] = get_obs(directory, names)
+        return pd.DataFrame(dicts).transpose()
 
 
 def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
@@ -398,9 +398,26 @@ def get_obs(sim_dir, names=None):
         names = os.listdir(sim_dir)
     for name in names:
         if name.endswith('_scalJ'):
-            obs[name] = _read_scalJ(os.path.join(sim_dir, name))
-        if name.endswith('_eqJK') or name.endswith('_eqJR'):
-            obs[name] = _read_eqJ(os.path.join(sim_dir, name))
+            name0 = name[:-1]
+            temp = _read_scalJ(os.path.join(sim_dir, name))
+            obs[name0+'_sign'] = temp['sign'][0]
+            obs[name0+'_sign_err'] = temp['sign'][1]
+            for i, temp2 in enumerate(temp['obs']):
+                name2 = '{}{}'.format(name0, i)
+                obs[name2] = temp['obs'][i, 0]
+                obs[name2+'_err'] = temp['obs'][i, 1]
+        if name.endswith('_eqJK'):
+            name0 = name[:-2]+name[-1]
+            temp = _read_eqJ(os.path.join(sim_dir, name))
+            obs[name0] = temp['dat'][..., 0] + 1j*temp['dat'][..., 1]
+            obs[name0+'_err'] = temp['dat'][..., 2] + 1j*temp['dat'][..., 3]
+            obs[name0+'_k'] = temp['k']
+        if name.endswith('_eqJR'):
+            name0 = name[:-2]+name[-1]
+            temp = _read_eqJ(os.path.join(sim_dir, name))
+            obs[name0] = temp['dat'][..., 0] + 1j*temp['dat'][..., 1]
+            obs[name0+'_err'] = temp['dat'][..., 2] + 1j*temp['dat'][..., 3]
+            obs[name0+'_r'] = temp['r']
     return obs
 
 

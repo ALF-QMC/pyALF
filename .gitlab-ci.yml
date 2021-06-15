@@ -1,5 +1,7 @@
 variables:
   BRANCH_R: "master"
+  OMPI_ALLOW_RUN_AS_ROOT: 1
+  OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
   
 .test_template: &test_definition
   rules:
@@ -11,7 +13,7 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-h5py python3-numba python3-mpi4py git
+    - apt-get update && apt-get install -y pylint3 python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
     - $linter -E Run.py default_variables.py py_alf.py
@@ -29,7 +31,7 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-h5py python3-numba python3-mpi4py
+    - apt-get update && apt-get install -y pylint3 python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py
     - pylint Run.py default_variables.py py_alf.py
     
 .test_branch_template: &test_branch_definition
@@ -37,7 +39,7 @@ variables:
     - if: '$BRANCH_T'
       when: always
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-h5py python3-numba python3-mpi4py git
+    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - cd Scripts

@@ -16,9 +16,10 @@ import numpy as np
 from py_alf import Simulation
 
 
-def test_branch(alf_dir, sim_dict, branch_R, branch_T,
+def test_branch(alf_dir, pars, branch_R, branch_T,
                 machine="DEVELOPMENT", mpi=False, n_mpi=4):
-    ham_name = sim_dict.pop("ham_name", sim_dict.get("Model"))
+    ham_name = pars[0]
+    sim_dict = pars[1]
     sim_R = Simulation(ham_name, sim_dict, alf_dir,
                        machine=machine,
                        branch=branch_R,
@@ -40,58 +41,46 @@ def test_branch(alf_dir, sim_dict, branch_R, branch_T,
     sim_T.analysis()
     obs_T = sim_T.get_obs()
 
-    test_all = True
+    # test_all = obs_R.equals(obs_T)
     with open('{}.txt'.format(sim_R.sim_dir), 'w') as f:
+        test_all = True
         for name in obs_R:
-            if name.endswith('_scalJ'):
-                x_R = obs_R[name]['obs']
-                x_T = obs_T[name]['obs']
-                test = np.allclose(x_R, x_T)
-                f.write('{}: {}\n'.format(name, test))
-                f.write('    reference: {}\n'.format(x_R))
-                f.write('         test: {}\n'.format(x_T))
-                if not test:
-                    test_all = False
-        for name in obs_R:
-            if name.endswith('_eqJK') or name.endswith('_eqJR'):
-                test = np.allclose(obs_R[name]['dat'], obs_T[name]['dat'])
-                f.write('{}: {}\n'.format(name, test))
-                if not test:
-                    test_all = False
+            test = True
+            for dat_R, dat_T in zip(obs_R[name], obs_T[name]):
+                test = test and np.allclose(dat_R, dat_T)
+            f.write('{}: {}\n'.format(name, test))
+            test_all = test_all and test
+
+    # with open('{}.txt'.format(sim_R.sim_dir), 'w') as f:
+    #     # for name_obs, o_R in obs_R.items():
+    #     #     for name_dat, dat_R in o_R.items():
+    #     #         if isinstance(dat_R, np.ndarray):
+    #     #             dat_T = obs_T[name_obs][name_dat]
+    #     #             test = np.allclose(dat_R, dat_T)
+    #     #             test_all = test_all and test
+    #     #             f.write('{}: {}\n'.format(name_obs, test))
+    #     #             f.write('    reference: {}\n'.format(x_R))
+    #     #             f.write('         test: {}\n'.format(x_T))
+    #     for name in obs_R:
+    #         if name.endswith('_scalJ'):
+    #             x_R = obs_R[name]['obs']
+    #             x_T = obs_T[name]['obs']
+    #             test = np.allclose(x_R, x_T)
+    #             f.write('{}: {}\n'.format(name, test))
+    #             f.write('    reference: {}\n'.format(x_R))
+    #             f.write('         test: {}\n'.format(x_T))
+    #             test_all = test_all and test
+    #         if name.endswith('_eqJK') or name.endswith('_eqJR'):
+    #             test = np.allclose(obs_R[name]['dat'], obs_T[name]['dat'])
+    #             f.write('{}: {}\n'.format(name, test))
+    #             test_all = test_all and test
     return test_all
 
 
 sim_pars = {
-    "Langevin": 
-        {"ham_name": "Hubbard", 
-         "Model" : "Hubbard",
-         "Lattice_type": "N_leg_ladder", 
-         "L1": 1 , "L2": 6, 
-         "Beta": 4.0, 
-         "Nsweep": 50, 
-         "NBin": 10,
-         "Ltau": 0,
-         "Dtau": 0.1,
-         "Continuous" : True, 
-         "Langevin" : True,
-         "Delta_t_Langevin_HMC" :  0.05, 
-         },
-    "Langevin_1":
-        {"ham_name": "Hubbard",
-         "Model" : "Hubbard",
-         "Lattice_type": "N_leg_ladder",
-         "L1": 1 , "L2": 6,
-         "Beta": 4.0,
-         "Nsweep": 50,
-         "NBin": 10,
-         "Ltau": 1,
-         "Dtau": 0.1,
-         "Continuous" : True,
-         "Langevin" : True,
-         "Delta_t_Langevin_HMC" :  0.05,
-         },
-    "Hubbard_N_Leg_Ladder": {
-        "ham_name": "Hubbard",
+    "Hubbard_N_Leg_Ladder_temper": [
+        "Hubbard",
+        [{
         "Model": "Hubbard",
         "Lattice_type": "N_leg_ladder",
         "L1": 6, "L2": 2,
@@ -108,8 +97,75 @@ sim_pars = {
         "Ltau": 1,
         "Mz": False,
         },
-    "Hubbard_PAM": {
-        "ham_name": "Hubbard",
+        {
+        "Model": "Hubbard",
+        "Lattice_type": "N_leg_ladder",
+        "L1": 6, "L2": 2,
+        "Beta": 10.0,
+        "Projector": False,
+        "Theta": 10.0,
+        "Ham_U": 4.0,
+        "Ham_U2": 0.0,
+        "Ham_T": 1.0,
+        "Ham_T2": 0.0,
+        "ham_Tperp": 0.0,
+        "Nsweep": 20,
+        "NBin": 5,
+        "Ltau": 1,
+        "Mz": False,
+        }]],
+    "Langevin": [
+        "Hubbard",
+        {
+         "Model" : "Hubbard",
+         "Lattice_type": "N_leg_ladder",
+         "L1": 1 , "L2": 6,
+         "Beta": 4.0,
+         "Nsweep": 50,
+         "NBin": 10,
+         "Ltau": 0,
+         "Dtau": 0.1,
+         "Continuous" : True,
+         "Langevin" : True,
+         "Delta_t_Langevin_HMC" :  0.05,
+         }],
+    "Langevin_1": [
+        "Hubbard",
+        {
+         "Model" : "Hubbard",
+         "Lattice_type": "N_leg_ladder",
+         "L1": 1 , "L2": 6,
+         "Beta": 4.0,
+         "Nsweep": 50,
+         "NBin": 10,
+         "Ltau": 1,
+         "Dtau": 0.1,
+         "Continuous" : True,
+         "Langevin" : True,
+         "Delta_t_Langevin_HMC" :  0.05,
+         }],
+    "Hubbard_N_Leg_Ladder": [
+        "Hubbard",
+        {
+        "Model": "Hubbard",
+        "Lattice_type": "N_leg_ladder",
+        "L1": 6, "L2": 2,
+        "Beta": 10.0,
+        "Projector": False,
+        "Theta": 10.0,
+        "Ham_U": 4.0,
+        "Ham_U2": 0.0,
+        "Ham_T": 1.0,
+        "Ham_T2": 0.0,
+        "ham_Tperp": 0.0,
+        "Nsweep": 20,
+        "NBin": 5,
+        "Ltau": 1,
+        "Mz": False,
+        }],
+    "Hubbard_PAM": [
+        "Hubbard",
+        {
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
         "L1": 4, "L2": 4,
@@ -125,9 +181,10 @@ sim_pars = {
         "NBin": 5,
         "Ltau": 1,
         "Mz": True,
-        },
-    "Hubbard_PAM_1": {
-        "ham_name": "Hubbard",
+        }],
+    "Hubbard_PAM_1": [
+        "Hubbard",
+        {
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
         "L1": 4, "L2": 4,
@@ -144,9 +201,10 @@ sim_pars = {
         "Ltau": 1,
         "N_Phi": 1,
         "Mz": False,
-        },
-    "Hubbard_Bilayer": {
-        "ham_name": "Hubbard",
+        }],
+    "Hubbard_Bilayer": [
+        "Hubbard",
+        {
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
         "L1": 4, "L2": 4,
@@ -163,9 +221,10 @@ sim_pars = {
         "Ltau": 1,
         "N_Phi": 1,
         "Mz": False,
-        },
-    "Hubbard_PAM_2": {
-        "ham_name": "Hubbard",
+        }],
+    "Hubbard_PAM_2": [
+        "Hubbard",
+        {
         "Model": "Hubbard",
         "Lattice_type": "Bilayer_square",
         "L1": 4, "L2": 4,
@@ -184,9 +243,10 @@ sim_pars = {
         "N_Phi": 1,
         "N_SUN": 4,
         "Mz": False,
-        },
-    "Hubbard_Plain_Vanilla": {
-        "ham_name": "Hubbard_Plain_Vanilla",
+        }],
+    "Hubbard_Plain_Vanilla": [
+        "Hubbard_Plain_Vanilla",
+        {
         "Model": "Hubbard_Plain_Vanilla",
         "Lattice_type": "Square",
         "L1": 4, "L2": 4,
@@ -196,9 +256,10 @@ sim_pars = {
         "Ltau": 1,
         "Dtau": 0.05,
         "Projector": True,
-        },
-    "Kondo": {
-        "ham_name": "Kondo",
+        }],
+    "Kondo": [
+        "Kondo",
+        {
         "Model": "Kondo",
         "Lattice_type": "Bilayer_square",
         "L1": 4, "L2": 4,
@@ -207,9 +268,10 @@ sim_pars = {
         "Nsweep": 20,
         "NBin": 5,
         "Ltau": 1
-        },
-    "LRC": {
-        "ham_name": "LRC",
+        }],
+    "LRC": [
+        "LRC",
+        {
         "Model": "LRC",
         "Lattice_type": "Square",
         "L1": 4, "L2": 4,
@@ -221,9 +283,10 @@ sim_pars = {
         "ham_U": 4.0,
         "ham_alpha": 0.0,
         "Percent_change": 0.1
-        },
-    "tV": {
-        "ham_name": "tV",
+        }],
+    "tV": [
+        "tV",
+        {
         "Model": "tV",
         "Lattice_type": "Square",
         "L1": 4, "L2": 4,
@@ -241,9 +304,10 @@ sim_pars = {
         "Ltau": 0,
         "N_SUN": 1,
         "Global_tau_moves": False,
-        },
-    "Z2_Matter": {
-        "ham_name": "Z2_Matter",
+        }],
+    "Z2_Matter": [
+        "Z2_Matter",
+        {
         "Model": "Z2_Matter",
         "Lattice_type": "Square",
         "L1": 4, "L2": 4,
@@ -262,7 +326,7 @@ sim_pars = {
         "Global_tau_moves": True,
         "Propose_S0": False,
         "Nwrap": 10,
-        },
+        }],
     }
 
 
