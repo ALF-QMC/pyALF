@@ -1,3 +1,4 @@
+"""Analysis routines."""
 # pylint: disable=invalid-name
 # pylint: disable=too-many-branches
 # pylint: disable=missing-function-docstring
@@ -43,7 +44,6 @@ def symmetrize(latt, syms, dat):
 class Parameters:
     """Object representing the "parameters" file."""
     def __init__(self, directory, obs_name=None):
-        import f90nml
         self.directory = directory
         self.filename = os.path.join(directory, 'parameters')
         self._nml = f90nml.read(self.filename)
@@ -58,7 +58,7 @@ class Parameters:
     def get_parameter(self, parameter_name):
         try:
             return self._nml[self.obs_name][parameter_name]
-        except Exception:
+        except KeyError:
             return self._nml['var_errors'][parameter_name]
 
     def N_skip(self):
@@ -70,7 +70,7 @@ class Parameters:
     def set_parameter(self, parameter_name, parameter):
         try:
             temp = self._nml[self.obs_name]
-        except Exception:
+        except KeyError:
             temp = {}
 
         temp[parameter_name] = parameter
@@ -127,8 +127,7 @@ def error(jacks, imag=False):
         m_i = np.mean(jacks.imag, axis=0)
         e_i = np.sqrt(np.var(jacks.imag, axis=0) * N)
         return m_r, e_r, m_i, e_i
-    else:
-        return m_r, e_r
+    return m_r, e_r
 
 
 class ReadObs:
@@ -157,26 +156,24 @@ class ReadObs:
     def all(self):
         if self.obs_name.endswith('_scal'):
             return self.J_obs, self.J_sign, self.N_obs
-        elif self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
+        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
             return (self.J_obs, self.J_back, self.J_sign, self.N_orb,
                     self.N_tau, self.dtau, self.latt)
-        elif self.obs_name.endswith('_hist'):
+        if self.obs_name.endswith('_hist'):
             return (self.J_obs, self.J_sign, self.J_above, self.J_below,
                     self.N_classes, self.upper, self.lower)
-        else:
-            raise Exception('Error in ReadObs.all')
+        raise Exception('Error in ReadObs.all')
 
     def slice(self, n):
         if self.obs_name.endswith('_scal'):
             return self.J_obs[n], self.J_sign[n], self.N_obs
-        elif self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
+        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
             return (self.J_obs[n], self.J_back[n], self.J_sign[n], self.N_orb,
                     self.N_tau, self.dtau, self.latt)
-        elif self.obs_name.endswith('_hist'):
+        if self.obs_name.endswith('_hist'):
             return (self.J_obs[n], self.J_sign[n], self.J_above[n],
                     self.J_below[n], self.N_classes, self.upper, self.lower)
-        else:
-            raise Exception('Error in ReadObs.slice')
+        raise Exception('Error in ReadObs.slice')
 
     def jack(self, N_rebin):
         par = Parameters(self.directory)
@@ -186,20 +183,19 @@ class ReadObs:
             return (J_obs_temp,
                     jack(self.J_sign, par, N_rebin=N_rebin),
                     N*[self.N_obs])
-        elif self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
+        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
             return (J_obs_temp,
                     jack(self.J_back, par, N_rebin=N_rebin),
                     jack(self.J_sign, par, N_rebin=N_rebin),
                     N*[self.N_orb], N*[self.N_tau], N*[self.dtau],
                     N*[self.latt])
-        elif self.obs_name.endswith('_hist'):
+        if self.obs_name.endswith('_hist'):
             return (J_obs_temp,
                     jack(self.J_sign, par, N_rebin=N_rebin),
                     jack(self.J_above, par, N_rebin=N_rebin),
                     jack(self.J_below, par, N_rebin=N_rebin),
                     N*[self.N_classes], N*[self.upper], N*[self.lower])
-        else:
-            raise Exception('Error in ReadObs.jack')
+        raise Exception('Error in ReadObs.jack')
 
 
 def read_scal(directory, obs_name, bare_bins=False):
