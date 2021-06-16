@@ -11,11 +11,23 @@ import pandas as pd
 
 from alf_ana.lattice import Lattice
 
+try:
+    import f90nml
+except ImportError:
+    print("Package f90nml not found, trying to install via pip.")
+    import subprocess
+    import sys
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "f90nml"])
+    except subprocess.CalledProcessError as f90nml_not_installed:
+        raise Exception("Failed to install f90nml, consider retrieving it " + \
+            "manually from https://github.com/marshallward/f90nml") \
+            from f90nml_not_installed
 
 def symmetrize(latt, syms, dat):
     """Symmetrizes a dataset, where syms is the list of symmetry operations,
     including the identity, and dat is the data. The symmetrization is with
-    respect to the last index of dat
+    respect to the last index of dat.
     """
     N = dat.shape[-1]
     N_sym = len(syms)
@@ -29,21 +41,16 @@ def symmetrize(latt, syms, dat):
 
 
 class Parameters:
-    """Object representing the "parameters" file """
-
+    """Object representing the "parameters" file."""
     def __init__(self, directory, obs_name=None):
-        try:
-            import f90nml
-            self.directory = directory
-            self.filename = os.path.join(directory, 'parameters')
-            self._nml = f90nml.read(self.filename)
-            if obs_name is None:
-                self.obs_name = 'var_errors'
-            else:
-                self.obs_name = obs_name.lower()
-        except ImportError:
-            Exception(
-                'Loading of f90nml failed, no reading of parameters file.')
+        import f90nml
+        self.directory = directory
+        self.filename = os.path.join(directory, 'parameters')
+        self._nml = f90nml.read(self.filename)
+        if obs_name is None:
+            self.obs_name = 'var_errors'
+        else:
+            self.obs_name = obs_name.lower()
 
     def write_nml(self):
         self._nml.write(self.filename, force=True)
