@@ -66,7 +66,9 @@ class Simulation:
         stab    -- Which version of stabilisation to employ
                    Possible values: STAB1, STAB2, STAB3, LOG
                    TODO: Add some details
-        machine and stab are not case sensitive.
+          machine and stab are not case sensitive.
+        use_hdf5-- Whether to compile ALF with HDF5 (default: True)
+                   Full postprocessing support only exists with HDF5.
         """
         self.ham_name = ham_name
         self.sim_dict = sim_dict
@@ -81,6 +83,7 @@ class Simulation:
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
         stab = kwargs.pop('stab', '').upper()
         machine = kwargs.pop('machine', 'GNU').upper()
+        self.use_hdf5 = kwargs.pop('use_hdf5', True)
         if kwargs:
             raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
@@ -124,6 +127,9 @@ class Simulation:
         if self.tempering:
             self.config += ' TEMPERING'
 
+        if self.use_hdf5:
+            self.config += ' HDF5'
+
     def compile(self):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
         compile_alf(self.alf_dir, self.branch, self.config)
@@ -160,8 +166,12 @@ class Simulation:
                 raise Exception('Error while running {}.'.format(executable)) \
                     from ALF_crash
 
-    def analysis(self, python_version=False):
-        """Performs default analysis on Monte Carlo data."""
+    def analysis(self, python_version=True):
+        """Performs default analysis on Monte Carlo data.
+        
+        The non-python version is legacy and does not support all postprocessing
+        features.
+        """
         if self.tempering:
             directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
                            for i in range(len(self.sim_dict))]
@@ -174,11 +184,11 @@ class Simulation:
             else:
                 analysis(self.alf_dir, directory)
 
-    def get_obs(self, names=None, python_version=False):
+    def get_obs(self, python_version=True):
         """Returns dictionary containing anaysis results from observables.
-
-        Currently only scalar and equal time correlators.
-        If names is None: gets all observables, else the ones listed in names.
+        
+        The non-python version is legacy and does not support all postprocessing
+        features, e.g. time-displaced observables.
         """
         if self.tempering:
             directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
@@ -190,7 +200,7 @@ class Simulation:
 
         dicts = {}
         for directory in directories:
-            dicts[directory] = get_obs(directory, names)
+            dicts[directory] = get_obs(directory, names=None)
         return pd.DataFrame(dicts).transpose()
 
 

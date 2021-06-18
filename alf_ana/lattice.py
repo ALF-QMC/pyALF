@@ -278,8 +278,8 @@ def _init1(L1, L2, a1, a2):
     # Compute the Reciprocal Lattice vectors.
     mat = np.array([[a1[0], a1[1]], [a2[0], a2[1]]])
     mat2 = 2. * np.pi * np.linalg.inv(mat)
-    BZ1 = mat2[0]
-    BZ2 = mat2[1]
+    BZ1 = np.copy(mat2[0])
+    BZ2 = np.copy(mat2[1])
 
     # K-space Quantization  from periodicity in L1_p and L2_p
     X = 2. * np.pi / (np.dot(BZ1, L1) * np.dot(BZ2, L2)
