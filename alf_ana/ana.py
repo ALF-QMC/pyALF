@@ -510,6 +510,9 @@ def ana(directory, sym_spec=None, custom_obs=None, do_tau=True):
             pass
 
         with h5py.File(os.path.join(directory, 'data.h5'), "r") as f:
+            params = {}
+            for name in f['parameters']:
+                params.update(f['parameters'][name].attrs)
             list_obs = []
             list_scal = []
             list_hist = []
@@ -561,7 +564,7 @@ def ana(directory, sym_spec=None, custom_obs=None, do_tau=True):
     if 'res' not in os.listdir(directory):
         os.mkdir(os.path.join(directory, 'res'))
 
-    dic = {}
+    dic = params
 
     if custom_obs is not None:
         print("Custom observables:")

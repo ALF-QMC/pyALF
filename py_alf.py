@@ -128,7 +128,7 @@ class Simulation:
             self.config += ' TEMPERING'
 
         if self.use_hdf5:
-            self.config += ' HDF5'
+            self.config += ' HDF5 NO-INTERACTIVE'
 
     def compile(self):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
