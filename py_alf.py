@@ -16,10 +16,10 @@ import numpy as np
 import pandas as pd
 
 from default_variables import default_params, params_list
-from alf_ana.analysis import analysis
-from alf_ana.ana import load_res
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
+from alf_ana.analysis import analysis
+from alf_ana.ana import load_res
 
 
 class cd:
