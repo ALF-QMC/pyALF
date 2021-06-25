@@ -107,10 +107,10 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
                 for i in range(err.shape[1]):
                     ax.plot(range(1, Nmax+1), err[:, i, 1])
 
-                    with open('{}_{}_err'.format(obs_name, i), 'w') as f2:
-                        for l in range(Nmax):
-                            f2.write('{} {} {}\n'.format(
-                                l+1, err[l, i, 0], err[l, i, 1]))
+                    # with open('{}_{}_err'.format(obs_name, i), 'w') as f2:
+                    #     for l in range(Nmax):
+                    #         f2.write('{} {} {}\n'.format(
+                    #             l+1, err[l, i, 0], err[l, i, 1]))
                 ax.set_ylim(err[:, :, 1].min(), err[:, :, 1].max())
         canvas.draw()
         N_rebin_str.set(str(par.N_rebin()))
