@@ -16,7 +16,8 @@ import numpy as np
 import pandas as pd
 
 from default_variables import default_params, params_list
-from alf_ana.ana import ana, load_res
+from alf_ana.analysis import analysis
+from alf_ana.ana import load_res
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
 
@@ -131,7 +132,7 @@ class Simulation:
 
         if self.use_hdf5:
             self.config += ' HDF5 NO-INTERACTIVE'
-        
+
         self.custom_obs = {}
 
     def compile(self):
@@ -183,31 +184,32 @@ class Simulation:
         """Plot bins to determine n_skip.
         names: Names of Observables to check
         """
-        check_warmup(self.get_directories(), names, custom_obs={})
+        check_warmup(self.get_directories(), names, custom_obs=self.custom_obs)
 
     def check_rebin(self, names):
         """Plot error vs n_rebin to control autocorrelation.
         names: Names of Observables to check
         """
-        check_rebin(self.get_directories(), names, custom_obs={})
+        check_rebin(self.get_directories(), names, custom_obs=self.custom_obs)
 
-    def analysis(self, python_version=True):
+    def analysis(self, python_version=True, symmetry=None):
         """Performs default analysis on Monte Carlo data.
 
-        The non-python version is legacy and does not support all postprocessing
-        features.
+        The non-python version is legacy and does not support all
+        postprocessing features.
         """
         for directory in self.get_directories():
             if python_version:
-                ana(directory)
+                analysis(directory,
+                         custom_obs=self.custom_obs, symmetry=symmetry)
             else:
-                analysis(self.alf_dir, directory)
+                analysis_fortran(self.alf_dir, directory)
 
     def get_obs(self, python_version=True):
         """Returns dictionary containing anaysis results from observables.
-        
-        The non-python version is legacy and does not support all postprocessing
-        features, e.g. time-displaced observables.
+
+        The non-python version is legacy and does not support all
+        postprocessing features, e.g. time-displaced observables.
         """
         if python_version:
             return load_res(self.get_directories())
@@ -385,9 +387,10 @@ def out_to_in(verbose=False):
             os.replace(name, name2)
 
 
-def analysis(alf_dir, sim_dir='.'):
-    """Perform the default analysis on all files ending in _scal, _eq or _tau
-    in directory sim_dir.
+def analysis_fortran(alf_dir, sim_dir='.'):
+    """Perform the default analysis unsing ALFs own analysis routines
+    on all files ending in _scal, _eq or _tau in directory sim_dir. Not fully
+    supported
     """
     env = os.environ.copy()
     env['OMP_NUM_THREADS'] = '1'

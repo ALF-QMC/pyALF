@@ -55,6 +55,9 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
 
     def _next():
         n_dir = n_dir_var.get() + 1
+        if n_dir == len(directories):
+            print("At end of list, click 'Finish' to exit.")
+            return
         n_dir_var.set(n_dir)
         directory_var.set(directories[n_dir])
         root.wm_title('{} N_rebin vs error'.format(directory_var.get()))
@@ -68,10 +71,9 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
             vert[n] = ax.axvline(x=par.N_rebin(), color="red")
             if obs_name in custom_obs:
                 print('custom', obs_name)
-                func = custom_obs[obs_name][0]
-                o_in = custom_obs[obs_name][1]
-                dict = custom_obs[obs_name][2]
-                bins = [ReadObs(directory_var.get(), o, bare_bins=True) for o in o_in]
+                obs_spec = custom_obs[obs_name]
+                bins = [ReadObs(directory_var.get(), o, bare_bins=True)
+                        for o in obs_spec['needs']]
 
                 N_bins1 = bins[0].N_bins - par.N_skip()
                 Nmax = min(N_bins1 // 3, Nmax0)
@@ -84,7 +86,8 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
                     J = np.empty(N_bins, dtype=jacks[0].dtype)
                     print(N_bins)
                     for i in range(N_bins):
-                        J[i] = func(*[x[i] for x in jacks], **dict)
+                        J[i] = obs_spec['function'](*[x[i] for x in jacks],
+                                                    **obs_spec['kwargs'])
 
                     m, e = error(J)
                     err[N-1] = e
@@ -119,7 +122,7 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
 
     nskip_frame = tk.Frame(frame)
     nskip_frame.pack(side=tk.LEFT)
-    nskip_label = tk.Label(nskip_frame, text='N_skip:')
+    nskip_label = tk.Label(nskip_frame, text='N_rebin:')
     nskip_label.pack(side=tk.LEFT)
     nskip_entry = tk.Entry(nskip_frame, width=5, textvariable=N_rebin_str)
     nskip_entry.pack()

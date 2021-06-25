@@ -63,6 +63,9 @@ def check_warmup(directories, names, custom_obs={}):
 
     def _next():
         n_dir = n_dir_var.get() + 1
+        if n_dir == len(directories):
+            print("At end of list, click 'Finish' to exit.")
+            return
         n_dir_var.set(n_dir)
         directory_var.set(directories[n_dir])
         root.wm_title('{} warmup'.format(directory_var.get()))
@@ -129,17 +132,17 @@ def get_bins(directory, names, custom_obs, res):
     for n, obs_name in enumerate(names):
         if obs_name in custom_obs:
             print('custom', obs_name)
-            func = custom_obs[obs_name][0]
-            o_in = custom_obs[obs_name][1]
-            dict = custom_obs[obs_name][2]
+            obs_spec = custom_obs[obs_name]
 
-            Bins = [ReadObs(directory, o, bare_bins=True) for o in o_in]
+            Bins = [ReadObs(directory, o, bare_bins=True)
+                    for o in obs_spec['needs']]
             N_bins = Bins[0].N_bins
 
             bins = np.empty(N_bins)
             for i in range(N_bins):
-                bins[i] = func(*[x for b in Bins for x in b.slice(i)],
-                               **dict).real
+                bins[i] = obs_spec['function'](
+                    *[x for b in Bins for x in b.slice(i)],
+                    **obs_spec['kwargs']).real
         else:
             print(obs_name)
             bins_c, sign, N_obs = read_scal(directory, obs_name,

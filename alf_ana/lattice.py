@@ -126,13 +126,33 @@ class Lattice:
         R = np.array(((c, -s), (s, c)))
         return self.k_to_n(np.matmul(R, self.k[n]))
 
-    def plot_r(self, ax, data, cmap):
+    def plot_r(self, data):
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        
+        fig, ax = plt.subplots(1, 1, constrained_layout=True)
+        cmap = mpl.cm.ScalarMappable(
+            mpl.colors.Normalize(
+                vmin=data.min(), vmax=data.max()),
+            mpl.cm.Greys)
+        
         _plot_2d(self.r, self.a1, self.a2, ax, data, cmap)
+        fig.colorbar(cmap, ax=ax, shrink=0.6)
         ax.set_xlabel(r'$r_x$')
         ax.set_ylabel(r'$r_y$')
 
-    def plot_k(self, ax, data, cmap):
+    def plot_k(self, data):
+        import matplotlib.pyplot as plt
+        import matplotlib as mpl
+        
+        fig, ax = plt.subplots(1, 1, constrained_layout=True)
+        cmap = mpl.cm.ScalarMappable(
+            mpl.colors.Normalize(
+                vmin=data.min(), vmax=data.max()),
+            mpl.cm.Greys)
+        
         _plot_2d(self.k, self.b1, self.b2, ax, data, cmap)
+        fig.colorbar(cmap, ax=ax, shrink=0.6)
         ax.set_xlabel(r'$k_x$')
         ax.set_ylabel(r'$k_y$')
 
