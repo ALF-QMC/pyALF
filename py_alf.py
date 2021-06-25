@@ -17,6 +17,8 @@ import pandas as pd
 
 from default_variables import default_params, params_list
 from alf_ana.ana import ana, load_res
+from alf_ana.check_warmup import check_warmup
+from alf_ana.check_rebin import check_rebin
 
 
 class cd:
@@ -129,6 +131,8 @@ class Simulation:
 
         if self.use_hdf5:
             self.config += ' HDF5 NO-INTERACTIVE'
+        
+        self.custom_obs = {}
 
     def compile(self):
         """Compiles ALF. Clones a new repository if alf_dir does not exist."""
@@ -166,19 +170,34 @@ class Simulation:
                 raise Exception('Error while running {}.'.format(executable)) \
                     from ALF_crash
 
-    def analysis(self, python_version=True):
-        """Performs default analysis on Monte Carlo data.
-        
-        The non-python version is legacy and does not support all postprocessing
-        features.
-        """
+    def get_directories(self):
+        """Return list of directories connected to this simulation."""
         if self.tempering:
             directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
                            for i in range(len(self.sim_dict))]
         else:
             directories = [self.sim_dir]
+        return directories
 
-        for directory in directories:
+    def check_warmup(self, names):
+        """Plot bins to determine n_skip.
+        names: Names of Observables to check
+        """
+        check_warmup(self.get_directories(), names, custom_obs={})
+
+    def check_rebin(self, names):
+        """Plot error vs n_rebin to control autocorrelation.
+        names: Names of Observables to check
+        """
+        check_rebin(self.get_directories(), names, custom_obs={})
+
+    def analysis(self, python_version=True):
+        """Performs default analysis on Monte Carlo data.
+
+        The non-python version is legacy and does not support all postprocessing
+        features.
+        """
+        for directory in self.get_directories():
             if python_version:
                 ana(directory)
             else:
@@ -190,16 +209,11 @@ class Simulation:
         The non-python version is legacy and does not support all postprocessing
         features, e.g. time-displaced observables.
         """
-        if self.tempering:
-            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
-                           for i in range(len(self.sim_dict))]
-        else:
-            directories = [self.sim_dir]
         if python_version:
-            return load_res(directories)
+            return load_res(self.get_directories())
 
         dicts = {}
-        for directory in directories:
+        for directory in self.get_directories():
             dicts[directory] = get_obs(directory, names=None)
         return pd.DataFrame(dicts).transpose()
 
