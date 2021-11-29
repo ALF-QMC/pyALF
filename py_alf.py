@@ -4,7 +4,7 @@
 # pylint: disable=too-many-instance-attributes
 
 __author__ = "Jonas Schwab"
-__copyright__ = "Copyright 2020, The ALF Project"
+__copyright__ = "Copyright 2020-2021, The ALF Project"
 __license__ = "GPL"
 
 import os
@@ -62,16 +62,15 @@ class Simulation:
         n_mpi   -- Number of MPI processes
         n_omp   -- Number of OpenMP threads per process (default: 1)
         mpiexec -- Command used for starting a MPI run (default: "mpiexec")
-        machine -- Possible values: GNU, INTEL, PGI, JUWELS, SUPERMUC,
-                                    SUPERMUC-NG, DEVELOPMENT, FAKHERSMAC
+        machine -- Possible values: GNU, INTEL, PGI, SUPERMUC-NG, JUWELS
                    default: GNU
-                   TODO: Add some details
         stab    -- Which version of stabilisation to employ
                    Possible values: STAB1, STAB2, STAB3, LOG
-                   TODO: Add some details
-          machine and stab are not case sensitive.
-        use_hdf5-- Whether to compile ALF with HDF5 (default: True)
+        devel   -- Compile with additional flags for development and debugging
+                   default: False
+        hdf5    -- Whether to compile ALF with HDF5 (default: True)
                    Full postprocessing support only exists with HDF5.
+        machine and stab are not case sensitive.
         """
         self.ham_name = ham_name
         self.sim_dict = sim_dict
@@ -86,7 +85,8 @@ class Simulation:
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
         stab = kwargs.pop('stab', '').upper()
         machine = kwargs.pop('machine', 'GNU').upper()
-        self.use_hdf5 = kwargs.pop('use_hdf5', True)
+        self.devel = kwargs.pop('devel', False)
+        self.hdf5 = kwargs.pop('hdf5', True)
         if kwargs:
             raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
@@ -113,8 +113,7 @@ class Simulation:
         if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
 
-        if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC',
-                           'SUPERMUC-NG', 'DEVELOPMENT', 'FAKHERSMAC']:
+        if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC-NG']:
             raise Exception('Illegal value machine={}'.format(machine))
 
         if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
@@ -130,8 +129,13 @@ class Simulation:
         if self.tempering:
             self.config += ' TEMPERING'
 
-        if self.use_hdf5:
-            self.config += ' HDF5 NO-INTERACTIVE'
+        if self.devel:
+            self.config += ' DEVEL'
+
+        if self.hdf5:
+            self.config += ' HDF5'
+
+        self.config += ' NO-INTERACTIVE'
 
         self.custom_obs = {}
 
@@ -203,7 +207,7 @@ class Simulation:
                 analysis(directory,
                          custom_obs=self.custom_obs, symmetry=symmetry)
             else:
-                analysis_fortran(self.alf_dir, directory)
+                analysis_fortran(self.alf_dir, directory, hdf5=self.hdf5)
 
     def get_obs(self, python_version=True):
         """Returns dictionary containing anaysis results from observables.
@@ -387,7 +391,7 @@ def out_to_in(verbose=False):
             os.replace(name, name2)
 
 
-def analysis_fortran(alf_dir, sim_dir='.'):
+def analysis_fortran(alf_dir, sim_dir='.', hdf5=False):
     """Perform the default analysis unsing ALFs own analysis routines
     on all files ending in _scal, _eq or _tau in directory sim_dir. Not fully
     supported
@@ -395,23 +399,27 @@ def analysis_fortran(alf_dir, sim_dir='.'):
     env = os.environ.copy()
     env['OMP_NUM_THREADS'] = '1'
     with cd(sim_dir):
-        for name in os.listdir():
-            if name.endswith('_scal'):
-                print('Analysing {}'.format(name))
-                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
-                subprocess.run([executable, name], check=True, env=env)
+        if hdf5:
+            executable = os.path.join(alf_dir, 'Analysis', 'ana_hdf5.out')
+            subprocess.run([executable], check=True, env=env)
+        else:
+            for name in os.listdir():
+                if name.endswith('_scal'):
+                    print('Analysing {}'.format(name))
+                    executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                    subprocess.run([executable, name], check=True, env=env)
 
-        for name in os.listdir():
-            if name.endswith('_eq'):
-                print('Analysing {}'.format(name))
-                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
-                subprocess.run([executable, name], check=True, env=env)
+            for name in os.listdir():
+                if name.endswith('_eq'):
+                    print('Analysing {}'.format(name))
+                    executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                    subprocess.run([executable, name], check=True, env=env)
 
-        for name in os.listdir():
-            if name.endswith('_tau'):
-                print('Analysing {}'.format(name))
-                executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
-                subprocess.run([executable, name], check=True, env=env)
+            for name in os.listdir():
+                if name.endswith('_tau'):
+                    print('Analysing {}'.format(name))
+                    executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
+                    subprocess.run([executable, name], check=True, env=env)
 
 
 def get_obs(sim_dir, names=None):
