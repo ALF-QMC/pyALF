@@ -332,7 +332,7 @@ def _init1(L1, L2, a1, a2):
                     in_latt = False
             if in_latt:
                 invlistr[i1, i2] = N
-                N = N + 1
+                N += 1
 
     listr = np.empty((N, ndim), dtype=np.int32)
     nc = 0

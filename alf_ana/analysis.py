@@ -181,16 +181,16 @@ def analysis(directory, symmetry=None, custom_obs=None, do_tau=True):
         print("Time displaced observables:")
         for obs_name in list_tau:
             print(obs_name)
-            sign, m_k, e_k, m_r0, e_r0, dtau, latt = \
+            sign, m_k, e_k, m_r, e_r, dtau, latt = \
                 ana_tau(directory, obs_name, sym=symmetry)
 
             write_res_tau(directory, obs_name,
-                          m_k, e_k, m_r0, e_r0, dtau, latt)
+                          m_k, e_k, m_r, e_r, dtau, latt)
 
             dic[obs_name+'K'] = m_k
             dic[obs_name+'K_err'] = e_k
-            dic[obs_name+'R0'] = m_r0
-            dic[obs_name+'R0_err'] = e_r0
+            dic[obs_name+'R'] = m_r
+            dic[obs_name+'R_err'] = e_r
             dic[obs_name+'_lattice'] = {
                 'L1': latt.L1,
                 'L2': latt.L2,

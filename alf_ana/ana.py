@@ -19,11 +19,13 @@ except ImportError:
     import subprocess
     import sys
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "f90nml"])
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "f90nml"])
     except subprocess.CalledProcessError as f90nml_not_installed:
-        raise Exception("Failed to install f90nml, consider retrieving it " + \
-            "manually from https://github.com/marshallward/f90nml") \
+        raise Exception("Failed to install f90nml, consider retrieving it " +
+                    "manually from https://github.com/marshallward/f90nml") \
             from f90nml_not_installed
+
 
 def symmetrize(latt, syms, dat):
     """Symmetrizes a dataset, where syms is the list of symmetry operations,
@@ -43,6 +45,7 @@ def symmetrize(latt, syms, dat):
 
 class Parameters:
     """Object representing the "parameters" file."""
+
     def __init__(self, directory, obs_name=None):
         self.directory = directory
         self.filename = os.path.join(directory, 'parameters')
@@ -482,14 +485,11 @@ def ana_tau(filename, obs_name=None, sym=None):
 
     m_K, e_K = error(J)
 
-    # Fourier transform, r=0
-    J_R0 = J.sum(axis=2) / latt.N
-    m_R0, e_R0 = error(J_R0)
+    # Fourier transform
+    J_R = latt.fourier_K_to_R(J)
+    m_R, e_R = error(J_R)
 
-    return sign, m_K, e_K, m_R0, e_R0, dtau, latt
-
-
-
+    return sign, m_K, e_K, m_R, e_R, dtau, latt
 
 
 def write_res_eq(directory, obs_name,
@@ -559,7 +559,7 @@ def write_res_eq(directory, obs_name,
         )
 
 
-def write_res_tau(directory, obs_name, m_k, e_k, m_r0, e_r0, dtau, latt):
+def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
     N_tau = m_k.shape[0]
     taus = np.linspace(0., (N_tau-1)*dtau, num=N_tau)
 
@@ -574,8 +574,9 @@ def write_res_tau(directory, obs_name, m_k, e_k, m_r0, e_r0, dtau, latt):
                    fmt=['%14.7f', '%16.8f', '%16.8f']
                    )
 
+    n = latt.invlistr[0, 0]
     np.savetxt(os.path.join(directory, 'res', obs_name, 'R0'),
-               np.column_stack([taus, m_r0, e_r0]),
+               np.column_stack([taus, m_r[:, n], e_r[:, n]]),
                fmt=['%14.7f', '%16.8f', '%16.8f']
                )
 
