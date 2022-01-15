@@ -1,61 +1,12 @@
 """
-Supplies all ALF parameters with default values.
-
-Default_params -- Object containing all parameters with default values.
+Supplies generic (Hamiltonian independent) ALF parameters with default values.
 """
 
-__author__ = "Fakher F. Assaad, and Jonas Schwab"
-__copyright__ = "Copyright 2020-2022, The ALF Project"
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2022, The ALF Project"
 __license__ = "GPL"
 
-import os
-import copy
-# import pprint
 from collections import OrderedDict
-
-from parse_ham import parse
-
-
-class DefaultParams:
-    def __init__(self, alf_dir):
-        with open(os.path.join(alf_dir, 'Prog', 'Hamiltonians.list'),
-                  'r') as f:
-            ham_names = f.read().splitlines()
-
-        self.default_parameters = {}
-        for ham_name in ham_names:
-            filename = os.path.join(alf_dir, 'Prog', 'Hamiltonians',
-                                    'Hamiltonian_{}_smod.F90'.format(ham_name))
-            # print('Hamiltonian:', ham_name)
-
-            self.default_parameters[ham_name] = parse(filename)
-            # pprint.pprint(self.default_parameters[ham_name])
-
-    def get_ham_names(self):
-        """Returns list of Hamiltonians."""
-        return list(self.default_parameters)
-
-    def get_params(self, ham_name):
-        """Return full set of default parameters for hamiltonian."""
-        params = OrderedDict()
-        for nlist_name, nlist in self.default_parameters[ham_name].items():
-            params[nlist_name] = copy.deepcopy(nlist)
-        for nlist_name, nlist in _PARAMS_GENERIC.items():
-            params[nlist_name] = copy.deepcopy(nlist)
-        return params
-
-    def get_params_names(self, ham_name, include_generic=False):
-        """Return list of parameter names for hamiltonian,
-        transformed in all upper case.
-        """
-        p_list = []
-        for nlist_name, nlist in self.default_parameters[ham_name].items():
-            p_list += list(nlist)
-        if include_generic:
-            for nlist_name in _PARAMS_GENERIC:
-                p_list += list(_PARAMS_GENERIC[nlist_name])
-
-        return [i.upper() for i in p_list]
 
 
 _PARAMS_GENERIC = OrderedDict([

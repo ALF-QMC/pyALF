@@ -9,17 +9,22 @@ __license__ = "GPL"
 
 import os
 import re
+import copy
+import json
+# import pprint
 import subprocess
 from shutil import copyfile
+from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
 
-from default_variables import DefaultParams
+from default_parameters_generic import _PARAMS_GENERIC
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
 from alf_ana.analysis import analysis
 from alf_ana.ana import load_res
+from parse_ham import parse
 
 
 class cd:
@@ -72,17 +77,44 @@ class ALF_source:
                         from git_checkout_failed
 
         # Parse ALF Hamiltonians to get parameter list.
-        self.default_params = DefaultParams(self.alf_dir)
+        with open(os.path.join(alf_dir, 'Prog', 'Hamiltonians.list'),
+                  'r') as f:
+            ham_names = f.read().splitlines()
+
+        self.default_parameters = {}
+        for ham_name in ham_names:
+            filename = os.path.join(alf_dir, 'Prog', 'Hamiltonians',
+                                    'Hamiltonian_{}_smod.F90'.format(ham_name))
+            # print('Hamiltonian:', ham_name)
+
+            self.default_parameters[ham_name] = parse(filename)
+            # pprint.pprint(self.default_parameters[ham_name])
 
     def get_ham_names(self):
-        return self.default_params.get_ham_names()
+        """Returns list of Hamiltonians."""
+        return list(self.default_parameters)
 
     def get_default_params(self, ham_name):
-        return self.default_params.get_params(ham_name)
+        """Return full set of default parameters for hamiltonian."""
+        params = OrderedDict()
+        for nlist_name, nlist in self.default_parameters[ham_name].items():
+            params[nlist_name] = copy.deepcopy(nlist)
+        for nlist_name, nlist in _PARAMS_GENERIC.items():
+            params[nlist_name] = copy.deepcopy(nlist)
+        return params
 
     def get_params_names(self, ham_name, include_generic=False):
-        return self.default_params.get_params_names(
-            ham_name, include_generic=include_generic)
+        """Return list of parameter names for hamiltonian,
+        transformed in all upper case.
+        """
+        p_list = []
+        for nlist_name, nlist in self.default_parameters[ham_name].items():
+            p_list += list(nlist)
+        if include_generic:
+            for nlist_name in _PARAMS_GENERIC:
+                p_list += list(_PARAMS_GENERIC[nlist_name])
+
+        return [i.upper() for i in p_list]
 
 
 class Simulation:
@@ -382,7 +414,7 @@ def getenv(config, alf_dir='.'):
     with cd(alf_dir):
         subprocess.run(
             ['bash', '-c',
-             '. ./configure.sh {} || exit 1 && env > environment'
+             '. ./configure.sh {} > /dev/null || exit 1 && env > environment'
              .format(config)],
             check=True)
         with open('environment', 'r') as f:
