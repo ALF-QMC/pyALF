@@ -14,7 +14,7 @@ import sys
 import json
 import argparse
 from collections import OrderedDict
-from py_alf import Simulation
+from py_alf import ALF_source, Simulation
 
 
 if __name__ == "__main__":
@@ -78,18 +78,22 @@ if __name__ == "__main__":
         sim_dict = json.loads(sim, object_pairs_hook=OrderedDict)
         if do_R:
             print('do R')
-            sim_R = Simulation(ham_name_R, sim_dict, alf_dir,
-                               machine=machine,
-                               branch=branch_R, mpi=mpi, n_mpi=n_mpi)
+            sim_R = Simulation(
+                ALF_source(alf_dir=alf_dir, branch=branch_R),
+                ham_name_R, sim_dict,
+                machine=machine, mpi=mpi, n_mpi=n_mpi
+                )
             sim_R.compile()
             sim_R.run()
             sim_R.analysis()
             obs_R = sim_R.get_obs()
         if do_T:
             print('do T')
-            sim_T = Simulation(ham_name_T, sim_dict, alf_dir,
-                               machine=machine,
-                               branch=branch_T, mpi=mpi, n_mpi=n_mpi)
+            sim_T = Simulation(
+                ALF_source(alf_dir=alf_dir, branch=branch_T),
+                ham_name_T, sim_dict,
+                machine=machine, mpi=mpi, n_mpi=n_mpi
+                )
             sim_T.sim_dir = sim_T.sim_dir + '_test'
             sim_T.compile()
             sim_T.run()

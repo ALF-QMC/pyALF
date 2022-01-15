@@ -13,28 +13,28 @@ import os
 import sys
 import argparse
 import numpy as np
-from py_alf import Simulation
+from py_alf import ALF_source, Simulation
 
 
 def test_branch(alf_dir, pars, branch_R, branch_T,
                 machine="DEVELOPMENT", mpi=False, n_mpi=4):
     ham_name = pars[0]
     sim_dict = pars[1]
-    sim_R = Simulation(ham_name, sim_dict, alf_dir,
-                       machine=machine,
-                       branch=branch_R,
-                       mpi=mpi,
-                       n_mpi=n_mpi)
+    sim_R = Simulation(
+        ALF_source(alf_dir=alf_dir, branch=branch_R),
+        ham_name, sim_dict,
+        machine=machine, mpi=mpi, n_mpi=n_mpi
+        )
     sim_R.compile()
     sim_R.run()
     sim_R.analysis()
     obs_R = sim_R.get_obs()
 
-    sim_T = Simulation(ham_name, sim_dict, alf_dir,
-                       machine=machine,
-                       branch=branch_T,
-                       mpi=mpi,
-                       n_mpi=n_mpi)
+    sim_T = Simulation(
+        ALF_source(alf_dir=alf_dir, branch=branch_T),
+        ham_name, sim_dict,
+        machine=machine, mpi=mpi, n_mpi=n_mpi
+        )
     sim_T.sim_dir = sim_T.sim_dir + '_test'
     sim_T.compile()
     sim_T.run()
