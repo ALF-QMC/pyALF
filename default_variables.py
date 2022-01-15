@@ -1,210 +1,160 @@
 """
-Defines dictionaries containing all ALF parameters with default values.
+Supplies all ALF parameters with default values.
 
-default_params -- Return full set of default parameters for hamiltonian.
-params_list -- Return list of parameter names for hamiltonian.
-PARAMS_GENERIC -- contains all generic parameters independent from the choice
-                  of hamiltonian.
-PARAMS_MODEL -- contains namelists dependant on hamiltonian
-IN_HAM -- defines which elements of PARAMS_MODEL are needed by a hamiltonian
+Default_params -- Object containing all parameters with default values.
 """
-# pylint: disable = line-too-long
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
-__copyright__ = "Copyright 2020, The ALF Project"
+__copyright__ = "Copyright 2020-2022, The ALF Project"
 __license__ = "GPL"
 
+import os
 import copy
+# import pprint
 from collections import OrderedDict
 
-
-def default_params(ham_name):
-    """Return full set of default parameters for hamiltonian."""
-    params = OrderedDict()
-    for name in IN_HAM[ham_name]:
-        params[name] = copy.deepcopy(PARAMS_MODEL[name])
-    for name, namelist in PARAMS_GENERIC.items():
-        params[name] = copy.deepcopy(namelist)
-    return params
+from parse_ham import parse
 
 
-def params_list(ham_name, include_generic=False):
-    """Return list of parameter names for hamiltonian,
-    transformed in all upper case.
-    """
-    p_list = []
-    for name in IN_HAM[ham_name]:
-        p_list += list(PARAMS_MODEL[name])
-    if include_generic:
-        for nlist_name in PARAMS_GENERIC:
-            p_list += list(PARAMS_GENERIC[nlist_name])
+class DefaultParams:
+    def __init__(self, alf_dir):
+        with open(os.path.join(alf_dir, 'Prog', 'Hamiltonians.list'),
+                  'r') as f:
+            ham_names = f.read().splitlines()
 
-    return [i.upper() for i in p_list]
+        self.default_parameters = {}
+        for ham_name in ham_names:
+            filename = os.path.join(alf_dir, 'Prog', 'Hamiltonians',
+                                    'Hamiltonian_{}_smod.F90'.format(ham_name))
+            # print('Hamiltonian:', ham_name)
 
+            self.default_parameters[ham_name] = parse(filename)
+            # pprint.pprint(self.default_parameters[ham_name])
 
-PARAMS_GENERIC = OrderedDict()
-PARAMS_MODEL = OrderedDict()
+    def get_ham_names(self):
+        """Returns list of Hamiltonians."""
+        return list(self.default_parameters)
 
-IN_HAM = {
-    'Hubbard': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Hubbard"],
-    'Hubbard_Plain_Vanilla': ["VAR_Lattice", "VAR_Hubbard_Plain_Vanilla"],
-    'Kondo': ["VAR_Lattice", "VAR_Model_Generic", "VAR_Kondo"],
-    'tV': ["VAR_Lattice", "VAR_Model_Generic", "VAR_tV"],
-    'LRC': ["VAR_Lattice", "VAR_Model_Generic", "VAR_LRC"],
-    'Z2_Matter': ["VAR_Lattice",  "VAR_Z2_Matter"],
-    }
+    def get_params(self, ham_name):
+        """Return full set of default parameters for hamiltonian."""
+        params = OrderedDict()
+        for nlist_name, nlist in self.default_parameters[ham_name].items():
+            params[nlist_name] = copy.deepcopy(nlist)
+        for nlist_name, nlist in _PARAMS_GENERIC.items():
+            params[nlist_name] = copy.deepcopy(nlist)
+        return params
 
-PARAMS_GENERIC["VAR_QMC"] = {
-    # General parameters for the Monte Carlo algorithm
-    "Nwrap"                : [10,  "Stabilization. Green functions will be computed from scratch after each time interval Nwrap*Dtau."],
-    "Nsweep"               : [100, "Number of sweeps per bin."],
-    "Nbin"                 : [5, "Number of bins."],
-    "Ltau"                 : [1, "1 to calculate time-displaced Green functions; 0 otherwise."],
-    "LOBS_ST"              : [0, "Start measurements at time slice LOBS_ST"],
-    "LOBS_EN"              : [0, "End measurements at time slice LOBS_EN"],
-    "CPU_MAX"              : [0.0, "Code stops after CPU_MAX hours, if 0 or not specified, the code stops after Nbin bins"],
-    "Propose_S0"           : [False, "Proposes single spin flip moves with probability exp(-S0)."],
-    "Global_moves"         : [False, "Allows for global moves in space and time."],
-    "N_global"             : [1, "Number of global moves per sweep."],
-    "Global_tau_moves"     : [False, "Allows for global moves on a single time slice."],
-    "N_global_tau"         : [1, "Number of global moves that will be carried out on a single time slice."],
-    "Nt_sequential_start"  : [0, ""],
-    "Nt_sequential_end"    : [-1, ""],
-    "Langevin"             : [False, "Langevin update"],
-    "Delta_t_Langevin_HMC" : [0.01, "Time step for Langevin or HMC"],
-    "Max_Force"            : [1.5,  "Max Force for Langevin" ],
-    "HMC"                  : [False, "HMC update"],
-    "Leapfrog_steps"       : [0, "Number of leapfrog steps"],
-    }
+    def get_params_names(self, ham_name, include_generic=False):
+        """Return list of parameter names for hamiltonian,
+        transformed in all upper case.
+        """
+        p_list = []
+        for nlist_name, nlist in self.default_parameters[ham_name].items():
+            p_list += list(nlist)
+        if include_generic:
+            for nlist_name in _PARAMS_GENERIC:
+                p_list += list(_PARAMS_GENERIC[nlist_name])
 
-PARAMS_GENERIC["VAR_errors"] = {
-    # Post-processing parameters
-    "N_skip" : [1, "Number of bins to be skipped."],
-    "N_rebin": [1, "Rebinning: Number of bins to combine into one."],
-    "N_Cov"  : [0, "If set to 1, covariance computed for time-displaced correlation functions."],
-    "N_Back" : [1, "If set to 1, substract background in correlation functions."],
-    "N_auto" : [0, "If > 0, calculate autocorrelation."],
-    }
-
-PARAMS_GENERIC["VAR_TEMP"] = {
-    # Parallel tempering parameters
-    "N_exchange_steps"      : [6, "Number of exchange moves."],
-    "N_Tempering_frequency" : [10, "The frequency, in units of sweeps, at which the exchange moves are carried out."],
-    "mpi_per_parameter_set" : [2, "Number of mpi-processes per parameter set."],
-    "Tempering_calc_det"    :
-        [True, "Specifies whether the fermion weight has to be taken into \
-         account while tempering. Can be set to .F. if the parameters that \
-         get varied only enter the Ising action S_0"],
-    }
-
-PARAMS_GENERIC["VAR_Max_Stoch"] = {
-    # MaxEnt parameters
-    "Ngamma"     : [400, "Number of Dirac delta-functions for parametrization."],
-    "Om_st"      : [-10.0, "Frequency range lower bound."],
-    "Om_en"      : [10.0, "Frequency range upper bound."],
-    "Ndis"       : [2000, "Number of boxes for histogram."],
-    "NBins"      : [250, "Number of bins for Monte Carlo."],
-    "NSweeps"    : [70, "Number of sweeps per bin."],
-    "Nwarm"      : [20, "The Nwarm first bins will be ommitted."],
-    "N_alpha"    : [14, "Number of temperatures."],
-    "alpha_st"   : [1.0, ""],
-    "R"          : [1.2, ""],
-    "Checkpoint" : [False, ""],
-    "Tolerance"  : [0.1, ""],
-    }
-
-PARAMS_MODEL["VAR_Lattice"] = {
-    # Parameters that define the Bravais lattice
-    "L1": [6, ""],
-    "L2": [6, ""],
-    "Lattice_type": ["Square", ""],
-    "Model": ["Hubbard", ""],
-    }
-
-PARAMS_MODEL["VAR_Model_Generic"] = {
-    # General parameters concerning any model
-    "Checkerboard": [True, ""],
-    "Symm"        : [True, ""],
-    "N_SUN"       : [2, ""],
-    "N_FL"        : [1, ""],
-    "Phi_X"       : [0.0, ""],
-    "Phi_Y"       : [0.0, ""],
-    "Bulk"        : [True, ""],
-    "N_Phi"       : [0, ""],
-    "Dtau"        : [0.1, ""],
-    "Beta"        : [5.0, ""],
-    "Projector"   : [False, ""],
-    "Theta"       : [10.0, ""],
-    }
-
-PARAMS_MODEL["VAR_Hubbard"] = {
-    # Parameters of the Hubbard hamiltonian
-    "Mz"         :  [True, ""] ,
-    "ham_T"      :  [1.0, ""]  ,
-    "ham_chem"   :  [0.0, ""]  ,
-    "ham_U"      :  [4.0, ""]  ,
-    "ham_T2"     :  [1.0, ""]  ,
-    "ham_U2"     :  [4.0, ""]  ,
-    "ham_Tperp"  :  [1.0, ""]  ,
-    "Continuous" :  [False, "Continuous HS transformation"],
-    }
-
-PARAMS_MODEL["VAR_tV"] = {
-    "ham_T"    :  [1.0, ""]  ,
-    "ham_chem" :  [0.0, ""]  ,
-    "ham_V"    :  [0.5, ""]  ,
-    "ham_T2"   :  [1.0, ""]  ,
-    "ham_V2"   :  [0.5, ""]  ,
-    "ham_Tperp":  [1.0, ""]  ,
-    "ham_Vperp":  [0.5, ""]  ,
-    }
-
-PARAMS_MODEL["VAR_Hubbard_Plain_Vanilla"] = {
-    # Parameters of the Plain Vanilla Hubbard hamiltonian
-    "ham_T"       : [1.0, ""]  ,
-    "ham_chem"    : [0.0, ""]  ,
-    "ham_U"       : [4.0, ""]  ,
-    "Dtau"        : [0.1, ""],
-    "Beta"        : [5.0, ""],
-    "Projector"   : [False, ""],
-    "Theta"       : [10.0, ""],
-    "Symm"        : [True, ""],
-    }
+        return [i.upper() for i in p_list]
 
 
-PARAMS_MODEL["VAR_Kondo"] = {
-    # Parameters of the SU(N) Kondo lattice
-    "ham_T"    :  [1.0, ""]  ,
-    "ham_chem" :  [0.0, ""]  ,
-    "ham_Uc"   :  [0.0, ""]  ,
-    "ham_Uf"   :  [2.0, ""]  ,
-    "ham_JK"   :  [2.0, ""]  ,
-    }
-
-PARAMS_MODEL["VAR_LRC"] = {
-    # Parameters  for the long-ranged Coulomb model
-    "ham_T"            :  [1.0, ""]  ,
-    "ham_T2"           :  [1.0, ""]  ,
-    "ham_Tperp"        :  [1.0, ""]  ,
-    "ham_chem"         :  [0.0, ""]  ,
-    "ham_U"            :  [4.0, ""]  ,
-    "ham_alpha"        :  [0.1, ""]  ,
-    "Percent_change"   :  [0.1, ""]  ,
-    }
-
-PARAMS_MODEL["VAR_Z2_Matter"] = {
-    # Parameters Z2 gauged theories coupled to Z2 matter
-    "ham_T"            : [1.0, "Hopping for fermions"],
-    "ham_TZ2"          : [1.0, "Hopping for orthogonal fermions"],
-    "ham_chem"         : [0.0, "Chemical potential for fermions"],
-    "ham_U"            : [0.0, "Hubbard for fermions"],
-    "Ham_J"            : [1.0, "Hopping Z2 matter fields"],
-    "Ham_K"            : [1.0, "Plaquette term for gauge fields"],
-    "Ham_h"            : [1.0, "sigma^x-term for matter"],
-    "Ham_g"            : [1.0, "tau^x-term for gauge"],
-    "Dtau"             : [0.1,  ""],
-    "Beta"             : [10.0, ""],
-    "N_SUN"            : [2, ""],
-    "Projector"        : [False, ""],
-    "Theta"            : [10.0, ""],
-    }
+_PARAMS_GENERIC = OrderedDict([
+    ('VAR_QMC',
+        {'CPU_MAX': {'comment': 'Code stops after CPU_MAX hours, if 0 or '
+                                'not specified, the code stops after '
+                                'Nbin bins',
+                     'value': 0.0},
+         'Delta_t_Langevin_HMC': {'comment': 'Time step for Langevin or '
+                                             'HMC',
+                                  'value': 0.01},
+         'Global_moves': {'comment': 'Allows for global moves in space '
+                                     'and time.',
+                          'value': False},
+         'Global_tau_moves': {'comment': 'Allows for global moves on a '
+                                         'single time slice.',
+                              'value': False},
+         'HMC': {'comment': 'HMC update', 'value': False},
+         'LOBS_EN': {'comment': 'End measurements at time slice LOBS_EN',
+                     'value': 0},
+         'LOBS_ST': {'comment': 'Start measurements at time slice '
+                                'LOBS_ST',
+                     'value': 0},
+         'Langevin': {'comment': 'Langevin update', 'value': False},
+         'Leapfrog_steps': {'comment': 'Number of leapfrog steps',
+                            'value': 0},
+         'Ltau': {'comment': '1 to calculate time-displaced Green '
+                             'functions; 0 otherwise.',
+                  'value': 1},
+         'Max_Force': {'comment': 'Max Force for Langevin', 'value': 1.5},
+         'N_global': {'comment': 'Number of global moves per sweep.',
+                      'value': 1},
+         'N_global_tau': {'comment': 'Number of global moves that will '
+                                     'be carried out on a single time '
+                                     'slice.',
+                          'value': 1},
+         'Nbin': {'comment': 'Number of bins.', 'value': 5},
+         'Nsweep': {'comment': 'Number of sweeps per bin.', 'value': 100},
+         'Nt_sequential_end': {'comment': '', 'value': -1},
+         'Nt_sequential_start': {'comment': '', 'value': 0},
+         'Nwrap': {'comment': 'Stabilization. Green functions will be '
+                              'computed from scratch after each time '
+                              'interval Nwrap*Dtau.',
+                   'value': 10},
+         'Propose_S0': {'comment': 'Proposes single spin flip moves with '
+                                   'probability exp(-S0).',
+                        'value': False}}),
+    ('VAR_errors',
+        {'N_Back': {'comment': 'If set to 1, substract background in '
+                               'correlation functions.',
+                    'value': 1},
+         'N_Cov': {'comment': 'If set to 1, covariance computed for '
+                              'time-displaced correlation functions.',
+                   'value': 0},
+         'N_auto': {'comment': 'If > 0, calculate autocorrelation.',
+                    'value': 0},
+         'N_rebin': {'comment': 'Rebinning: Number of bins to combine '
+                                'into one.',
+                     'value': 1},
+         'N_skip': {'comment': 'Number of bins to be skipped.',
+                    'value': 1}}),
+    ('VAR_TEMP',
+        {'N_Tempering_frequency': {'comment': 'The frequency, in units '
+                                              'of sweeps, at which the '
+                                              'exchange moves are '
+                                              'carried out.',
+                                   'value': 10},
+         'N_exchange_steps': {'comment': 'Number of exchange moves.',
+                              'value': 6},
+         'Tempering_calc_det': {'comment': 'Specifies whether the '
+                                           'fermion weight has to be '
+                                           'taken into          account '
+                                           'while tempering. Can be set '
+                                           'to .F. if the parameters '
+                                           'that          get varied '
+                                           'only enter the Ising action '
+                                           'S_0',
+                                'value': True},
+         'mpi_per_parameter_set': {'comment': 'Number of mpi-processes '
+                                              'per parameter set.',
+                                   'value': 2}}),
+    ('VAR_Max_Stoch',
+        {'Checkpoint': {'comment': '', 'value': False},
+         'NBins': {'comment': 'Number of bins for Monte Carlo.',
+                   'value': 250},
+         'NSweeps': {'comment': 'Number of sweeps per bin.', 'value': 70},
+         'N_alpha': {'comment': 'Number of temperatures.', 'value': 14},
+         'Ndis': {'comment': 'Number of boxes for histogram.',
+                  'value': 2000},
+         'Ngamma': {'comment': 'Number of Dirac delta-functions for '
+                               'parametrization.',
+                    'value': 400},
+         'Nwarm': {'comment': 'The Nwarm first bins will be ommitted.',
+                   'value': 20},
+         'Om_en': {'comment': 'Frequency range upper bound.',
+                   'value': 10.0},
+         'Om_st': {'comment': 'Frequency range lower bound.',
+                   'value': -10.0},
+         'R': {'comment': '', 'value': 1.2},
+         'Tolerance': {'comment': '', 'value': 0.1},
+         'alpha_st': {'comment': '', 'value': 1.0}})
+    ])
