@@ -1,5 +1,5 @@
 variables:
-  BRANCH_R: "master"
+  BRANCH_R: "196-write-parameters-to-hdf5-file"
   OMPI_ALLOW_RUN_AS_ROOT: 1
   OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
   
