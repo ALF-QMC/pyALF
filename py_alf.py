@@ -62,7 +62,7 @@ class ALF_source:
             print("Repository {} does not exist, cloning from {}"
                   .format(alf_dir, url))
             try:
-                subprocess.run(["git", "clone", url, alf_dir], check=True)
+                subprocess.run(["git", "clone", url, self.alf_dir], check=True)
             except subprocess.CalledProcessError as git_clone_failed:
                 raise Exception('Error while cloning repository') \
                     from git_clone_failed
@@ -77,13 +77,13 @@ class ALF_source:
                         from git_checkout_failed
 
         # Parse ALF Hamiltonians to get parameter list.
-        with open(os.path.join(alf_dir, 'Prog', 'Hamiltonians.list'),
+        with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
                   'r') as f:
             ham_names = f.read().splitlines()
 
         self.default_parameters = {}
         for ham_name in ham_names:
-            filename = os.path.join(alf_dir, 'Prog', 'Hamiltonians',
+            filename = os.path.join(self.alf_dir, 'Prog', 'Hamiltonians',
                                     'Hamiltonian_{}_smod.F90'.format(ham_name))
             # print('Hamiltonian:', ham_name)
 
