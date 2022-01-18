@@ -47,7 +47,11 @@ def test_branch(alf_dir, pars, branch_R, branch_T,
         for name in obs_R:
             test = True
             for dat_R, dat_T in zip(obs_R[name], obs_T[name]):
-                test = test and np.allclose(dat_R, dat_T)
+                try:
+                    test_temp = np.allclose(dat_R, dat_T)
+                except TypeError:
+                    pass
+                test = test and test_temp
             f.write('{}: {}\n'.format(name, test))
             test_all = test_all and test
 
