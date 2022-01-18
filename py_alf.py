@@ -247,7 +247,7 @@ class Simulation:
         executable = os.path.join(self.alf_src.alf_dir, 'Prog', 'ALF.out')
         if copy_bin:
             shutil.copy(executable, self.sim_dir)
-            executable =  os.path.join(self.sim_dir, 'ALF.out')
+            executable = os.path.join(self.sim_dir, 'ALF.out')
         if only_prep:
             return
         with cd(self.sim_dir):
