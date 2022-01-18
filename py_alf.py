@@ -387,7 +387,7 @@ def _update_var(params, var, value):
     for name in params:
         for var2 in params[name]:
             if var2.lower() == var.lower():
-                params[name][var2][0] = value
+                params[name][var2]['value'] = value
                 return params
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 
