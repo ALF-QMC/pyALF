@@ -2,6 +2,7 @@
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2020-2022, The ALF Project"
@@ -13,7 +14,7 @@ import copy
 import json
 # import pprint
 import subprocess
-from shutil import copyfile
+import shutil
 from collections import OrderedDict
 
 import numpy as np
@@ -78,7 +79,7 @@ class ALF_source:
 
         # Parse ALF Hamiltonians to get parameter list.
         with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
-                  'r') as f:
+                  'r', encoding='UTF-8') as f:
             ham_names = f.read().splitlines()
 
         self.default_parameters = {}
@@ -220,11 +221,16 @@ class Simulation:
         self.custom_obs = {}
 
     def compile(self):
-        """Compiles ALF. Clones a new repository if alf_dir does not exist."""
+        """Compile ALF. Clones a new repository if alf_dir does not exist."""
         compile_alf(self.alf_src.alf_dir, config=self.config)
 
-    def run(self):
-        """Prepares simulation directory and runs ALF."""
+    def run(self, copy_bin=False, only_prep=False):
+        """Prepars simulation directory and run ALF.
+
+        Optional arguments:
+        copy_bin  -- Copy ALF binary into simulation folder (default: False)
+        only_prep -- Do not run ALF, but only prepare directory (default: False)
+        """
         if self.tempering:
             _prep_sim_dir(self.alf_src, self.sim_dir,
                           self.ham_name, self.sim_dict[0])
@@ -239,6 +245,11 @@ class Simulation:
         env = getenv(self.config, self.alf_src.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
         executable = os.path.join(self.alf_src.alf_dir, 'Prog', 'ALF.out')
+        if copy_bin:
+            shutil.copy(executable, self.sim_dir)
+            executable =  os.path.join(self.sim_dir, 'ALF.out')
+        if only_prep:
+            return
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
@@ -250,7 +261,7 @@ class Simulation:
             except subprocess.CalledProcessError as ALF_crash:
                 print('Error while running {}.'.format(executable))
                 print('parameters:')
-                with open('parameters') as f:
+                with open('parameters', 'r') as f:
                     print(f.read())
                 raise Exception('Error while running {}.'.format(executable)) \
                     from ALF_crash
@@ -314,7 +325,7 @@ def _prep_sim_dir(alf_src, sim_dir, ham_name, sim_dict):
     with cd(sim_dir):
         if 'confout_0' in os.listdir() or 'confout_0.h5' in os.listdir():
             print('Resuming previous run.')
-        copyfile(os.path.join(
+        shutil.copyfile(os.path.join(
             alf_src.alf_dir, 'Scripts_and_Parameters_files', 'Start', 'seeds'),
                  'seeds')
         params = set_param(alf_src, ham_name, sim_dict)
