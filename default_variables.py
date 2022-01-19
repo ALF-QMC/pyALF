@@ -75,6 +75,8 @@ PARAMS_GENERIC["VAR_QMC"] = {
     "Max_Force"            : [1.5,  "Max Force for Langevin" ],
     "HMC"                  : [False, "HMC update"],
     "Leapfrog_steps"       : [0, "Number of leapfrog steps"],
+    "do_ED"                : [False, "Calculate eigenenergies through exact diagonalization"],
+    "ED_N_Part"            : [-1, "Fixed fermion number, for which to do ED. -1 means all possible values."],
     }
 
 PARAMS_GENERIC["VAR_errors"] = {
