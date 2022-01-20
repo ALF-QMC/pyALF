@@ -11,8 +11,6 @@ __license__ = "GPL"
 import os
 import re
 import copy
-import json
-# import pprint
 import subprocess
 import shutil
 from collections import OrderedDict
@@ -46,15 +44,16 @@ class ALF_source:
     """
 
     Optional arguments:
-    alf_dir -- Directory containing the ALF source code (default: './ALF').
-               If the directory does not exist, the source cFalseode will be
-               fetched from a server.
+    alf_dir -- Directory containing the ALF source code. If the directory does
+               not exist, the source cFalseode will be fetched from a server.
+               Defaults to environment variable $ALF_DIR if present, otherwise
+               to './ALF'.
     branch  -- If specified, this will be checked out by git.
     url     -- Address, from where to clone ALF if alf_dir not exists
                (default: 'https://git.physik.uni-wuerzburg.de/ALF/ALF.git')
     """
 
-    def __init__(self, alf_dir='./ALF', branch=None,
+    def __init__(self, alf_dir=os.getenv('ALF_DIR', './ALF'), branch=None,
                  url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.branch = branch

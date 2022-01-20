@@ -8,6 +8,8 @@ __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2022, The ALF Project"
 __license__ = "GPL"
 
+import os
+
 """Import ALF_source and Simulation classes from the py_alf pythonmodule,
 which provide the interface with ALF."""
 from py_alf import ALF_source, Simulation
@@ -16,7 +18,9 @@ from py_alf import ALF_source, Simulation
 """Create an instance of ALF_source, downloading the ALF source code from
 https://git.physik.uni-wuerzburg.de/ALF/ALF, if alf_dir does not exist."""
 alf_src = ALF_source(
-    alf_dir='./ALF',
+    alf_dir=os.getenv('ALF_DIR', './ALF'),  # Gets alf_dir from environment
+                                            # variable $ALF_DIR, or defaults
+                                            # to "./ALF", if not present.
     branch='196-write-parameters-to-hdf5-file',  # TODO: Remove this after merging '196-write-parameters-to-hdf5-file' into master
 )
 
