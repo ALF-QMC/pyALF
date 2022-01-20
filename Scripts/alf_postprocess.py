@@ -16,16 +16,16 @@ if __name__ == '__main__':
         description='Script for postprocessing monte carlo bins.',
         )
     parser.add_argument(
-        '--check_warmup', action="store_true",
+        '--check_warmup', '--warmup', action="store_true",
         help='Check warmup.')
     parser.add_argument(
-        '--check_rebin', action="store_true",
+        '--check_rebin', '--rebin', action="store_true",
         help='Check rebinning for controlling autocorrelation.')
     parser.add_argument(
         '-l', '--check_list', nargs='+', default=None,
         help='List of observables to check for warmup and rebinning.')
     parser.add_argument(
-        '--do_analysis', action="store_true",
+        '--do_analysis', '--ana', action="store_true",
         help='Do analysis.')
     parser.add_argument(
         '--gather', action="store_true",
@@ -37,7 +37,7 @@ if __name__ == '__main__':
         '--custom_obs', default=os.getenv('ALF_CUSTOM_OBS', None),
         help='File that defines custom observables.')
     parser.add_argument(
-        '--symmetry', default=None,
+        '--symmetry', '--sym', default=None,
         help='File that defines lattice symmetries.')
     parser.add_argument(
         'directories', nargs='*',
@@ -46,14 +46,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.custom_obs is None:
-        custom_obs = None
+        custom_obs = {}
     else:
-        exec(open(args.custom_obs).read())
+        exec(open(os.path.expanduser(args.custom_obs)).read())
 
     if args.symmetry is None:
         symmetry = None
     else:
-        exec(open(args.symmetry).read())
+        exec(open(os.path.expanduser(args.symmetry)).read())
 
     if args.directories:
         directories = args.directories
