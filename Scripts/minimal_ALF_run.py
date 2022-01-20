@@ -28,6 +28,7 @@ sim = Simulation(
     {                             # Dictionary overwriting default parameters
         "Lattice_type": "Square"
     },
+    machine='GNU'  # Change to "intel", or "PGI" if gfortran is not installed
 )
 
 """Compile ALF. The first time it will also download and compile HDF5,
