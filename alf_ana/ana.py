@@ -9,22 +9,9 @@ import pickle
 import h5py
 import numpy as np
 import pandas as pd
+import f90nml
 
 from alf_ana.lattice import Lattice
-
-try:
-    import f90nml
-except ImportError:
-    print("Package f90nml not found, trying to install via pip.")
-    import subprocess
-    import sys
-    try:
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", "f90nml"])
-    except subprocess.CalledProcessError as f90nml_not_installed:
-        raise Exception("Failed to install f90nml, consider retrieving it " +
-                    "manually from https://github.com/marshallward/f90nml") \
-            from f90nml_not_installed
 
 
 def symmetrize(latt, syms, dat):
