@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
 """Show observables and their number of bins in ALF HDF5 file(s).
+
+Arguments: Name of HDF5 files.
+If no arguments are supplied, all files named "data.h5" in the current working
+directory and below are taken.
 """
+
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2022, The ALF Project"
+__license__ = "GPL"
+
 import sys
 import os
-import h5py
+
+from alf_ana.util import show_obs
+
 
 if len(sys.argv) > 1:
     filenames = sys.argv[1:]
@@ -16,27 +27,4 @@ else:
 
 for filename in filenames:
     print("===== {} =====".format(filename))
-    with h5py.File(filename,'r') as f:
-        print("Scalar observables:")
-        for o in f:
-            if o.endswith('_scal'):
-                N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
-
-        print("Histogram observables:")
-        for o in f:
-            if o.endswith('_hist'):
-                N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
-
-        print("Equal time observables:")
-        for o in f:
-            if o.endswith('_eq'):
-                N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
-
-        print("Time displaced observables:")
-        for o in f:
-            if o.endswith('_tau'):
-                N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
+    show_obs(filename)

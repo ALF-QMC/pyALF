@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
-"""Count number of bins in ALF HDF5 file.
+"""Count number of bins in ALF HDF5 file(s), assuming all
+observables have same number of bins.
 
-
+Arguments: Name of HDF5 files.
+If no arguments are supplied, all files named "data.h5" in the current working
+directory and below are taken.
 """
+
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2022, The ALF Project"
+__license__ = "GPL"
+
 import sys
 import os
-import h5py
+
+from alf_ana.util import bin_count
+
 
 if len(sys.argv) > 1:
     filenames = sys.argv[1:]
@@ -17,10 +27,4 @@ else:
     filenames.sort()
 
 for filename in filenames:
-    f = h5py.File(filename,'r')
-    N_bins = 0
-    for o in f:
-        if '_scal' in o:
-            N_bins = f[o +"/obser"].shape[0]
-            break
-    print(filename, N_bins)
+    bin_count(filename)

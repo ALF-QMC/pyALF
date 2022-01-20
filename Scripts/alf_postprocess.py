@@ -2,6 +2,10 @@
 """Analyze Monte Carlo bins."""
 # pylint: disable=invalid-name
 
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2021-2022, The ALF Project"
+__license__ = "GPL"
+
 import os
 import argparse
 

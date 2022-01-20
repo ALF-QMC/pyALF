@@ -4,6 +4,10 @@ Example script showing the minimal steps for creating and running an ALF
 simulation in pyALF.
 """
 
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2022, The ALF Project"
+__license__ = "GPL"
+
 """Import ALF_source and Simulation classes from the py_alf pythonmodule,
 which provide the interface with ALF."""
 from py_alf import ALF_source, Simulation

@@ -1,39 +1,20 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Delete N bins in all observables of the specified HDF5-file.
 
 Command line arguments:
    First argument: Name of HDF5 file
    Second argument: Number of first N0 bins to leave
-   Second argument: Number of bins to remove after first N0 bins
+   Third argument: Number of bins to remove after first N0 bins
 """
 
+__author__ = "Jonas Schwab"
+__copyright__ = "Copyright 2022, The ALF Project"
+__license__ = "GPL"
+
 import sys
-import h5py
-import numpy as np
 
-
-def reshape(fileobj, dset_name, N0, N):
-    dset = fileobj[dset_name]
-    dat = np.copy(np.concatenate([dset[:N0], dset[N0+N:]]))
-    fileobj[dset_name].resize(dat.shape)
-    fileobj[dset_name][:] = dat
-
-
-def del_bins(filename, N0, N):
-    with h5py.File(filename, 'r+') as f:
-        for o in f:
-            if o.endswith('_scal') or o.endswith('_eq') \
-               or o.endswith('_tau') or o.endswith('_hist'):
-                reshape(f, o+"/obser", N0, N)
-                reshape(f, o+"/sign", N0, N)
-
-            if o.endswith('_eq') or o.endswith('_tau'):
-                reshape(f, o+"/back", N0, N)
-
-            if o.endswith('_hist'):
-                reshape(f, o+"/above", N0, N)
-                reshape(f, o+"/below", N0, N)
+from alf_ana.util import del_bins
 
 
 if __name__ == '__main__':

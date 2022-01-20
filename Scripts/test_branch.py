@@ -6,7 +6,7 @@ Helper script for testing between ALF branches.
 # pylint: disable=invalid-name
 
 __author__ = "Jonas Schwab"
-__copyright__ = "Copyright 2020, The ALF Project"
+__copyright__ = "Copyright 2020-2022, The ALF Project"
 __license__ = "GPL"
 
 import os
