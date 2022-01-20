@@ -78,12 +78,11 @@ _PARAMS_GENERIC = OrderedDict([
                               'value': 6},
          'Tempering_calc_det': {'comment': 'Specifies whether the '
                                            'fermion weight has to be '
-                                           'taken into          account '
-                                           'while tempering. Can be set '
-                                           'to .F. if the parameters '
-                                           'that          get varied '
-                                           'only enter the Ising action '
-                                           'S_0',
+                                           'taken into account while '
+                                           'tempering. Can be set to '
+                                           '.F. if the parameters '
+                                           'that get varied only '
+                                           'enter the Ising action S_0',
                                 'value': True},
          'mpi_per_parameter_set': {'comment': 'Number of mpi-processes '
                                               'per parameter set.',
