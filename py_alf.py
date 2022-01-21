@@ -14,6 +14,7 @@ import copy
 import subprocess
 import shutil
 from collections import OrderedDict
+import importlib.util
 
 import numpy as np
 import pandas as pd
@@ -23,7 +24,6 @@ from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
 from alf_ana.analysis import analysis
 from alf_ana.ana import load_res
-from parse_ham import parse
 
 
 class cd:
@@ -76,6 +76,16 @@ class ALF_source:
                         'Error while checking out {}'.format(branch)) \
                         from git_checkout_failed
 
+        def import_module(module_name, path):
+            """Dynamically import module from given path."""
+            spec = importlib.util.spec_from_file_location(module_name, path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+        
+        parse_ham = import_module(
+            'parse_ham', os.path.join(self.alf_dir, 'Prog', 'parse_ham.py'))
+
         # Parse ALF Hamiltonians to get parameter list.
         with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
                   'r', encoding='UTF-8') as f:
@@ -86,8 +96,7 @@ class ALF_source:
             filename = os.path.join(self.alf_dir, 'Prog', 'Hamiltonians',
                                     'Hamiltonian_{}_smod.F90'.format(ham_name))
             # print('Hamiltonian:', ham_name)
-
-            self.default_parameters[ham_name] = parse(filename)
+            self.default_parameters[ham_name] = parse_ham.parse(filename)
             # pprint.pprint(self.default_parameters[ham_name])
 
     def get_ham_names(self):
