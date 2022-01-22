@@ -41,7 +41,7 @@ class cd:
 
 
 class ALF_source:
-    """
+    """Objet representing ALF source code.
 
     Optional arguments:
     alf_dir -- Directory containing the ALF source code. If the directory does
@@ -103,16 +103,17 @@ class ALF_source:
         """Returns list of Hamiltonians."""
         return list(self.default_parameters)
 
-    def get_default_params(self, ham_name):
+    def get_default_params(self, ham_name, include_generic=True):
         """Return full set of default parameters for hamiltonian."""
         params = OrderedDict()
         for nlist_name, nlist in self.default_parameters[ham_name].items():
             params[nlist_name] = copy.deepcopy(nlist)
-        for nlist_name, nlist in _PARAMS_GENERIC.items():
-            params[nlist_name] = copy.deepcopy(nlist)
+        if include_generic:
+            for nlist_name, nlist in _PARAMS_GENERIC.items():
+                params[nlist_name] = copy.deepcopy(nlist)
         return params
 
-    def get_params_names(self, ham_name, include_generic=False):
+    def get_params_names(self, ham_name, include_generic=True):
         """Return list of parameter names for hamiltonian,
         transformed in all upper case.
         """
@@ -127,7 +128,7 @@ class ALF_source:
 
 
 class Simulation:
-    """Object corresponding to a simulation directory.
+    """Object corresponding to an ALF simulation.
 
     Provides functions for preparing, running, and postprocessing a simulation.
 
@@ -391,7 +392,7 @@ def directory_name(alf_src, ham_name, sim_dict):
     """Returns name of directory for simulations, given a set of simulation
     parameters.
     """
-    p_list = alf_src.get_params_names(ham_name)
+    p_list = alf_src.get_params_names(ham_name, include_generic=False)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
         dirname = 'temper_{}_'.format(ham_name)
