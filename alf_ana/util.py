@@ -40,7 +40,7 @@ def del_bins(filename, N0, N):
 
 def show_obs(filename):
     """Show observables and their number of bins in ALF HDF5 file."""
-    with h5py.File(filename,'r') as f:
+    with h5py.File(filename, 'r') as f:
         print("Scalar observables:")
         for o in f:
             if o.endswith('_scal'):
@@ -67,13 +67,15 @@ def show_obs(filename):
 
 
 def bin_count(filename):
-    """Count number of bins in ALF HDF5 file, assuming all
-    observables have same number of bins."""
-    with h5py.File(filename,'r') as f:
+    """Count number of bins in ALF HDF5 file.
+
+    Assumes all observables have same number of bins.
+    """
+    with h5py.File(filename, 'r') as f:
         N_bins = 0
         for o in f:
             if o.endswith('_scal') or o.endswith('_eq') \
-            or o.endswith('_tau') or o.endswith('_hist'):
+               or o.endswith('_tau') or o.endswith('_hist'):
                 N_bins = f[o+"/obser"].shape[0]
                 break
         print(filename, N_bins)

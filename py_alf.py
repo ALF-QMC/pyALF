@@ -41,16 +41,21 @@ class cd:
 
 
 class ALF_source:
-    """Objet representing ALF source code.
+    """
+    Objet representing ALF source code.
 
-    Optional arguments:
-    alf_dir -- Directory containing the ALF source code. If the directory does
-               not exist, the source cFalseode will be fetched from a server.
-               Defaults to environment variable $ALF_DIR if present, otherwise
-               to './ALF'.
-    branch  -- If specified, this will be checked out by git.
-    url     -- Address, from where to clone ALF if alf_dir not exists
-               (default: 'https://git.physik.uni-wuerzburg.de/ALF/ALF.git')
+    Parameters
+    ----------
+    alf_dir : path-like object, optional
+        Directory containing the ALF source code. If the directory does
+        not exist, the source code will be fetched from a server.
+        Defaults to environment variable $ALF_DIR if present, otherwise
+        to './ALF'.
+    branch : str, optional
+        If specified, this will be checked out by git. The default is None.
+    url : str, optional
+        Address, from where to clone ALF if alf_dir not exists.
+        The default is 'https://git.physik.uni-wuerzburg.de/ALF/ALF.git'.
     """
 
     def __init__(self, alf_dir=os.getenv('ALF_DIR', './ALF'), branch=None,
@@ -82,7 +87,7 @@ class ALF_source:
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             return module
-        
+
         parse_ham = import_module(
             'parse_ham', os.path.join(self.alf_dir, 'Prog', 'parse_ham.py'))
 
@@ -100,7 +105,7 @@ class ALF_source:
             # pprint.pprint(self.default_parameters[ham_name])
 
     def get_ham_names(self):
-        """Returns list of Hamiltonians."""
+        """Return list of Hamiltonians."""
         return list(self.default_parameters)
 
     def get_default_params(self, ham_name, include_generic=True):
@@ -128,33 +133,41 @@ class ALF_source:
 
 
 class Simulation:
-    """Object corresponding to an ALF simulation.
+    """
+    Object corresponding to an ALF simulation.
 
-    Provides functions for preparing, running, and postprocessing a simulation.
-
-    Required arguments:
-    alf_src  -- Instance of ALF_source
-    ham_name -- Name of the hamiltonian
-    sim_dict -- Dictionary specfying parameters owerwriting defaults.
-                Can be a list of dictionaries to enable parallel tempering.
-
-    Optional arguments:
-    sim_dir -- Directory in which the Monte Carlo will be run.
-               If not specified, sim_dir will be generated from sim_dict.
-    sim_root-- Directory to prepend to sim_dir. (default: "ALF_data")
-    mpi     -- Employ MPI (default: False)
-    n_mpi   -- Number of MPI processes
-    n_omp   -- Number of OpenMP threads per process (default: 1)
-    mpiexec -- Command used for starting a MPI run (default: "mpiexec")
-    machine -- Possible values: GNU, INTEL, PGI, SUPERMUC-NG, JUWELS
-               default: GNU
-    stab    -- Which version of stabilisation to employ
-               Possible values: STAB1, STAB2, STAB3, LOG
-    devel   -- Compile with additional flags for development and debugging
-               default: False
-    hdf5    -- Whether to compile ALF with HDF5 (default: True)
-               Full postprocessing support only exists with HDF5.
-    machine and stab are not case sensitive.
+    Parameters
+    ----------
+    alf_src : ALF_source
+        Objet representing ALF source code.
+    ham_name : str
+        Name of the hamiltonian.
+    sim_dict : dict or list of dicts
+        Dictionary specfying parameters owerwriting defaults.
+        Can be a list of dictionaries to enable parallel tempering.
+    sim_dir : path-like object, optional
+        Directory in which the Monte Carlo will be run.
+        If not specified, sim_dir will be generated from sim_dict.
+    sim_root : path-like object, default="ALF_data"
+        Directory to prepend to sim_dir.
+    mpi : bool, default=False
+        Employ MPI.
+    n_mpi : int, default=2
+        Number of MPI processes if mpi is true.
+    n_omp : int, default=1
+        Number of OpenMP threads per process.
+    mpiexec : str, default="mpiexec"
+        Command used for starting a MPI run.
+    machine : {"GNU", "INTEL", "PGI", "SUPERMUC-NG", "JUWELS"}
+        Compiler and environment.
+    stab : str, optional
+        Possible values: "STAB1", "STAB2", "STAB3", "LOG". Not case sensitive.
+    devel : bool, default=True
+        Compile with additional flags for development and debugging.
+        The default is False.
+    hdf5 : bool, default=True
+        Whether to compile ALF with HDF5.
+        Full postprocessing support only exists with HDF5.
     """
 
     def __init__(self, alf_src, ham_name, sim_dict, **kwargs):
@@ -168,7 +181,7 @@ class Simulation:
             kwargs.pop("sim_dir",
                        directory_name(alf_src, ham_name, sim_dict)))))
         self.mpi = kwargs.pop("mpi", False)
-        self.n_mpi = kwargs.pop("n_mpi", None)
+        self.n_mpi = kwargs.pop("n_mpi", 2)
         self.n_omp = kwargs.pop('n_omp', 1)
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
         stab = kwargs.pop('stab', '').upper()
@@ -234,11 +247,15 @@ class Simulation:
         compile_alf(self.alf_src.alf_dir, config=self.config)
 
     def run(self, copy_bin=False, only_prep=False):
-        """Prepars simulation directory and run ALF.
+        """
+        Prepare simulation directory and run ALF.
 
-        Optional arguments:
-        copy_bin  -- Copy ALF binary into simulation folder (default: False)
-        only_prep -- Do not run ALF, but only prepare directory (default: False)
+        Parameters
+        ----------
+        copy_bin : bool, default=False
+            Copy ALF binary into simulation folder.
+        only_prep : bool, default=False
+            Do not run ALF, but only prepare directory.
         """
         if self.tempering:
             _prep_sim_dir(self.alf_src, self.sim_dir,
@@ -284,46 +301,6 @@ class Simulation:
             directories = [self.sim_dir]
         return directories
 
-    def check_warmup(self, names):
-        """Plot bins to determine n_skip.
-        names: Names of Observables to check
-        """
-        check_warmup(self.get_directories(), names, custom_obs=self.custom_obs)
-
-    def check_rebin(self, names):
-        """Plot error vs n_rebin to control autocorrelation.
-        names: Names of Observables to check
-        """
-        check_rebin(self.get_directories(), names, custom_obs=self.custom_obs)
-
-    def analysis(self, python_version=True, symmetry=None):
-        """Performs default analysis on Monte Carlo data.
-
-        The non-python version is legacy and does not support all
-        postprocessing features.
-        """
-        for directory in self.get_directories():
-            if python_version:
-                analysis(directory,
-                         custom_obs=self.custom_obs, symmetry=symmetry)
-            else:
-                analysis_fortran(self.alf_src.alf_dir, directory,
-                                 hdf5=self.hdf5)
-
-    def get_obs(self, python_version=True):
-        """Returns dictionary containing anaysis results from observables.
-
-        The non-python version is legacy and does not support all
-        postprocessing features, e.g. time-displaced observables.
-        """
-        if python_version:
-            return load_res(self.get_directories())
-
-        dicts = {}
-        for directory in self.get_directories():
-            dicts[directory] = get_obs(directory, names=None)
-        return pd.DataFrame(dicts).transpose()
-
     def print_info_file(self):
         """Print info file(s) that get generated by ALF."""
         for directory in self.get_directories():
@@ -335,6 +312,65 @@ class Simulation:
             else:
                 print('{} does not exist.'.format(filename))
                 return
+
+    def check_warmup(self, names):
+        """
+        Plot bins to determine n_skip.
+
+        Parameters
+        ----------
+        names : list of str
+            Names of Observables to check.
+        """
+        check_warmup(self.get_directories(), names, custom_obs=self.custom_obs)
+
+    def check_rebin(self, names):
+        """
+        Plot error vs n_rebin to control autocorrelation.
+
+        Parameters
+        ----------
+        names : list of str
+            Names of Observables to check.
+        """
+        check_rebin(self.get_directories(), names, custom_obs=self.custom_obs)
+
+    def analysis(self, python_version=True, symmetry=None):
+        """
+        Perform default analysis on Monte Carlo data.
+
+        Parameters
+        ----------
+        python_version : bool, default=True
+            Use python version of analysis.
+            The non-python version is legacy and does not support all
+            postprocessing features.
+        symmetry : list of functions, default=None
+            List of functions reppresenting symmetry operations on lattice,
+            including unity. Will be used to symmetrize lattice-type
+            observables.
+        """
+        for directory in self.get_directories():
+            if python_version:
+                analysis(directory,
+                         custom_obs=self.custom_obs, symmetry=symmetry)
+            else:
+                analysis_fortran(self.alf_src.alf_dir, directory,
+                                 hdf5=self.hdf5)
+
+    def get_obs(self, python_version=True):
+        """Return Pandas DataFrame containing anaysis results from observables.
+
+        The non-python version is legacy and does not support all
+        postprocessing features, e.g. time-displaced observables.
+        """
+        if python_version:
+            return load_res(self.get_directories())
+
+        dicts = {}
+        for directory in self.get_directories():
+            dicts[directory] = get_obs(directory, names=None)
+        return pd.DataFrame(dicts).transpose()
 
 
 def _prep_sim_dir(alf_src, sim_dir, ham_name, sim_dict):
@@ -355,9 +391,7 @@ def _prep_sim_dir(alf_src, sim_dir, ham_name, sim_dict):
 
 
 def _convert_par_to_str(parameter):
-    """Converts a given parameter value to a string that can be
-    written into a parameter file.
-    """
+    """Convert a given parameter value to a string for parameter file."""
     if isinstance(parameter, bool):
         if parameter:
             return '.T.'
@@ -375,7 +409,7 @@ def _convert_par_to_str(parameter):
 
 
 def write_parameters(params):
-    """Writes nameslists to file 'parameters'"""
+    """Write nameslists to file 'parameters'."""
     with open('parameters', 'w') as file:
         for namespace in params:
             file.write("&{}\n".format(namespace))
@@ -389,7 +423,7 @@ def write_parameters(params):
 
 
 def directory_name(alf_src, ham_name, sim_dict):
-    """Returns name of directory for simulations, given a set of simulation
+    """Return name of directory for simulations, given a set of simulation
     parameters.
     """
     p_list = alf_src.get_params_names(ham_name, include_generic=False)
@@ -425,7 +459,7 @@ def _update_var(params, var, value):
 
 
 def set_param(alf_src, ham_name, sim_dict):
-    """Returns dictionary containing all parameters needed by ALF.
+    """Return dictionary containing all parameters needed by ALF.
 
     Input: Dictionary with chosen set of <parameter: value> pairs.
     Output: Dictionary containing all namelists needed by ALF.
@@ -465,7 +499,6 @@ def getenv(config, alf_dir='.'):
 def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
                 url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
     """Compile ALF. Clone a new repository if alf_dir does not exist."""
-
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
         print("Repository {} does not exist, cloning from {}"
@@ -493,8 +526,9 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
 
 
 def out_to_in(verbose=False):
-    """Renames all the output configurations confout_* to confin_*
-    to continue the Monte Carlo simulation where the previous stopped.
+    """Rename all output configurations confout_* to confin_*.
+
+    For continuing the Monte Carlo simulation where the previous stopped.
     """
     for name in os.listdir():
         if name.startswith('confout_'):
@@ -507,7 +541,7 @@ def out_to_in(verbose=False):
 def analysis_fortran(alf_dir, sim_dir='.', hdf5=False):
     """Perform the default analysis unsing ALFs own analysis routines
     on all files ending in _scal, _eq or _tau in directory sim_dir. Not fully
-    supported
+    supported.
     """
     env = os.environ.copy()
     env['OMP_NUM_THREADS'] = '1'
@@ -536,10 +570,10 @@ def analysis_fortran(alf_dir, sim_dir='.', hdf5=False):
 
 
 def get_obs(sim_dir, names=None):
-    """Returns dictionary containing analysis results from observables.
+    """Return dictionary with analysis results from Fortran analysis (legacy).
 
-    Currently only scalar and equal time correlators.
-    If names is None: gets all observables, else the ones listed in names
+    Only scalar observables and equal time correlators.
+    If names is None: gets all observables, else the ones listed in names.
     """
     obs = {}
     if names is None:
@@ -570,7 +604,8 @@ def get_obs(sim_dir, names=None):
 
 
 def _read_scalJ(name):
-    """Returns dictionary containing anaysis results from scalar observable.
+    """Return dictionary with Fortran analysis
+    results from scalar observable. (legacy)
     """
     with open(name) as f:
         lines = f.readlines()
@@ -587,8 +622,8 @@ def _read_scalJ(name):
 
 
 def _read_eqJ(name):
-    """Returns dictionary containing analysis results from equal time
-    correlation function
+    """Return dictionary with Fortran analysis results from equal time
+    correlation function. (legacy)
     """
     with open(name) as f:
         lines = f.readlines()

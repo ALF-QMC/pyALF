@@ -13,7 +13,23 @@ _cache = {}
 
 
 class Lattice:
-    """Bravais lattice object."""
+    """
+    Finite size Bravais lattice object.
+
+    Parameters
+    ----------
+    *args : dict, tuple, or list
+
+        if dict: {'L1': L1, 'L2': L2, 'a1': a1, 'a2': a2}
+
+        if tuple or list: [L1, L2, a1, a2]
+
+        L1, L2: 2d vector defining periodic boundary conditions
+
+        a1, a2: 2d primitive vectors
+    init_version : int, default=1
+        init_version=0 uses compiled Fortran, faster. Not supported right now.
+    """
 
     def __init__(self, *args, init_version=1):
         if len(args) == 1:
@@ -74,12 +90,15 @@ class Lattice:
                self.nnlistk[n, -1, -1], self.nnlistk[n, -1, 1])
 
     def periodic_boundary_k(self, k):
+        """Apply periodic boundary conditions on vector in k space."""
         return _periodic_boundary(np.array(k), self.BZ1, self.BZ2)
 
     def periodic_boundary_r(self, r):
+        """Apply periodic boundary conditions on vector in r space."""
         return _periodic_boundary(np.array(r), self.L1, self.L2)
 
     def r_to_n(self, r):
+        """Map vector in r space to integer running over all lattice points."""
         r1 = self.periodic_boundary_r(r)
 
         n1 = int(round(np.dot(self.BZ1, r1) / (2*np.pi)))
@@ -91,6 +110,7 @@ class Lattice:
         return n
 
     def k_to_n(self, k):
+        """Map vector in k space to integer running over all lattice points."""
         k1 = self.periodic_boundary_k(np.array(k))
 
         n1 = int(round(np.dot(self.b1_perp, k1)))
@@ -102,6 +122,13 @@ class Lattice:
         return n
 
     def fourier_K_to_R(self, X):
+        """
+        Fourier transform from k to r space.
+
+        Last index of input has to run over all lattice points in k space.
+
+        Last index of output runs over all lattice points in r space.
+        """
         if X.shape[-1] != self.N:
             raise Exception("Last index of X has wrong number of elements")
         Y = np.zeros(X.shape, dtype=X.dtype)
@@ -112,6 +139,13 @@ class Lattice:
         return Y
 
     def fourier_R_to_K(self, X):
+        """
+        Fourier transform from r to k space.
+
+        Last index of input has to run over all lattice points in r space.
+
+        Last index of output runs over all lattice points in k space.
+        """
         if X.shape[-1] != self.N:
             raise Exception("Last index of X has wrong number of elements")
         Y = np.zeros(X.shape, dtype=X.dtype)
@@ -122,35 +156,66 @@ class Lattice:
         return Y
 
     def rotate(self, n, theta):
+        """
+        Rotate vector in k space.
+
+        Parameters
+        ----------
+        n : int
+            Index corresponding to input vector.
+        theta : float
+            Angle of rotation.
+
+        Returns
+        -------
+        int
+            Index corresponding to output vector.
+        """
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
         return self.k_to_n(np.matmul(R, self.k[n]))
 
     def plot_r(self, data):
+        """
+        Plot data in r space.
+
+        Parameters
+        ----------
+        data : iterable
+            Index corresponds to coordinates.
+        """
         import matplotlib.pyplot as plt
         import matplotlib as mpl
-        
+
         fig, ax = plt.subplots(1, 1, constrained_layout=True)
         cmap = mpl.cm.ScalarMappable(
             mpl.colors.Normalize(
                 vmin=data.min(), vmax=data.max()),
             mpl.cm.Greys)
-        
+
         _plot_2d(self.r, self.a1, self.a2, ax, data, cmap)
         fig.colorbar(cmap, ax=ax, shrink=0.6)
         ax.set_xlabel(r'$r_x$')
         ax.set_ylabel(r'$r_y$')
 
     def plot_k(self, data):
+        """
+        Plot data in k space.
+
+        Parameters
+        ----------
+        data : iterable
+            Index corresponds to coordinates.
+        """
         import matplotlib.pyplot as plt
         import matplotlib as mpl
-        
+
         fig, ax = plt.subplots(1, 1, constrained_layout=True)
         cmap = mpl.cm.ScalarMappable(
             mpl.colors.Normalize(
                 vmin=data.min(), vmax=data.max()),
             mpl.cm.Greys)
-        
+
         _plot_2d(self.k, self.b1, self.b2, ax, data, cmap)
         fig.colorbar(cmap, ax=ax, shrink=0.6)
         ax.set_xlabel(r'$k_x$')
@@ -203,7 +268,7 @@ def _find_cross(x, d, a):
 
 
 def _calc_patch(a1, a2):
-    """Calculates the corners of the Wiger-Seitz cell defined by a1, a2."""
+    """Calculate the corners of the Wiger-Seitz cell defined by a1, a2."""
     NNs = [d[0]*a1 + d[1]*a2 for d in
            [[1, 0], [0, 1], [-1, 0], [0, -1],
             [1, 1], [1, -1], [-1, -1], [-1, 1]]]
