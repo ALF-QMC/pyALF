@@ -15,9 +15,23 @@ from alf_ana.lattice import Lattice
 
 
 def symmetrize(latt, syms, dat):
-    """Symmetrizes a dataset, where syms is the list of symmetry operations,
-    including the identity, and dat is the data. The symmetrization is with
-    respect to the last index of dat.
+    """
+    Symmetrize a dataset.
+
+    Parameters
+    ----------
+    latt : Lattice
+    syms : list
+        List of symmetry operations, including the identity of the form
+        sym(latt, i) -> i_tranformed
+    dat : array-like object
+        Data to symmetrize. The symmetrization is with respect to the last
+        index of dat.
+
+    Returns
+    -------
+    dat_sym : numpy array
+        Symmetrized data.
     """
     N = dat.shape[-1]
     N_sym = len(syms)
@@ -31,7 +45,16 @@ def symmetrize(latt, syms, dat):
 
 
 class Parameters:
-    """Object representing the "parameters" file."""
+    """
+    Object representing the "parameters" file.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory of "parameters" file.
+    obs_name : str, optional
+        Observable name.
+    """
 
     def __init__(self, directory, obs_name=None):
         self.directory = directory
@@ -77,10 +100,11 @@ class Parameters:
 
 
 def rebin(X, N_rebin):
-    '''Combines each N_rebin bins into one bin. If the number of bins (=N0)
-    is not an integer multiple of N_rebin, the last N0 modulo N_rebin bins get
-    dismissed.
-    '''
+    """Combine each N_rebin bins into one bin.
+
+    If the number of bins (=N0) is not an integer multiple of N_rebin,
+    the last N0 modulo N_rebin bins get dismissed.
+    """
     if N_rebin == 1:
         return X
     N0 = len(X)
@@ -93,9 +117,24 @@ def rebin(X, N_rebin):
 
 
 def jack(X, par, N_skip=None, N_rebin=None):
-    '''Creates jackknife bins out of input bins after after skipping and
-    rebinning according to par. N_rebin overwrites N_rebin of par.
-    '''
+    """
+    Create jackknife bins out of input bins after after skipping and rebinning.
+
+    Parameters
+    ----------
+    X : array-like object
+        Input bins. Bins run over first index.
+    par : Parameters
+    N_skip : int, default=par.N_skip()
+        Number of bins to skip.
+    N_rebin : int, default=par.N_rebin()
+        Number of bins to recombine into one.
+
+    Returns
+    -------
+    numpy array
+        Jackknife bins after skipping and rebinning.
+    """
     if N_rebin is None:
         N_rebin = par.N_rebin()
     if N_skip is None:
@@ -109,7 +148,21 @@ def jack(X, par, N_skip=None, N_rebin=None):
 
 
 def error(jacks, imag=False):
-    '''Calculates expectation values and erros of given jackknife bins.'''
+    """
+    Calculate expectation values and errors of given jackknife bins.
+
+    Parameters
+    ----------
+    jacks : array-like object
+        Jackknife bins.
+    imag : bool, default=False
+        Output with imaginary part.
+
+    Returns
+    -------
+    tuple of numpy arrays
+        (expectation values, errors).
+    """
     N = len(jacks)
     m_r = np.mean(jacks.real, axis=0)
     e_r = np.sqrt(np.var(jacks.real, axis=0) * N)
@@ -118,74 +171,6 @@ def error(jacks, imag=False):
         e_i = np.sqrt(np.var(jacks.imag, axis=0) * N)
         return m_r, e_r, m_i, e_i
     return m_r, e_r
-
-
-class ReadObs:
-    '''Reads in bins of arbitraty format and performs skipping of bins and
-    rebinning as specified in parameters file. Returns jackknife bins'''
-
-    def __init__(self, directory, obs_name,
-                 bare_bins=False, substract_back=True):
-        self.directory = directory
-        self.obs_name = obs_name
-        if obs_name.endswith('_scal'):
-            self.J_obs, self.J_sign, self.N_obs = \
-                read_scal(directory, obs_name, bare_bins)
-        elif obs_name.endswith('_eq') or obs_name.endswith('_tau'):
-            (self.J_obs, self.J_back, self.J_sign, self.N_orb, self.N_tau,
-             self.dtau, self.latt) = \
-                read_latt(directory, obs_name, bare_bins, substract_back)
-        elif obs_name.endswith('_hist'):
-            (self.J_obs, self.J_sign, self.J_above, self.J_below,
-             self.N_classes, self.upper, self.lower) = \
-                read_hist(directory, obs_name, bare_bins)
-        else:
-            raise Exception('Error in ReadObs.init')
-        self.N_bins = self.J_obs.shape[0]
-
-    def all(self):
-        if self.obs_name.endswith('_scal'):
-            return self.J_obs, self.J_sign, self.N_obs
-        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
-            return (self.J_obs, self.J_back, self.J_sign, self.N_orb,
-                    self.N_tau, self.dtau, self.latt)
-        if self.obs_name.endswith('_hist'):
-            return (self.J_obs, self.J_sign, self.J_above, self.J_below,
-                    self.N_classes, self.upper, self.lower)
-        raise Exception('Error in ReadObs.all')
-
-    def slice(self, n):
-        if self.obs_name.endswith('_scal'):
-            return self.J_obs[n], self.J_sign[n], self.N_obs
-        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
-            return (self.J_obs[n], self.J_back[n], self.J_sign[n], self.N_orb,
-                    self.N_tau, self.dtau, self.latt)
-        if self.obs_name.endswith('_hist'):
-            return (self.J_obs[n], self.J_sign[n], self.J_above[n],
-                    self.J_below[n], self.N_classes, self.upper, self.lower)
-        raise Exception('Error in ReadObs.slice')
-
-    def jack(self, N_rebin):
-        par = Parameters(self.directory)
-        J_obs_temp = jack(self.J_obs, par, N_rebin=N_rebin)
-        N = len(J_obs_temp)
-        if self.obs_name.endswith('_scal'):
-            return (J_obs_temp,
-                    jack(self.J_sign, par, N_rebin=N_rebin),
-                    N*[self.N_obs])
-        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
-            return (J_obs_temp,
-                    jack(self.J_back, par, N_rebin=N_rebin),
-                    jack(self.J_sign, par, N_rebin=N_rebin),
-                    N*[self.N_orb], N*[self.N_tau], N*[self.dtau],
-                    N*[self.latt])
-        if self.obs_name.endswith('_hist'):
-            return (J_obs_temp,
-                    jack(self.J_sign, par, N_rebin=N_rebin),
-                    jack(self.J_above, par, N_rebin=N_rebin),
-                    jack(self.J_below, par, N_rebin=N_rebin),
-                    N*[self.N_classes], N*[self.upper], N*[self.lower])
-        raise Exception('Error in ReadObs.jack')
 
 
 def read_scal(directory, obs_name, bare_bins=False):
@@ -385,6 +370,87 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
                     J_obs[:, no1, no, nt, n] \
                         -= latt.N*J_back[:, no1]*J_back[:, no]
     return J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt
+
+
+class ReadObs:
+    """
+    Reads in bins of arbitraty format and performs skipping of bins and
+    rebinning as specified in parameters file. Saves jackknife bins.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory the observable lies in.
+    obs_name : str
+        Name of observable.
+    bare_bins : TYPE, default=False
+        Do not perform jackknifing.
+    substract_back : TYPE, default=True
+        Substract background for correlation functions.
+    """
+
+    def __init__(self, directory, obs_name,
+                 bare_bins=False, substract_back=True):
+        self.directory = directory
+        self.obs_name = obs_name
+        if obs_name.endswith('_scal'):
+            self.J_obs, self.J_sign, self.N_obs = \
+                read_scal(directory, obs_name, bare_bins)
+        elif obs_name.endswith('_eq') or obs_name.endswith('_tau'):
+            (self.J_obs, self.J_back, self.J_sign, self.N_orb, self.N_tau,
+             self.dtau, self.latt) = \
+                read_latt(directory, obs_name, bare_bins, substract_back)
+        elif obs_name.endswith('_hist'):
+            (self.J_obs, self.J_sign, self.J_above, self.J_below,
+             self.N_classes, self.upper, self.lower) = \
+                read_hist(directory, obs_name, bare_bins)
+        else:
+            raise Exception('Error in ReadObs.init')
+        self.N_bins = self.J_obs.shape[0]
+
+    def all(self):
+        if self.obs_name.endswith('_scal'):
+            return self.J_obs, self.J_sign, self.N_obs
+        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
+            return (self.J_obs, self.J_back, self.J_sign, self.N_orb,
+                    self.N_tau, self.dtau, self.latt)
+        if self.obs_name.endswith('_hist'):
+            return (self.J_obs, self.J_sign, self.J_above, self.J_below,
+                    self.N_classes, self.upper, self.lower)
+        raise Exception('Error in ReadObs.all')
+
+    def slice(self, n):
+        if self.obs_name.endswith('_scal'):
+            return self.J_obs[n], self.J_sign[n], self.N_obs
+        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
+            return (self.J_obs[n], self.J_back[n], self.J_sign[n], self.N_orb,
+                    self.N_tau, self.dtau, self.latt)
+        if self.obs_name.endswith('_hist'):
+            return (self.J_obs[n], self.J_sign[n], self.J_above[n],
+                    self.J_below[n], self.N_classes, self.upper, self.lower)
+        raise Exception('Error in ReadObs.slice')
+
+    def jack(self, N_rebin):
+        par = Parameters(self.directory)
+        J_obs_temp = jack(self.J_obs, par, N_rebin=N_rebin)
+        N = len(J_obs_temp)
+        if self.obs_name.endswith('_scal'):
+            return (J_obs_temp,
+                    jack(self.J_sign, par, N_rebin=N_rebin),
+                    N*[self.N_obs])
+        if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
+            return (J_obs_temp,
+                    jack(self.J_back, par, N_rebin=N_rebin),
+                    jack(self.J_sign, par, N_rebin=N_rebin),
+                    N*[self.N_orb], N*[self.N_tau], N*[self.dtau],
+                    N*[self.latt])
+        if self.obs_name.endswith('_hist'):
+            return (J_obs_temp,
+                    jack(self.J_sign, par, N_rebin=N_rebin),
+                    jack(self.J_above, par, N_rebin=N_rebin),
+                    jack(self.J_below, par, N_rebin=N_rebin),
+                    N*[self.N_classes], N*[self.upper], N*[self.lower])
+        raise Exception('Error in ReadObs.jack')
 
 
 def ana_scal(filename, obs_name=None):
