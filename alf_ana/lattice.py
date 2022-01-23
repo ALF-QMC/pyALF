@@ -27,8 +27,10 @@ class Lattice:
         L1, L2: 2d vector defining periodic boundary conditions
 
         a1, a2: 2d primitive vectors
+
     init_version : int, default=1
-        init_version=0 uses compiled Fortran, faster. Not supported right now.
+        init_version=0 uses compiled Fortran, which is faster but not supported
+        right now.
     """
 
     def __init__(self, *args, init_version=1):

@@ -12,7 +12,7 @@ Welcome to pyALF's documentation!
 
 
 Indices and tables
-==================
+=================================
 
 * :ref:`genindex`
 * :ref:`modindex`
@@ -20,34 +20,23 @@ Indices and tables
 
 
 Module py_alf
-=============
-
+----------------------------------
 .. automodule:: py_alf
    :members:
 
+High-level analysis functions
+----------------------------------
+.. autofunction:: alf_ana.analysis.analysis
+.. autofunction:: alf_ana.check_warmup.check_warmup
+.. autofunction:: alf_ana.check_rebin.check_rebin
 
-Module alf_ana.analysis
-=================================
-.. automodule:: alf_ana.analysis
-   :members:
 
 Module alf_ana.ana
-=================================
+----------------------------------
 .. automodule:: alf_ana.ana
    :members:
 
-Module alf_ana.lattice
-=================================
-.. automodule:: alf_ana.lattice
+Object alf_ana.lattice.Lattice
+----------------------------------
+.. autoclass:: alf_ana.lattice.Lattice
    :members:
-
-Module alf_ana.check_warmup
-=================================
-.. automodule:: alf_ana.check_warmup
-   :members:
-
-Module alf_ana.check_rebin
-=================================
-.. automodule:: alf_ana.check_rebin
-   :members:
-
