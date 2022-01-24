@@ -19,7 +19,6 @@ import importlib.util
 import numpy as np
 import pandas as pd
 
-# from default_parameters_generic import _PARAMS_GENERIC
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
 from alf_ana.analysis import analysis
@@ -53,9 +52,8 @@ class ALF_source:
         to './ALF'.
     branch : str, optional
         If specified, this will be checked out by git. The default is None.
-    url : str, optional
-        Address, from where to clone ALF if alf_dir not exists.
-        The default is 'https://git.physik.uni-wuerzburg.de/ALF/ALF.git'.
+    url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
+        Address from where to clone ALF if alf_dir not exists.
     """
 
     def __init__(self, alf_dir=os.getenv('ALF_DIR', './ALF'), branch=None,
@@ -88,8 +86,15 @@ class ALF_source:
             spec.loader.exec_module(module)
             return module
 
-        parse_ham = import_module(
-            'parse_ham', os.path.join(self.alf_dir, 'Prog', 'parse_ham.py'))
+        try:
+            parse_ham = import_module(
+                'parse_ham', os.path.join(self.alf_dir, 'Prog', 'parse_ham.py'))
+        except FileNotFoundError as parse_ham_not_found:
+            raise Exception(
+                "parse_ham.py not found. Directory {} ".format(self.alf_dir) +
+                "does not contain a supported ALF code.") \
+                    from parse_ham_not_found
+
         self._PARAMS_GENERIC = parse_ham._PARAMS_GENERIC
 
         # Parse ALF Hamiltonians to get parameter list.
@@ -162,6 +167,7 @@ class Simulation:
     machine : {"GNU", "INTEL", "PGI", "SUPERMUC-NG", "JUWELS"}
         Compiler and environment.
     stab : str, optional
+        Stabilization strategy employed by ALF.
         Possible values: "STAB1", "STAB2", "STAB3", "LOG". Not case sensitive.
     devel : bool, default=True
         Compile with additional flags for development and debugging.
