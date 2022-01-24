@@ -19,7 +19,7 @@ import importlib.util
 import numpy as np
 import pandas as pd
 
-from default_parameters_generic import _PARAMS_GENERIC
+# from default_parameters_generic import _PARAMS_GENERIC
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
 from alf_ana.analysis import analysis
@@ -90,6 +90,7 @@ class ALF_source:
 
         parse_ham = import_module(
             'parse_ham', os.path.join(self.alf_dir, 'Prog', 'parse_ham.py'))
+        self._PARAMS_GENERIC = parse_ham._PARAMS_GENERIC
 
         # Parse ALF Hamiltonians to get parameter list.
         with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
@@ -114,7 +115,7 @@ class ALF_source:
         for nlist_name, nlist in self.default_parameters[ham_name].items():
             params[nlist_name] = copy.deepcopy(nlist)
         if include_generic:
-            for nlist_name, nlist in _PARAMS_GENERIC.items():
+            for nlist_name, nlist in self._PARAMS_GENERIC.items():
                 params[nlist_name] = copy.deepcopy(nlist)
         return params
 
@@ -126,8 +127,8 @@ class ALF_source:
         for nlist_name, nlist in self.default_parameters[ham_name].items():
             p_list += list(nlist)
         if include_generic:
-            for nlist_name in _PARAMS_GENERIC:
-                p_list += list(_PARAMS_GENERIC[nlist_name])
+            for nlist_name in self._PARAMS_GENERIC:
+                p_list += list(self._PARAMS_GENERIC[nlist_name])
 
         return [i.upper() for i in p_list]
 
