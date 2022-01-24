@@ -19,10 +19,16 @@ Indices and tables
 * :ref:`search`
 
 
-Module py_alf
+class ALF_source
 ----------------------------------
-.. automodule:: py_alf
+.. autoclass:: py_alf.ALF_source
    :members:
+
+class Simulation
+----------------------------------
+.. autoclass:: py_alf.Simulation
+   :members:
+
 
 High-level analysis functions
 ----------------------------------
@@ -31,7 +37,34 @@ High-level analysis functions
 .. autofunction:: alf_ana.check_rebin.check_rebin
 
 
-Module alf_ana.ana
+Scripts
+----------------------------------
+alf_postprocess.py::
+   Script for postprocessing monte carlo bins.
+
+   positional arguments:
+   directories           Directories to analyze. If empty, analyzes all directories
+                           containing file "data.h5" it can find.
+
+   optional arguments:
+   -h, --help            show this help message and exit
+   --check_warmup, --warmup
+                           Check warmup.
+   --check_rebin, --rebin
+                           Check rebinning for controlling autocorrelation.
+   -l CHECK_LIST [CHECK_LIST ...], --check_list CHECK_LIST [CHECK_LIST ...]
+                           List of observables to check for warmup and rebinning.
+   --do_analysis, --ana  Do analysis.
+   --gather              Gather all analysis results in one file.
+   --no_tau              Skip time displaced correlations.
+   --custom_obs CUSTOM_OBS
+                           File that defines custom observables.
+   --symmetry SYMMETRY, --sym SYMMETRY
+                           File that defines lattice symmetries.
+
+
+.. Module alf_ana.ana
+Low-level analysis functions
 ----------------------------------
 .. automodule:: alf_ana.ana
    :members:
