@@ -40,30 +40,38 @@ High-level analysis functions
 Scripts
 ----------------------------------
 alf_postprocess.py::
-   Script for postprocessing monte carlo bins.
 
-   positional arguments:
-   directories           Directories to analyze. If empty, analyzes all directories
-                           containing file "data.h5" it can find.
+  usage: alf_postprocess.py [-h] [--check_warmup] [--check_rebin]
+                            [-l CHECK_LIST [CHECK_LIST ...]] [--do_analysis]
+                            [--gather] [--no_tau] [--custom_obs CUSTOM_OBS]
+                            [--symmetry SYMMETRY]
+                            [directories ...]
 
-   optional arguments:
-   -h, --help            show this help message and exit
-   --check_warmup, --warmup
-                           Check warmup.
-   --check_rebin, --rebin
-                           Check rebinning for controlling autocorrelation.
-   -l CHECK_LIST [CHECK_LIST ...], --check_list CHECK_LIST [CHECK_LIST ...]
-                           List of observables to check for warmup and rebinning.
-   --do_analysis, --ana  Do analysis.
-   --gather              Gather all analysis results in one file.
-   --no_tau              Skip time displaced correlations.
-   --custom_obs CUSTOM_OBS
-                           File that defines custom observables.
-   --symmetry SYMMETRY, --sym SYMMETRY
-                           File that defines lattice symmetries.
+  Script for postprocessing monte carlo bins.
+
+  positional arguments:
+    directories           Directories to analyze. If empty, analyzes all
+                          directories containing file "data.h5" it can find.
+
+  optional arguments:
+    -h, --help            show this help message and exit
+    --check_warmup, --warmup
+                          Check warmup.
+    --check_rebin, --rebin
+                          Check rebinning for controlling autocorrelation.
+    -l CHECK_LIST [CHECK_LIST ...], --check_list CHECK_LIST [CHECK_LIST ...]
+                          List of observables to check for warmup and rebinning.
+    --do_analysis, --ana  Do analysis.
+    --gather              Gather all analysis results in one file.
+    --no_tau              Skip time displaced correlations.
+    --custom_obs CUSTOM_OBS
+                          File that defines custom observables.
+    --symmetry SYMMETRY, --sym SYMMETRY
+                          File that defines lattice symmetries.
 
 
 .. Module alf_ana.ana
+
 Low-level analysis functions
 ----------------------------------
 .. automodule:: alf_ana.ana
