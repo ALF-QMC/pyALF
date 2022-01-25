@@ -1,7 +1,5 @@
 variables:
   BRANCH_R: "196-write-parameters-to-hdf5-file"
-  OMPI_ALLOW_RUN_AS_ROOT: 1
-  OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
   
 .test_template: &test_definition
   rules:
@@ -19,7 +17,8 @@ variables:
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
     - $linter -E alf_postprocess.py default_parameters_generic.py parse_ham.py py_alf.py Run.py Scripts/test_branch.py
     - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
-    - ./Run.py -R --alfdir ./ALF --machine $MACHINE --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
+    - adduser --system --disabled-password tester
+    - runuser -m -u tester -- ./Run.py -R --alfdir ./ALF --machine $MACHINE --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
 
 .warn_template: &warn_definition
   allow_failure: true
@@ -42,9 +41,13 @@ variables:
   script:
     - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
     - export PYTHONPATH="$PWD:$PYTHONPATH"
+    - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/compilers/bin:$PATH"
+    - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/comm_libs/mpi/bin:$PATH"
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - cd Scripts
-    - ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE
+    - echo "localhost slots=4" > myhostfile
+    - adduser --system --disabled-password tester
+    - runuser -m -u tester -- ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
 
 
 Test_Stretch:
