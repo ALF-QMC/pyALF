@@ -16,14 +16,12 @@ import numpy as np
 from py_alf import ALF_source, Simulation
 
 
-def test_branch(alf_dir, pars, branch_R, branch_T,
-                machine="DEVELOPMENT", mpi=False, n_mpi=4):
+def test_branch(alf_dir, pars, branch_R, branch_T, **kwargs):
     ham_name = pars[0]
     sim_dict = pars[1]
     sim_R = Simulation(
         ALF_source(alf_dir=alf_dir, branch=branch_R),
-        ham_name, sim_dict,
-        machine=machine, mpi=mpi, n_mpi=n_mpi
+        ham_name, sim_dict, **kwargs
         )
     sim_R.compile()
     sim_R.run()
@@ -32,8 +30,7 @@ def test_branch(alf_dir, pars, branch_R, branch_T,
 
     sim_T = Simulation(
         ALF_source(alf_dir=alf_dir, branch=branch_T),
-        ham_name, sim_dict,
-        machine=machine, mpi=mpi, n_mpi=n_mpi
+        ham_name, sim_dict, **kwargs
         )
     sim_T.sim_dir = sim_T.sim_dir + '_test'
     sim_T.compile()
@@ -351,11 +348,17 @@ if __name__ == "__main__":
         '--machine', default="DEVELOPMENT",
         help='Machine configuration                (default: DEVELOPMENT)')
     parser.add_argument(
-        '--mpi', default=False,
+        '--mpi', action='store_true',
         help='mpi run                              (default: False)')
     parser.add_argument(
         '--n_mpi', default=4,
         help='number of mpi processes              (default: 4)')
+    parser.add_argument(
+        '--mpiexec', default="mpiexec",
+        help='Command used for starting a MPI run  (default: "mpiexec")')
+    parser.add_argument(
+        '--mpiexec_args', default='',
+        help='Additional arguments to MPI executable.')
 
     args = parser.parse_args()
 
@@ -365,13 +368,18 @@ if __name__ == "__main__":
     machine = args.machine
     mpi = args.mpi
     n_mpi = args.n_mpi
+    mpiexec = args.mpiexec
+    mpiexec_args = args.mpiexec_args.split()
 
     if os.path.exists("test.txt"):
         os.remove("test.txt")
 
     test_all = True
     for sim_name, sim_dict in sim_pars.items():
-        test = test_branch(alf_dir, sim_dict, branch_R, branch_T, machine, mpi, n_mpi)
+        test = test_branch(
+            alf_dir, sim_dict, branch_R, branch_T, 
+            machine=machine, mpi=mpi, n_mpi=n_mpi,
+            mpiexec=mpiexec, mpiexec_args=mpiexec_args)
         with open('test.txt', 'a') as f:
             f.write('{}: {}\n'.format(sim_name, test))
         if not test:
