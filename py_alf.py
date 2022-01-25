@@ -163,7 +163,13 @@ class Simulation:
     n_omp : int, default=1
         Number of OpenMP threads per process.
     mpiexec : str, default="mpiexec"
-        Command used for starting a MPI run.
+        Command used for starting a MPI run. This may have to be adapted to
+        fit with the MPI library used at compilation. Possible candidates 
+        include 'orterun', 'mpiexec.hydra'.
+    mpiexec_args : list of str, optional
+        Additional arguments to MPI executable. E.g. the flag 
+        ``--hostfile /path/to/file`` is specified by
+        ``mpiexec_args=['--hostfile', '/path/to/file']``
     machine : {"GNU", "INTEL", "PGI", "SUPERMUC-NG", "JUWELS"}
         Compiler and environment.
     stab : str, optional
@@ -191,6 +197,9 @@ class Simulation:
         self.n_mpi = kwargs.pop("n_mpi", 2)
         self.n_omp = kwargs.pop('n_omp', 1)
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
+        self.mpiexec_args = kwargs.pop('mpiexec_args', [])
+        if not isinstance(self.mpiexec_args, list):
+            raise Exception('mpiexec_args has to be a list.')
         stab = kwargs.pop('stab', '').upper()
         machine = kwargs.pop('machine', 'GNU').upper()
         self.devel = kwargs.pop('devel', False)
@@ -287,7 +296,7 @@ class Simulation:
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    command = [self.mpiexec, '-n', str(self.n_mpi), executable]
+                    command = [self.mpiexec, '-n', str(self.n_mpi), *self.mpiexec_args, executable]
                 else:
                     command = executable
                 subprocess.run(command, check=True, env=env)
