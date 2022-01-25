@@ -1,3 +1,4 @@
+
 """Provides interfaces for compilig, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
@@ -51,7 +52,7 @@ class ALF_source:
         Defaults to environment variable $ALF_DIR if present, otherwise
         to './ALF'.
     branch : str, optional
-        If specified, this will be checked out by git. The default is None.
+        If specified, this will be checked out by git.
     url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
         Address from where to clone ALF if alf_dir not exists.
     """
@@ -164,10 +165,10 @@ class Simulation:
         Number of OpenMP threads per process.
     mpiexec : str, default="mpiexec"
         Command used for starting a MPI run. This may have to be adapted to
-        fit with the MPI library used at compilation. Possible candidates 
+        fit with the MPI library used at compilation. Possible candidates
         include 'orterun', 'mpiexec.hydra'.
     mpiexec_args : list of str, optional
-        Additional arguments to MPI executable. E.g. the flag 
+        Additional arguments to MPI executable. E.g. the flag
         ``--hostfile /path/to/file`` is specified by
         ``mpiexec_args=['--hostfile', '/path/to/file']``
     machine : {"GNU", "INTEL", "PGI", "SUPERMUC-NG", "JUWELS"}
@@ -258,9 +259,19 @@ class Simulation:
 
         self.custom_obs = {}
 
-    def compile(self):
-        """Compile ALF. Clones a new repository if alf_dir does not exist."""
-        compile_alf(self.alf_src.alf_dir, config=self.config)
+    def compile(self, verbosity=0):
+        """
+        Compile ALF.
+
+        Parameters
+        ----------
+        verbosity : int, default=0
+            0: Don't echo make reciepes.
+            1: Echo make reciepes.
+            else: Print make tracing information.
+        """
+        compile_alf(self.alf_src.alf_dir, config=self.config,
+                    verbosity=verbosity)
 
     def run(self, copy_bin=False, only_prep=False):
         """
@@ -296,15 +307,16 @@ class Simulation:
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    command = [self.mpiexec, '-n', str(self.n_mpi), *self.mpiexec_args, executable]
+                    command = [self.mpiexec, '-n', str(self.n_mpi),
+                               *self.mpiexec_args, executable]
                 else:
                     command = executable
                 subprocess.run(command, check=True, env=env)
             except subprocess.CalledProcessError as ALF_crash:
                 print('Error while running {}.'.format(executable))
                 print('parameters:')
-                with open('parameters', 'r') as f:
-                    print(f.read())
+                # with open('parameters', 'r') as f:
+                #     print(f.read())
                 raise Exception('Error while running {}.'.format(executable)) \
                     from ALF_crash
 
@@ -485,6 +497,7 @@ def set_param(alf_src, ham_name, sim_dict):
     params["VAR_ham_name"] = {
         "ham_name": {'value': ham_name, 'comment': "Name of Hamiltonian"}
     }
+    params.move_to_end('VAR_ham_name', last=False)
 
     for name, value in sim_dict.items():
         params = _update_var(params, name, value)
@@ -512,9 +525,40 @@ def getenv(config, alf_dir='.'):
     return env
 
 
-def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
-                url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
-    """Compile ALF. Clone a new repository if alf_dir does not exist."""
+def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
+                branch=None,
+                config='GNU noMPI',
+                url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git',
+                verbosity=0
+                ):
+    """
+    Compile ALF. Clone a new repository if alf_dir does not exist.
+
+    Parameters
+    ----------
+    alf_dir : path-like object, optional
+        Directory containing the ALF source code. If the directory does
+        not exist, the source code will be fetched from a server.
+        Defaults to environment variable $ALF_DIR if present, otherwise
+        to './ALF'.
+    branch : str, optional
+        If specified, this will be checked out by git.
+    config : str, default='GNU noMPI'
+        Arguments for `configure.sh`.
+    url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
+        Address from where to clone ALF if alf_dir not exists.
+    verbosity : int, default=0
+        0: Don't echo make reciepes.
+        1: Echo make reciepes.
+        else: Print make tracing information.
+    """
+    if verbosity == 0:
+        makeflags = ['-s']
+    elif verbosity == 1:
+        makeflags = []
+    else:
+        makeflags = ['--trace']
+
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
         print("Repository {} does not exist, cloning from {}"
@@ -534,10 +578,9 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
                 raise Exception('Error while checking out {}'.format(branch)) \
                     from git_checkout_failed
         env = getenv(config)
-        print('Compiling ALF... ', end='')
-        subprocess.run(['make', 'clean'], check=True, env=env)
-        subprocess.run(['make', 'ana'], check=True, env=env)
-        subprocess.run(['make', 'program'], check=True, env=env)
+        print('Compiling ALF... ')
+        subprocess.run(['make', *makeflags, 'clean'], check=True, env=env)
+        subprocess.run(['make', *makeflags, 'all'], check=True, env=env)
         print('Done.')
 
 
@@ -552,6 +595,9 @@ def out_to_in(verbose=False):
             if verbose:
                 print('mv {} {}'.format(name, name2))
             os.replace(name, name2)
+
+
+################ Legacy ################
 
 
 def analysis_fortran(alf_dir, sim_dir='.', hdf5=False):
