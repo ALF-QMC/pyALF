@@ -7,7 +7,7 @@ __copyright__ = "Copyright 2021-2022, The ALF Project"
 __license__ = "GPL"
 
 import os
-import argparse
+from argparse import ArgumentParser
 
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
@@ -16,7 +16,7 @@ from alf_ana.ana import load_res
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description='Script for postprocessing monte carlo bins.',
         )
     parser.add_argument(

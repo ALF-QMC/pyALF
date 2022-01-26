@@ -88,15 +88,28 @@ class ALF_source:
             return module
 
         try:
-            parse_ham = import_module(
-                'parse_ham', os.path.join(self.alf_dir, 'Prog', 'parse_ham.py'))
+            parse_ham_mode = import_module(
+                'parse_ham',
+                os.path.join(self.alf_dir, 'Prog', 'parse_ham_mod.py'))
         except FileNotFoundError as parse_ham_not_found:
             raise Exception(
-                "parse_ham.py not found. Directory {} ".format(self.alf_dir) +
+                "parse_ham_mod.py not found. "
+                "Directory {} ".format(self.alf_dir) +
                 "does not contain a supported ALF code.") \
                     from parse_ham_not_found
+        try:
+            default_parameters_generic = import_module(
+                'parse_ham',
+                os.path.join(self.alf_dir, 'Prog',
+                             'default_parameters_generic.py'))
+        except FileNotFoundError as default_parameters_generic_not_found:
+            raise Exception(
+                "default_parameters_generic.py not found. "
+                "Directory {} ".format(self.alf_dir) +
+                "does not contain a supported ALF code.") \
+                    from default_parameters_generic_not_found
 
-        self._PARAMS_GENERIC = parse_ham._PARAMS_GENERIC
+        self._PARAMS_GENERIC = default_parameters_generic._PARAMS_GENERIC
 
         # Parse ALF Hamiltonians to get parameter list.
         with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
@@ -108,7 +121,7 @@ class ALF_source:
             filename = os.path.join(self.alf_dir, 'Prog', 'Hamiltonians',
                                     'Hamiltonian_{}_smod.F90'.format(ham_name))
             # print('Hamiltonian:', ham_name)
-            self.default_parameters[ham_name] = parse_ham.parse(filename)
+            self.default_parameters[ham_name] = parse_ham_mode.parse(filename)
             # pprint.pprint(self.default_parameters[ham_name])
 
     def get_ham_names(self):
