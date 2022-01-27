@@ -15,7 +15,7 @@ variables:
     - pip install f90nml
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
-    - #$linter -E py_alf.py Run.py alf_ana/analysis.py alf_ana/ana.py alf_ana/check_rebin.py alf_ana/check_warmup.py alf_ana/lattice.py alf_ana/util.py Scripts/alf_bin_count.py Scripts/alf_del_bins.py Scripts/alf_postprocess.py Scripts/alf_show_obs.py Scripts/minimal_ALF_run.py Scripts/test_branch.py
+    # - $linter -E py_alf.py Run.py alf_ana/analysis.py alf_ana/ana.py alf_ana/check_rebin.py alf_ana/check_warmup.py alf_ana/lattice.py alf_ana/util.py Scripts/alf_bin_count.py Scripts/alf_del_bins.py Scripts/alf_postprocess.py Scripts/alf_show_obs.py Scripts/minimal_ALF_run.py Scripts/test_branch.py
     - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
     - adduser --system --disabled-password tester
     - runuser -m -u tester -- ./Run.py -R --alfdir ./ALF --machine $MACHINE --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
