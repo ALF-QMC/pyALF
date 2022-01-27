@@ -30,6 +30,7 @@ author = 'Jonas Schwab'
 extensions = [
     'sphinx.ext.autodoc',
     'numpydoc',
+    'sphinxarg.ext',       # See https://sphinx-argparse.readthedocs.io
 ]
 
 # Add any paths that contain templates here, relative to this directory.

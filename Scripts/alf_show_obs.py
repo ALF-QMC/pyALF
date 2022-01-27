@@ -10,21 +10,37 @@ __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2022, The ALF Project"
 __license__ = "GPL"
 
-import sys
 import os
+from argparse import ArgumentParser
 
 from alf_ana.util import show_obs
 
 
-if len(sys.argv) > 1:
-    filenames = sys.argv[1:]
-else:
-    filenames = []
-    for root, folders, files in os.walk('.'):
-        if 'data.h5' in files:
-            filenames.append(os.path.join(root, 'data.h5'))
-    filenames.sort()
+def _get_arg_parser():
+    parser = ArgumentParser(
+        description='Count number of bins in ALF HDF5 file(s), assuming all'
+                    'observables have the same number of bins.',
+        )
+    parser.add_argument(
+        'filenames', nargs='*',
+        help='Name of HDF5 files. If no arguments are supplied, '
+             'all files named "data.h5" in the current working '
+             'directory and below are taken.')
+    return parser
 
-for filename in filenames:
-    print("===== {} =====".format(filename))
-    show_obs(filename)
+
+if __name__ == '__main__':
+    parser = _get_arg_parser()
+    args = parser.parse_args()
+    if args.filenames:
+        filenames = args.filenames
+    else:
+        filenames = []
+        for root, folders, files in os.walk('.'):
+            if 'data.h5' in files:
+                filenames.append(os.path.join(root, 'data.h5'))
+        filenames.sort()
+
+    for filename in filenames:
+        print("===== {} =====".format(filename))
+        show_obs(filename)

@@ -39,35 +39,55 @@ High-level analysis functions
 
 Scripts
 ----------------------------------
-alf_postprocess.py::
+A number of executable python scripts in the folder `Scripts/`.
+For productive work, it may be suitable to add this folder to
+the `$PATH` environment variable.
 
-  usage: alf_postprocess.py [-h] [--check_warmup] [--check_rebin]
-                            [-l CHECK_LIST [CHECK_LIST ...]] [--do_analysis]
-                            [--gather] [--no_tau] [--custom_obs CUSTOM_OBS]
-                            [--symmetry SYMMETRY]
-                            [directories ...]
+minimal_ALF_run.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Extensively commented example script showing the minimal steps
+for creating and running an ALF simulation in pyALF.
 
-  Script for postprocessing monte carlo bins.
+alf_run.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. argparse::
+    :ref: Scripts.alf_run._get_arg_parser
+    :prog: alf_run.py
+    :nodefault:
 
-  positional arguments:
-    directories           Directories to analyze. If empty, analyzes all
-                          directories containing file "data.h5" it can find.
+alf_postprocess.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. argparse::
+    :ref: Scripts.alf_postprocess._get_arg_parser
+    :prog: alf_postprocess.py
 
-  optional arguments:
-    -h, --help            show this help message and exit
-    --check_warmup, --warmup
-                          Check warmup.
-    --check_rebin, --rebin
-                          Check rebinning for controlling autocorrelation.
-    -l CHECK_LIST [CHECK_LIST ...], --check_list CHECK_LIST [CHECK_LIST ...]
-                          List of observables to check for warmup and rebinning.
-    --do_analysis, --ana  Do analysis.
-    --gather              Gather all analysis results in one file.
-    --no_tau              Skip time displaced correlations.
-    --custom_obs CUSTOM_OBS
-                          File that defines custom observables.
-    --symmetry SYMMETRY, --sym SYMMETRY
-                          File that defines lattice symmetries.
+alf_bin_count.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. argparse::
+    :ref: Scripts.alf_bin_count._get_arg_parser
+    :prog: alf_bin_count.py
+    :nodefault:
+
+alf_show_obs.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. argparse::
+    :ref: Scripts.alf_show_obs._get_arg_parser
+    :prog: alf_show_obs.py
+    :nodefault:
+
+alf_del_bins.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. argparse::
+    :ref: Scripts.alf_del_bins._get_arg_parser
+    :prog: alf_del_bins.py
+    :nodefault:
+
+alf_test_branch.py
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. argparse::
+    :ref: Scripts.alf_test_branch._get_arg_parser
+    :prog: alf_test_branch.py
+    :nodefault:
 
 
 .. Module alf_ana.ana

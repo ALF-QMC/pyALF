@@ -15,7 +15,7 @@ from alf_ana.analysis import analysis
 from alf_ana.ana import load_res
 
 
-if __name__ == '__main__':
+def _get_arg_parser():
     parser = ArgumentParser(
         description='Script for postprocessing monte carlo bins.',
         )
@@ -39,7 +39,8 @@ if __name__ == '__main__':
         help='Skip time displaced correlations.')
     parser.add_argument(
         '--custom_obs', default=os.getenv('ALF_CUSTOM_OBS', None),
-        help='File that defines custom observables.')
+        help='File that defines custom observables. '
+             '(default: os.getenv("ALF_CUSTOM_OBS", None))')
     parser.add_argument(
         '--symmetry', '--sym', default=None,
         help='File that defines lattice symmetries.')
@@ -47,6 +48,11 @@ if __name__ == '__main__':
         'directories', nargs='*',
         help='Directories to analyze. If empty, analyzes all \
             directories containing file "data.h5" it can find.')
+    return parser
+
+
+if __name__ == '__main__':
+    parser = _get_arg_parser()
     args = parser.parse_args()
 
     if args.custom_obs is None:

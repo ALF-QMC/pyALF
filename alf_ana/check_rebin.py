@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot error vs n_rebin"""
+"""Plot error vs n_rebin."""
 
 import math
 import tkinter as tk
@@ -7,7 +7,7 @@ import tkinter as tk
 import numpy as np
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.backend_bases import key_press_handler
+# from matplotlib.backend_bases import key_press_handler
 import matplotlib.pyplot as plt
 
 
@@ -15,6 +15,21 @@ from alf_ana.ana import Parameters, jack, error, read_scal, ReadObs
 
 
 def check_rebin(directories, names, Nmax0=100, custom_obs={}):
+    """
+    Plot error vs n_rebin. Opens a new window.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories with bins to check.
+    names : list of str
+        Names of observables to check.
+    Nmax0 : int, default=100
+        Biggest n_rebin to consider. The default is 100.
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        See :func:`alf_ana.analysis.analysis`.
+    """
     root = tk.Tk()
 
     n_dir_var = tk.IntVar(master=root, value=-1)
@@ -23,7 +38,7 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
     # Nmax_str = tk.StringVar()
     N_rebin_str = tk.StringVar()
 
-    fig, axes = create_fig(len(names))
+    fig, axes = _create_fig(len(names))
     vert = [None] * len(names)
     canvas = FigureCanvasTkAgg(fig, master=root)
 
@@ -33,11 +48,11 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
     canvas.draw()
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-    def on_key_press(event):
-        print("you pressed {}".format(event.key))
-        key_press_handler(event, canvas, toolbar)
+    # def on_key_press(event):
+    #     print("you pressed {}".format(event.key))
+    #     key_press_handler(event, canvas, toolbar)
 
-    canvas.mpl_connect("key_press_event", on_key_press)
+    # canvas.mpl_connect("key_press_event", on_key_press)
 
     def _set_nrebin():
         N_rebin = int(N_rebin_str.get())
@@ -102,7 +117,7 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
                                                 bare_bins=True)
                 N_bins = bins_c.shape[0] - par.N_skip()
                 Nmax = min(N_bins // 3, Nmax0)
-                err = rebin_err(bins_c, par, Nmax)
+                err = _rebin_err(bins_c, par, Nmax)
                 ax.set_title('{}_err'.format(obs_name))
                 for i in range(err.shape[1]):
                     ax.plot(range(1, Nmax+1), err[:, i, 1])
@@ -138,7 +153,8 @@ def check_rebin(directories, names, Nmax0=100, custom_obs={}):
 
     tk.mainloop()
 
-def create_fig(N):
+
+def _create_fig(N):
     if N == 1:
         return plt.subplots(1, 1, figsize=(10, 7), dpi=100)
     ncols = math.ceil(math.sqrt(N))
@@ -152,7 +168,7 @@ def create_fig(N):
     return fig, axes0.flat
 
 
-def auto_corr(bins, Nmax):
+def _auto_corr(bins, Nmax):
     N_bins = len(bins)
     if N_bins < Nmax:
         raise Exception("Number of bins too low")
@@ -175,7 +191,7 @@ def auto_corr(bins, Nmax):
     return res
 
 
-def rebin_err(bins, par, Nmax):
+def _rebin_err(bins, par, Nmax):
     N_obs = bins.shape[1]
     res = np.empty((Nmax, N_obs, 2))
 

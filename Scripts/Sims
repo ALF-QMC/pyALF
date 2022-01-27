@@ -1,0 +1,5 @@
+Hubbard_Plain_Vanilla, {"Lattice_type": "Square", "L1": 4 , "L2": 4, "Nsweep": 50,  "NBin": 5, "Beta": 1.0 , "Theta": 7.0, "Dtau": 0.1,  "Projector": true }
+stop 
+Hubbard, {"Lattice_type": "Square", "L1": 4 , "L2": 4, "NBin": 5, "ham_T": 0.0, "Nsweep" : 2000, "Beta": 1.0, "ham_chem": -1.0 }
+Hubbard_Plain_Vanilla, {"Lattice_type": "Square", "L1": 4 , "L2": 4, "Nsweep": 200,  "NBin": 5, "Beta": 1.0 , "Theta": 7.0, "Dtau": 0.1,  "Projector": true }
+Sample file to be used with alf_run.py

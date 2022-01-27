@@ -8,13 +8,26 @@ import numpy as np
 from scipy.optimize import curve_fit
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
-from matplotlib.backend_bases import key_press_handler
+# from matplotlib.backend_bases import key_press_handler
 import matplotlib.pyplot as plt
 
 from alf_ana.ana import Parameters, ReadObs, read_scal
 
 
 def check_warmup(directories, names, custom_obs={}):
+    """
+    Plot bins to determine n_skip. Opens a new window.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories with bins to check.
+    names : list of str
+        Names of observables to check.
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        See :func:`alf_ana.analysis.analysis`.
+    """
     root = tk.Tk()
 
     n_dir_var = tk.IntVar(master=root, value=-1)
@@ -25,7 +38,7 @@ def check_warmup(directories, names, custom_obs={}):
 
     res = [None] * len(names)
 
-    fig, axes = create_fig(len(names))
+    fig, axes = _create_fig(len(names))
     canvas = FigureCanvasTkAgg(fig, master=root)
 
     toolbar = NavigationToolbar2Tk(canvas, root)
@@ -34,11 +47,11 @@ def check_warmup(directories, names, custom_obs={}):
     canvas.draw()
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-    def on_key_press(event):
-        print("you pressed {}".format(event.key))
-        key_press_handler(event, canvas, toolbar)
+    # def on_key_press(event):
+    #     print("you pressed {}".format(event.key))
+    #     key_press_handler(event, canvas, toolbar)
 
-    canvas.mpl_connect("key_press_event", on_key_press)
+    # canvas.mpl_connect("key_press_event", on_key_press)
 
     def _set_nmax():
         Nmax = int(Nmax_str.get())
@@ -70,7 +83,7 @@ def check_warmup(directories, names, custom_obs={}):
         directory_var.set(directories[n_dir])
         root.wm_title('{} warmup'.format(directory_var.get()))
         par = Parameters(directory_var.get())
-        get_bins(directory_var.get(), names, custom_obs, res)
+        _get_bins(directory_var.get(), names, custom_obs, res)
 
         for n, bins in enumerate(res):
             ax = axes[n]
@@ -113,7 +126,7 @@ def check_warmup(directories, names, custom_obs={}):
     tk.mainloop()
 
 
-def create_fig(N):
+def _create_fig(N):
     if N == 1:
         fig, axes0 = plt.subplots(1, 1, figsize=(10, 7), dpi=100)
         return fig, [axes0]
@@ -128,7 +141,7 @@ def create_fig(N):
     return fig, axes0.flat
 
 
-def get_bins(directory, names, custom_obs, res):
+def _get_bins(directory, names, custom_obs, res):
     for n, obs_name in enumerate(names):
         if obs_name in custom_obs:
             print('custom', obs_name)

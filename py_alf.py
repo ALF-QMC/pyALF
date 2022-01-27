@@ -1,5 +1,5 @@
-
-"""Provides interfaces for compilig, running and postprocessing ALF in Python.
+"""
+Provides interfaces for compiling, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
