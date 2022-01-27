@@ -11,11 +11,11 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y pylint3 python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
+    - apt-get update && apt-get install -y pylint3 python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py python3-pip git curl libghc-zlib-dev
     - pip install f90nml
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
-    - $linter -E alf_postprocess.py default_parameters_generic.py parse_ham.py py_alf.py Run.py Scripts/test_branch.py
+    - $linter -E py_alf.py Run.py alf_ana/analysis.py alf_ana/ana.py alf_ana/check_rebin.py alf_ana/check_warmup.py alf_ana/lattice.py alf_ana/util.py Scripts/alf_bin_count.py Scripts/alf_del_bins.py Scripts/alf_postprocess.py Scripts/alf_show_obs.py Scripts/minimal_ALF_run.py Scripts/test_branch.py
     - git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
     - adduser --system --disabled-password tester
     - runuser -m -u tester -- ./Run.py -R --alfdir ./ALF --machine $MACHINE --branch_R $BRANCH_R --ham_name_R Hubbard_Plain_Vanilla
@@ -32,7 +32,7 @@ variables:
       - .gitlab-ci.yml
   script:
     - apt-get update && apt-get install -y pylint3 python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py
-    - pylint Run.py default_variables.py py_alf.py
+    - pylint py_alf.py Run.py alf_ana/analysis.py alf_ana/ana.py alf_ana/check_rebin.py alf_ana/check_warmup.py alf_ana/lattice.py alf_ana/util.py Scripts/alf_bin_count.py Scripts/alf_del_bins.py Scripts/alf_postprocess.py Scripts/alf_show_obs.py Scripts/minimal_ALF_run.py Scripts/test_branch.py
     
 .test_branch_template: &test_branch_definition
   rules:
@@ -47,14 +47,7 @@ variables:
     - cd Scripts
     - echo "localhost slots=4" > myhostfile
     - adduser --system --disabled-password tester
-    - runuser -m -u tester -- ./test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
 
-
-Test_Stretch:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy3
-  variables:
-    MACHINE: "GNU"
-  <<: *test_definition
 
 Test_Buster:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
@@ -85,12 +78,6 @@ Warn_Bullseye:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
   <<: *warn_definition
 
-
-Test_branch_Stretch:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:stretch-gfortran-blas-lapack-fftw-hdf5-scipy3
-  variables:
-    MACHINE: "GNU"
-  <<: *test_branch_definition
 
 Test_branch_Buster:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
