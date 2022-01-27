@@ -9,25 +9,56 @@ from alf_ana.ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
                          ana_eq, write_res_eq, ana_tau, write_res_tau)
 
 
-def analysis(directory, symmetry=None, custom_obs=None, do_tau=True):
+def analysis(directory,
+             symmetry=None, custom_obs=None, do_tau=True, always=False):
     """
-    Performs analysis in given directory and writes results to "res.pkl".
+    Perform analysis in given directory.
+
+    Results are written to the pickled dictionary `res.pkl` and in plain text
+    in the folder `res/`.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory containing Monte Carlo bins.
+    symmetry : list of functions, optional
+        List of functions reppresenting symmetry operations on lattice,
+        including unity. Will be used to symmetrize lattice-type
+        observables.
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        The key of each entry is the observable name and the value is a
+        dictionary with the format::
+            {'needs': some_list,
+             'kwargs': some_dict,
+             'function': some_function,}
+
+        `some_list` contains observable names to be read by
+        :class:`alf_ana.ana.ReadObs`. Jackknife bins and kwargs from
+        `some_dict` are handed to `some_function` with a separate call for
+        each bin.
+    do_tau : bool, default=True
+        Analyze time-displaced correlation functions. Setting this to False
+        speeds up analysis and makes result files much smaller.
+    always : bool, default=False
+        Do not skip if parameters and bins are older than results.
     """
     print('### Analyzing {} ###'.format(directory))
     print(os.getcwd())
 
     par = Parameters(directory)
     if 'data.h5' in os.listdir(directory):
-        try:
-            d1 = os.path.getmtime(os.path.join(directory, 'data.h5')) \
-                - os.path.getmtime(os.path.join(directory, 'res.pkl'))
-            d2 = os.path.getmtime(os.path.join(directory, 'parameters')) \
-                - os.path.getmtime(os.path.join(directory, 'res.pkl'))
-            if d1 < 0 and d2 < 0:
-                print('already analyzed')
-                return
-        except OSError:
-            pass
+        if not always:
+            try:
+                d1 = os.path.getmtime(os.path.join(directory, 'data.h5')) \
+                    - os.path.getmtime(os.path.join(directory, 'res.pkl'))
+                d2 = os.path.getmtime(os.path.join(directory, 'parameters')) \
+                    - os.path.getmtime(os.path.join(directory, 'res.pkl'))
+                if d1 < 0 and d2 < 0:
+                    print('already analyzed')
+                    return
+            except OSError:
+                pass
 
         with h5py.File(os.path.join(directory, 'data.h5'), "r") as f:
             params = {}

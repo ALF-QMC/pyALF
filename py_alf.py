@@ -46,7 +46,7 @@ class ALF_source:
 
     Parameters
     ----------
-    alf_dir : path-like object, optional
+    alf_dir : path-like object, default=os.getenv('ALF_DIR', './ALF')
         Directory containing the ALF source code. If the directory does
         not exist, the source code will be fetched from a server.
         Defaults to environment variable $ALF_DIR if present, otherwise
@@ -195,6 +195,12 @@ class Simulation:
     hdf5 : bool, default=True
         Whether to compile ALF with HDF5.
         Full postprocessing support only exists with HDF5.
+
+    Attributes
+    ----------
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        See :func:`alf_ana.analysis.analysis`.
     """
 
     def __init__(self, alf_src, ham_name, sim_dict, **kwargs):
@@ -376,7 +382,8 @@ class Simulation:
         """
         check_rebin(self.get_directories(), names, custom_obs=self.custom_obs)
 
-    def analysis(self, python_version=True, symmetry=None):
+    def analysis(self, python_version=True,
+                 symmetry=None, do_tau=True, always=False):
         """
         Perform default analysis on Monte Carlo data.
 
@@ -386,15 +393,23 @@ class Simulation:
             Use python version of analysis.
             The non-python version is legacy and does not support all
             postprocessing features.
-        symmetry : list of functions, default=None
-            List of functions reppresenting symmetry operations on lattice,
-            including unity. Will be used to symmetrize lattice-type
-            observables.
+        symmetry : list of functions, optional
+            See :func:`alf_ana.analysis.analysis`.
+        do_tau : bool, default=True
+            Analyze time-displaced correlation functions. Setting this to False
+            speeds up analysis and makes result files much smaller.
+        always : bool, default=False
+            Do not skip if parameters and bins are older than results.
         """
         for directory in self.get_directories():
             if python_version:
-                analysis(directory,
-                         custom_obs=self.custom_obs, symmetry=symmetry)
+                analysis(
+                    directory,
+                    custom_obs=self.custom_obs,
+                    symmetry=symmetry,
+                    do_tau=do_tau,
+                    always=always,
+                    )
             else:
                 analysis_fortran(self.alf_src.alf_dir, directory,
                                  hdf5=self.hdf5)
