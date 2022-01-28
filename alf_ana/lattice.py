@@ -246,7 +246,7 @@ def _plot_2d(coords, vec1, vec2, ax, data, cmap):
     ax.set_ylim(ymin, ymax)
 
 
-@jit(nopython=True)
+@jit(nopython=False, cache=True)
 def _periodic_boundary(r, L1, L2):
     for L in [L2, L1, L2-L1, L2+L1]:
         x = np.dot(r, L) / np.sum(L**2)
@@ -358,7 +358,7 @@ def _init0(L1, L2, a1, a2):
            imj)
 
 
-@jit(nopython=True)
+@jit(nopython=False, cache=True)
 def _init1(L1, L2, a1, a2):
     ndim = len(L1)
 
