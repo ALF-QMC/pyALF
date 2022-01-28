@@ -20,7 +20,7 @@ variables:
     - export PATH="$PWD/Scripts:$PATH"
     - adduser --system --disabled-password tester
     - mkdir test && chown tester test && cd test
-    - runuser -m -u tester -- alf_run.py --alfdir ./ALF --machine $MACHINE --branch $BRANCH_R --sims_file Scripts/Sims
+    - runuser -m -u tester -- alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file ../Scripts/Sims
 
 .warn_template: &warn_definition
   allow_failure: true
@@ -52,7 +52,7 @@ variables:
     - adduser --system --disabled-password tester
     - mkdir test && chown tester test && cd test
     - echo "localhost slots=4" > myhostfile
-    - runuser -m -u tester -- test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
+    - runuser -m -u tester -- alf_test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
 
 
 Test_Buster:

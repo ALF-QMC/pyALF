@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     alf_src = ALF_source(alf_dir=alf_dir, branch=args.branch)
 
-    with open("Sims", 'r') as f:
+    with open(args.sims_file, 'r') as f:
         simulations = f.read().splitlines()
     num_sims = 0
     ham_names = []
