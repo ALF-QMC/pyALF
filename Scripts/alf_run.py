@@ -76,16 +76,13 @@ if __name__ == "__main__":
             sim_dicts.append(sim_dict)
 
     print("Number of simulations: {}".format(num_sims))
-    compiled = False
     for ham_name, sim_dict in zip(ham_names, sim_dicts):
         sim = Simulation(
             alf_src, ham_name, sim_dict,
             machine=args.machine, mpi=args.mpi, n_mpi=args.n_mpi,
             mpiexec=args.mpiexec, mpiexec_args=mpiexec_args
             )
-        if not compiled:
-            sim.compile()
-            compiled = True
+        sim.compile()
         sim.run()
         sim.analysis()
     print("Done")
