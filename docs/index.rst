@@ -19,12 +19,12 @@ Indices and tables
 * :ref:`search`
 
 
-class ALF_source
+Class ALF_source
 ----------------------------------
 .. autoclass:: py_alf.ALF_source
    :members:
 
-class Simulation
+Class Simulation
 ----------------------------------
 .. autoclass:: py_alf.Simulation
    :members:
@@ -97,7 +97,7 @@ Low-level analysis functions
 .. automodule:: alf_ana.ana
    :members:
 
-Object alf_ana.lattice.Lattice
+Class alf_ana.lattice.Lattice
 ----------------------------------
 .. autoclass:: alf_ana.lattice.Lattice
    :members:

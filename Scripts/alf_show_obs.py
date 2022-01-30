@@ -13,13 +13,13 @@ __license__ = "GPL"
 import os
 from argparse import ArgumentParser
 
-from alf_ana.util import show_obs
+from alf_ana.util import show_obs, find_sim_dirs
 
 
 def _get_arg_parser():
     parser = ArgumentParser(
-        description='Count number of bins in ALF HDF5 file(s), assuming all'
-                    'observables have the same number of bins.',
+        description='Show observables and their number of bins '
+                    'in ALF HDF5 file(s).',
         )
     parser.add_argument(
         'filenames', nargs='*',
@@ -35,11 +35,8 @@ if __name__ == '__main__':
     if args.filenames:
         filenames = args.filenames
     else:
-        filenames = []
-        for root, folders, files in os.walk('.'):
-            if 'data.h5' in files:
-                filenames.append(os.path.join(root, 'data.h5'))
-        filenames.sort()
+        dirs = find_sim_dirs('.')
+        filenames = [os.path.join(d, 'data.h5') for d in dirs]
 
     for filename in filenames:
         print("===== {} =====".format(filename))

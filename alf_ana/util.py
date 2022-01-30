@@ -7,7 +7,30 @@ __copyright__ = "Copyright 2022, The ALF Project"
 __license__ = "GPL"
 
 import h5py
+import os
+
 import numpy as np
+
+
+def find_sim_dirs(root_in='.'):
+    """
+    Find directories containing a file named 'data.h5'.
+
+    Parameters
+    ----------
+    root_in : path-like object, default='.'
+        Root directory from where to start searching.
+
+    Returns
+    -------
+    list of directory names.
+    """
+    dirs = []
+    for root, folders, files in os.walk(root_in):
+        if 'data.h5' in files:
+            dirs.append(root)
+    dirs.sort()
+    return dirs
 
 
 def del_bins(filename, N0, N):

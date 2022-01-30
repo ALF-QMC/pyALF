@@ -9,6 +9,7 @@ __license__ = "GPL"
 import os
 from argparse import ArgumentParser
 
+from alf_ana.util import find_sim_dirs
 from alf_ana.check_warmup import check_warmup
 from alf_ana.check_rebin import check_rebin
 from alf_ana.analysis import analysis
@@ -58,21 +59,19 @@ if __name__ == '__main__':
     if args.custom_obs is None:
         custom_obs = {}
     else:
-        exec(open(os.path.expanduser(args.custom_obs)).read())
+        with open(os.path.expanduser(args.custom_obs)) as f:
+            exec(f.read())
 
     if args.symmetry is None:
         symmetry = None
     else:
-        exec(open(os.path.expanduser(args.symmetry)).read())
+        with open(os.path.expanduser(args.symmetry)) as f:
+            exec(f.read())
 
     if args.directories:
         directories = args.directories
     else:
-        directories = []
-        for root, folders, files in os.walk('.'):
-            if 'data.h5' in files:
-                directories.append(root)
-        directories.sort()
+        directories = find_sim_dirs('.')
 
     if args.check_warmup and (args.check_list is not None):
         check_warmup(directories, args.check_list, custom_obs=custom_obs)
