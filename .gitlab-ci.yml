@@ -67,7 +67,7 @@ create_sphinx:
       - export PYTHONPATH="$PWD:$PYTHONPATH"
       - cd docs/
       - make html
-      - make latexpdf
+      - make latex
 
 
 Test_Buster:
