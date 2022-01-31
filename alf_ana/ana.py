@@ -53,7 +53,10 @@ class Parameters:
     directory : path-like object
         Directory of "parameters" file.
     obs_name : str, optional
-        Observable name.
+        Observable name. If this is set, the object tries to get a parameters
+        not from the namelist 'var_errors', but from a namelist called
+        `obs_name`, while 'var_errors' is the fallback options. Parameters
+        will be written to namelist `obs_name`.
     """
 
     def __init__(self, directory, obs_name=None):
@@ -66,21 +69,24 @@ class Parameters:
             self.obs_name = obs_name.lower()
 
     def write_nml(self):
+        """Write namelist to file."""
         self._nml.write(self.filename, force=True)
 
-    def get_parameter(self, parameter_name):
+    def _get_parameter(self, parameter_name):
         try:
             return self._nml[self.obs_name][parameter_name]
         except KeyError:
             return self._nml['var_errors'][parameter_name]
 
     def N_skip(self):
-        return self.get_parameter('n_skip')
+        """Get N_skip."""
+        return self._get_parameter('n_skip')
 
     def N_rebin(self):
-        return self.get_parameter('n_rebin')
+        """Get N_rebin."""
+        return self._get_parameter('n_rebin')
 
-    def set_parameter(self, parameter_name, parameter):
+    def _set_parameter(self, parameter_name, parameter):
         try:
             temp = self._nml[self.obs_name]
         except KeyError:
@@ -90,12 +96,15 @@ class Parameters:
         self._nml[self.obs_name] = temp
 
     def set_N_skip(self, parameter):
+        """Update N_skip."""
         self.set_parameter('n_skip', parameter)
 
     def set_N_rebin(self, parameter):
+        """Update N_rebin."""
         self.set_parameter('n_rebin', parameter)
 
     def N_min(self):
+        """Get minimal number of bins, given the parameters in this object."""
         return self.N_skip() + 2*self.N_rebin()
 
 
@@ -174,8 +183,29 @@ def error(jacks, imag=False):
 
 
 def read_scal(directory, obs_name, bare_bins=False):
-    '''Reads in scalar-type bins and performs skipping of bins and rebinning
-    as specified in parameters file. Returns jackknife bins'''
+    """
+    Read, skip, rebin and jackknife scalar-type bins.
+
+    Bins get skipped and rebinned according to N_skip an N_rebin retrieved
+    through :class:`Parameters`, then jackknife resampling is applied.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory containing the observabel.
+    obs_name : str
+    bare_bins : bool, default=False
+        Do not perform skipping, rebinning, or jackknife resampling.
+
+    Returns
+    -------
+    array
+        Observables. shape: `(N_bins, N_obs)`.
+    array
+        Sign. shape: `(N_bins,)`.
+    N_obs : int
+        Number of observables.
+    """
     if 'data.h5' in os.listdir(directory):
         filename = os.path.join(directory, 'data.h5')
 
@@ -214,8 +244,37 @@ def read_scal(directory, obs_name, bare_bins=False):
 
 
 def read_hist(directory, obs_name, bare_bins=False):
-    '''Reads in histogram-type bins and performs skipping of bins and rebinning
-    as specified in parameters file. Returns jackknife bins'''
+    """
+    Read, skip, rebin and jackknife histogram-type bins.
+
+    Bins get skipped and rebinned according to N_skip an N_rebin retrieved
+    through :class:`Parameters`, then jackknife resampling is applied.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory containing the observabel.
+    obs_name : str
+    bare_bins : bool, default=False
+        Do not perform skipping, rebinning, or jackknife resampling.
+
+    Returns
+    -------
+    array
+        Observables. shape: `(N_bins, N_classes)`.
+    array
+        Sign. shape: `(N_bins,)`.
+    array
+        Proportion of observations above upper bound. shape: `(N_bins,)`.
+    array
+        Proportion of observations below lower bound. shape: `(N_bins,)`.
+    N_classes : int
+        Number of classes between upper and lower bound.
+    upper : float
+        Upper bound.
+    lower : float
+        Lower bound.
+    """
     par = Parameters(directory, obs_name)
 
     if 'data.h5' in os.listdir(directory):
@@ -274,8 +333,39 @@ def read_hist(directory, obs_name, bare_bins=False):
 
 
 def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
-    '''Reads in Lattice-type bins and performs skipping of bins and rebinning
-    as specified in parameters file. Returns jackknife bins'''
+    """
+    Read, skip, rebin and jackknife lattice-type bins (_eq and _tau).
+
+    Bins get skipped and rebinned according to N_skip an N_rebin retrieved
+    through :class:`Parameters`, then jackknife resampling is applied.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory containing the observabel.
+    obs_name : str
+    bare_bins : bool, default=False
+        Do not perform skipping, rebinning, or jackknife resampling.
+    substract_back : bool, default=True
+        Substract background from correlation functions.
+
+    Returns
+    -------
+    array
+        Observables. shape: `(N_bins, N_orb, N_orb, N_tau, latt.N)`.
+    array
+        Background. shape: `(N_bins, N_orb)`
+    array
+        Sign. shape: `(N_bins,)`.
+    N_orb : int
+        Number of orbitals.
+    N_tau : int
+        Number of imaginary time steps.
+    dtau : TYPE
+        Imaginary time step length.
+    latt : Lattice
+        See :class:`alf_ana.lattice.Lattice`.
+    """
     par = Parameters(directory, obs_name)
     filename = os.path.join(directory, 'data.h5')
 
@@ -374,25 +464,31 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
 
 class ReadObs:
     """
-    Reads in bins of arbitraty format and performs skipping of bins and
-    rebinning as specified in parameters file. Saves jackknife bins.
+    Read, skip, rebin and jackknife scalar-type bins.
+
+    Bins get skipped and rebinned according to N_skip an N_rebin retrieved
+    through :class:`Parameters`, then jackknife resampling is applied.
+    Saves jackknife bins.
+
+    Cf. :func:`read_scal`, :func:`read_latt`, :func:`read_hist`.
 
     Parameters
     ----------
     directory : path-like object
-        Directory the observable lies in.
+        Directory containing the observable.
     obs_name : str
         Name of observable.
     bare_bins : TYPE, default=False
-        Do not perform jackknifing.
+        Do not perform skipping, rebinning, or jackknife resampling.
     substract_back : TYPE, default=True
-        Substract background for correlation functions.
+        Substract background. Applies to correlation functions.
     """
 
     def __init__(self, directory, obs_name,
                  bare_bins=False, substract_back=True):
         self.directory = directory
         self.obs_name = obs_name
+        self.bare_bins = bare_bins
         if obs_name.endswith('_scal'):
             self.J_obs, self.J_sign, self.N_obs = \
                 read_scal(directory, obs_name, bare_bins)
@@ -409,6 +505,7 @@ class ReadObs:
         self.N_bins = self.J_obs.shape[0]
 
     def all(self):
+        """Return all bins."""
         if self.obs_name.endswith('_scal'):
             return self.J_obs, self.J_sign, self.N_obs
         if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
@@ -420,6 +517,7 @@ class ReadObs:
         raise Exception('Error in ReadObs.all')
 
     def slice(self, n):
+        """Return n-th bin."""
         if self.obs_name.endswith('_scal'):
             return self.J_obs[n], self.J_sign[n], self.N_obs
         if self.obs_name.endswith('_eq') or self.obs_name.endswith('_tau'):
@@ -431,6 +529,16 @@ class ReadObs:
         raise Exception('Error in ReadObs.slice')
 
     def jack(self, N_rebin):
+        """
+        Return jackknife bins. Object has to be created with `bare_bins=True`.
+
+        Parameters
+        ----------
+        N_rebin : int
+            Overwrite N_rebin from parameters.
+        """
+        if not self.bare_bins:
+            raise Exception('Object has to be created with `bare_bins=True`.')
         par = Parameters(self.directory)
         J_obs_temp = jack(self.J_obs, par, N_rebin=N_rebin)
         N = len(J_obs_temp)
@@ -453,9 +561,17 @@ class ReadObs:
         raise Exception('Error in ReadObs.jack')
 
 
-def ana_scal(filename, obs_name=None):
-    '''Analyzes given scalar observables'''
-    J_obs, J_sign, N_obs = ReadObs(filename, obs_name).all()
+def ana_scal(directory, obs_name):
+    """Analyze given scalar observables.
+
+    Parameters
+    ----------
+    directory : path-like object
+        Directory containing the observable.
+    obs_name : str
+        Name of observable.
+    """
+    J_obs, J_sign, N_obs = ReadObs(directory, obs_name).all()
 
     sign = error(J_sign)
 
@@ -467,10 +583,10 @@ def ana_scal(filename, obs_name=None):
     return sign, dat
 
 
-def ana_hist(filename, obs_name=None):
-    '''Analyzes given histogram observables'''
+def ana_hist(directory, obs_name):
+    """Analyze given histogram observables."""
     J_obs, J_sign, J_above, J_below, N_classes, upper, lower = \
-        ReadObs(filename, obs_name).all()
+        ReadObs(directory, obs_name).all()
 
     sign = error(J_sign)
     above = error(J_above)
@@ -485,12 +601,14 @@ def ana_hist(filename, obs_name=None):
     return sign, above, below, dat, upper, lower
 
 
-def ana_eq(filename, obs_name=None, sym=None):
-    '''Analyzes given equal-time collalators.
+def ana_eq(directory, obs_name, sym=None):
+    """Analyze given equal-time collalators.
+
     If sym is given, it symmetrizes the bins prior to calculating the error.
-    '''
+    Cf. :func:`symmetrize`.
+    """
     J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt = \
-        ReadObs(filename, obs_name).all()
+        ReadObs(directory, obs_name).all()
     del J_back, N_tau, dtau
     N_bins = len(J_sign)
 
@@ -518,12 +636,14 @@ def ana_eq(filename, obs_name=None, sym=None):
     return sign, m_K, e_K, m_sum, e_sum, m_R, e_R, m_R_sum, e_R_sum, latt
 
 
-def ana_tau(filename, obs_name=None, sym=None):
-    '''Analyzes given timedisplaced corralators.
+def ana_tau(directory, obs_name, sym=None):
+    """Analyze given timedisplaced corralators.
+
     If sym is given, it symmetrizes the bins prior to calculating the error.
-    '''
+    Cf. :func:`symmetrize`.
+    """
     J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt = \
-        ReadObs(filename, obs_name).all()
+        ReadObs(directory, obs_name).all()
     del J_back, N_orb, N_tau
     N_bins = len(J_sign)
 
@@ -635,6 +755,23 @@ def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
 
 
 def load_res(directories):
+    """
+    Read analysis results from multiple simulations.
+
+    Reads from pickled dictionaries 'res.pkl' and returns everything
+    in single pandas DataFrame with one row per simulation.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories containing analyzed simulation results.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        Contains analysis results and Hamiltonian parameters.
+        One row per simulation.
+    """
     if not isinstance(directories, list):
         directories = [directories]
     li = []

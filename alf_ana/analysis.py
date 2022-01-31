@@ -93,6 +93,7 @@ def analysis(directory,
             print('too few bins ', N_bins)
             return
     else:
+        params = {}  # Stays empty, parameters are only supported with HDF5
         list_obs = []
         list_scal = []
         list_hist = []

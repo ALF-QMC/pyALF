@@ -77,20 +77,6 @@ class Lattice:
                 self.listk, self.invlistk, self.nnlistk,
                 self.imj, self.r, self.k)
 
-    def NNr(self, n):
-        return(self.nnlistr[n, 1, 0], self.nnlistr[n, 0, 1],
-               self.nnlistr[n, -1, 0], self.nnlistr[n, 0, -1])
-
-    def NNk(self, n):
-        return(self.nnlistk[n, 1, 0], self.nnlistk[n, 0, 1],
-               self.nnlistk[n, -1, 0], self.nnlistk[n, 0, -1])
-
-    def NNk2(self, n):
-        return(self.nnlistk[n, 1, 0], self.nnlistk[n, 0, 1],
-               self.nnlistk[n, -1, 0], self.nnlistk[n, 0, -1],
-               self.nnlistk[n, 1, 1], self.nnlistk[n, 1, -1],
-               self.nnlistk[n, -1, -1], self.nnlistk[n, -1, 1])
-
     def periodic_boundary_k(self, k):
         """Apply periodic boundary conditions on vector in k space."""
         return _periodic_boundary(np.array(k), self.BZ1, self.BZ2)

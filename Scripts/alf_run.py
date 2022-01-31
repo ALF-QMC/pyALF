@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Helper script for compiling and running ALF.
-"""
+"""Helper script for compiling and running ALF."""
 # pylint: disable=invalid-name
 
 __author__ = "Fakher F. Assaad, and Jonas Schwab"
@@ -68,12 +66,11 @@ if __name__ == "__main__":
     for i, sim_str in enumerate(simulations):
         if sim_str.strip().lower() == "stop":
             break
-        else:
-            num_sims += 1
-            ham_name, par_str = sim_str.split(sep=',', maxsplit=1)
-            sim_dict = json.loads(par_str, object_pairs_hook=OrderedDict)
-            ham_names.append(ham_name)
-            sim_dicts.append(sim_dict)
+        num_sims += 1
+        ham_name, par_str = sim_str.split(sep=',', maxsplit=1)
+        sim_dict = json.loads(par_str, object_pairs_hook=OrderedDict)
+        ham_names.append(ham_name)
+        sim_dicts.append(sim_dict)
 
     print("Number of simulations: {}".format(num_sims))
     for ham_name, sim_dict in zip(ham_names, sim_dicts):

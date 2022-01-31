@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Helper script for testing between ALF branches.
-"""
+"""Helper script for testing between ALF branches."""
 # pylint: disable=invalid-name
 
 __author__ = "Jonas Schwab"
@@ -59,7 +57,9 @@ def test_branch(alf_dir, pars, branch_R, branch_T, **kwargs):
 
 def _get_arg_parser():
     parser = argparse.ArgumentParser(
-        description='Script for testing two branches against one another',
+        description='Script for testing two branches against one another.'
+            'The test succeeds if analysis results for both branches are '
+            'exactly the same.',
         )
     parser.add_argument(
         '--sim_pars', default='./test_pars.json',

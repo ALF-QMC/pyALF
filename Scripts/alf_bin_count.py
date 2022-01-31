@@ -14,7 +14,7 @@ __license__ = "GPL"
 import os
 from argparse import ArgumentParser
 
-from alf_ana.util import bin_count
+from alf_ana.util import bin_count, find_sim_dirs
 
 
 def _get_arg_parser():
@@ -36,11 +36,8 @@ if __name__ == '__main__':
     if args.filenames:
         filenames = args.filenames
     else:
-        filenames = []
-        for root, folders, files in os.walk('.'):
-            if 'data.h5' in files:
-                filenames.append(os.path.join(root, 'data.h5'))
-        filenames.sort()
+        dirs = find_sim_dirs('.')
+        filenames = [os.path.join(d, 'data.h5') for d in dirs]
 
     for filename in filenames:
         bin_count(filename)
