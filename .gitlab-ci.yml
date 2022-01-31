@@ -55,6 +55,21 @@ variables:
     - runuser -m -u tester -- alf_test_branch.py --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
 
 
+create_sphinx:
+  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
+  artifacts:
+    expire_in: 120 days
+    paths:
+      - docs/_build/
+  script:
+      - apt-get update && apt install -y python3-pandas python3-numba python3-tk python3-sphinx python3-numpydoc python3-sphinx-argparse latexmk
+      - pip install f90nml
+      - export PYTHONPATH="$PWD:$PYTHONPATH"
+      - cd docs/
+      - make html
+      - make latexpdf
+
+
 Test_Buster:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
   variables:
