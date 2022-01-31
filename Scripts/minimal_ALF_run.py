@@ -17,9 +17,7 @@ from py_alf import ALF_source, Simulation
 # https://git.physik.uni-wuerzburg.de/ALF/ALF, if ALF diretory does not exist.
 # Gets ALF diretory from environment variable $ALF_DIR, or defaults to "./ALF",
 # if not present.
-alf_src = ALF_source(
-    branch='196-write-parameters-to-hdf5-file',  # TODO: Remove this after merging '196-write-parameters-to-hdf5-file' into master
-)
+alf_src = ALF_source()
 
 # Create instance of `Simulation`, overwriting default parameters as desired.
 sim = Simulation(
