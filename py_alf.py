@@ -1,18 +1,29 @@
-"""Provides interfaces for compilig, running and postprocessing ALF in Python.
+"""
+Provides interfaces for compiling, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
-__copyright__ = "Copyright 2020-2021, The ALF Project"
+__copyright__ = "Copyright 2020-2022, The ALF Project"
 __license__ = "GPL"
 
 import os
 import re
+import copy
 import subprocess
-from shutil import copyfile
+import shutil
+from collections import OrderedDict
+import importlib.util
+
 import numpy as np
-from default_variables import default_params, params_list
+import pandas as pd
+
+from alf_ana.check_warmup import check_warmup
+from alf_ana.check_rebin import check_rebin
+from alf_ana.analysis import analysis
+from alf_ana.ana import load_res
 
 
 class cd:
@@ -29,57 +40,190 @@ class cd:
         os.chdir(self.saved_path)
 
 
-class Simulation:
-    """Object corresponding to a simulation directory.
+class ALF_source:
+    """
+    Objet representing ALF source code.
 
-    Provides functions for preparing, running, and postprocessing a simulation.
+    Parameters
+    ----------
+    alf_dir : path-like object, default=os.getenv('ALF_DIR', './ALF')
+        Directory containing the ALF source code. If the directory does
+        not exist, the source code will be fetched from a server.
+        Defaults to environment variable $ALF_DIR if present, otherwise
+        to './ALF'.
+    branch : str, optional
+        If specified, this will be checked out by git.
+    url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
+        Address from where to clone ALF if alf_dir not exists.
     """
 
-    def __init__(self, ham_name, sim_dict, alf_dir='./ALF', **kwargs):
-        """Initialize the Simulation object.
+    def __init__(self, alf_dir=os.getenv('ALF_DIR', './ALF'), branch=None,
+                 url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
+        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
+        self.branch = branch
 
-        Required argument:
-        ham_name -- Name of the hamiltonian
-        sim_dict -- Dictionary specfying parameters owerwriting defaults.
-                    Can be a list of dictionaries to enable parallel tempering.
+        if not os.path.exists(self.alf_dir):
+            print("Repository {} does not exist, cloning from {}"
+                  .format(alf_dir, url))
+            try:
+                subprocess.run(["git", "clone", url, self.alf_dir], check=True)
+            except subprocess.CalledProcessError as git_clone_failed:
+                raise Exception('Error while cloning repository') \
+                    from git_clone_failed
+        if branch is not None:
+            with cd(self.alf_dir):
+                print('Checking out branch {}'.format(branch))
+                try:
+                    subprocess.run(['git', 'checkout', branch], check=True)
+                except subprocess.CalledProcessError as git_checkout_failed:
+                    raise Exception(
+                        'Error while checking out {}'.format(branch)) \
+                        from git_checkout_failed
 
-        Keyword arguments:
-        alf_dir -- Directory containing the ALF source code (default: './ALF').
-                   If the directory does not exist, the source code will be
-                   fetched from a server.
-        sim_dir -- Directory in which the Monte Carlo will be run.
-                   If not specified, sim_dir will be generated from sim_dict.
-        sim_root-- Directory to prepend to sim_dir. (default: "ALF_data")
-        branch  -- If specified, this will be checked out prior to compilation.
-        mpi     -- Employ MPI (default: False)
-        n_mpi   -- Number of MPI processes
-        n_omp   -- Number of OpenMP threads per process (default: 1)
-        mpiexec -- Command used for starting a MPI run (default: "mpiexec")
-        machine -- Possible values: GNU, INTEL, PGI, SUPERMUC-NG, JUWELS
-                   default: GNU
-        stab    -- Which version of stabilisation to employ
-                   Possible values: STAB1, STAB2, STAB3, LOG
-        devel   -- Compile with additional flags for development and debugging
-                   default: False
-        hdf5    -- Use HDF5
-                   default: False
-        machine and stab are not case sensitive.
+        def import_module(module_name, path):
+            """Dynamically import module from given path."""
+            spec = importlib.util.spec_from_file_location(module_name, path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
+
+        try:
+            parse_ham_mode = import_module(
+                'parse_ham',
+                os.path.join(self.alf_dir, 'Prog', 'parse_ham_mod.py'))
+        except FileNotFoundError as parse_ham_not_found:
+            raise Exception(
+                "parse_ham_mod.py not found. "
+                "Directory {} ".format(self.alf_dir) +
+                "does not contain a supported ALF code.") \
+                    from parse_ham_not_found
+        try:
+            default_parameters_generic = import_module(
+                'parse_ham',
+                os.path.join(self.alf_dir, 'Prog',
+                             'default_parameters_generic.py'))
+        except FileNotFoundError as default_parameters_generic_not_found:
+            raise Exception(
+                "default_parameters_generic.py not found. "
+                "Directory {} ".format(self.alf_dir) +
+                "does not contain a supported ALF code.") \
+                    from default_parameters_generic_not_found
+
+        self._PARAMS_GENERIC = default_parameters_generic._PARAMS_GENERIC
+
+        # Parse ALF Hamiltonians to get parameter list.
+        with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
+                  'r', encoding='UTF-8') as f:
+            ham_names = f.read().splitlines()
+
+        self.default_parameters = {}
+        for ham_name in ham_names:
+            filename = os.path.join(self.alf_dir, 'Prog', 'Hamiltonians',
+                                    'Hamiltonian_{}_smod.F90'.format(ham_name))
+            # print('Hamiltonian:', ham_name)
+            self.default_parameters[ham_name] = parse_ham_mode.parse(filename)
+            # pprint.pprint(self.default_parameters[ham_name])
+
+    def get_ham_names(self):
+        """Return list of Hamiltonians."""
+        return list(self.default_parameters)
+
+    def get_default_params(self, ham_name, include_generic=True):
+        """Return full set of default parameters for hamiltonian."""
+        params = OrderedDict()
+        for nlist_name, nlist in self.default_parameters[ham_name].items():
+            params[nlist_name] = copy.deepcopy(nlist)
+        if include_generic:
+            for nlist_name, nlist in self._PARAMS_GENERIC.items():
+                params[nlist_name] = copy.deepcopy(nlist)
+        return params
+
+    def get_params_names(self, ham_name, include_generic=True):
+        """Return list of parameter names for hamiltonian,
+        transformed in all upper case.
         """
+        p_list = []
+        for nlist_name, nlist in self.default_parameters[ham_name].items():
+            p_list += list(nlist)
+        if include_generic:
+            for nlist_name in self._PARAMS_GENERIC:
+                p_list += list(self._PARAMS_GENERIC[nlist_name])
+
+        return [i.upper() for i in p_list]
+
+
+class Simulation:
+    """
+    Object corresponding to an ALF simulation.
+
+    Parameters
+    ----------
+    alf_src : ALF_source
+        Objet representing ALF source code.
+    ham_name : str
+        Name of the hamiltonian.
+    sim_dict : dict or list of dicts
+        Dictionary specfying parameters owerwriting defaults.
+        Can be a list of dictionaries to enable parallel tempering.
+    sim_dir : path-like object, optional
+        Directory in which the Monte Carlo will be run.
+        If not specified, sim_dir will be generated from sim_dict.
+    sim_root : path-like object, default="ALF_data"
+        Directory to prepend to sim_dir.
+    mpi : bool, default=False
+        Employ MPI.
+    n_mpi : int, default=2
+        Number of MPI processes if mpi is true.
+    n_omp : int, default=1
+        Number of OpenMP threads per process.
+    mpiexec : str, default="mpiexec"
+        Command used for starting a MPI run. This may have to be adapted to
+        fit with the MPI library used at compilation. Possible candidates
+        include 'orterun', 'mpiexec.hydra'.
+    mpiexec_args : list of str, optional
+        Additional arguments to MPI executable. E.g. the flag
+        ``--hostfile /path/to/file`` is specified by
+        ``mpiexec_args=['--hostfile', '/path/to/file']``
+    machine : {"GNU", "INTEL", "PGI", "SUPERMUC-NG", "JUWELS"}
+        Compiler and environment.
+    stab : str, optional
+        Stabilization strategy employed by ALF.
+        Possible values: "STAB1", "STAB2", "STAB3", "LOG". Not case sensitive.
+    devel : bool, default=True
+        Compile with additional flags for development and debugging.
+        The default is False.
+    hdf5 : bool, default=True
+        Whether to compile ALF with HDF5.
+        Full postprocessing support only exists with HDF5.
+
+    Attributes
+    ----------
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        See :func:`alf_ana.analysis.analysis`.
+    """
+
+    def __init__(self, alf_src, ham_name, sim_dict, **kwargs):
+        if not isinstance(alf_src, ALF_source):
+            raise Exception('alf_src needs to be an instance of ALF_source')
+        self.alf_src = alf_src
         self.ham_name = ham_name
         self.sim_dict = sim_dict
-        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
         self.sim_dir = os.path.abspath(os.path.expanduser(os.path.join(
             kwargs.pop("sim_root", "ALF_data"),
-            kwargs.pop("sim_dir", directory_name(ham_name, sim_dict)))))
-        self.branch = kwargs.pop('branch', None)
+            kwargs.pop("sim_dir",
+                       directory_name(alf_src, ham_name, sim_dict)))))
         self.mpi = kwargs.pop("mpi", False)
-        self.n_mpi = kwargs.pop("n_mpi", None)
+        self.n_mpi = kwargs.pop("n_mpi", 2)
         self.n_omp = kwargs.pop('n_omp', 1)
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
+        self.mpiexec_args = kwargs.pop('mpiexec_args', [])
+        if not isinstance(self.mpiexec_args, list):
+            raise Exception('mpiexec_args has to be a list.')
         stab = kwargs.pop('stab', '').upper()
         machine = kwargs.pop('machine', 'GNU').upper()
         self.devel = kwargs.pop('devel', False)
-        self.hdf5 = kwargs.pop('hdf5', False)
+        self.hdf5 = kwargs.pop('hdf5', True)
         if kwargs:
             raise Exception('Unused keyword arguments: {}'.format(kwargs))
 
@@ -88,7 +232,9 @@ class Simulation:
             self.mpi = True
 
         # Check if all parameters in sim_dict are defined in default_variables
-        p_list = params_list(self.ham_name, include_generic=True)
+        p_list = self.alf_src.get_params_names(
+            self.ham_name, include_generic=True)
+
         if self.tempering:
             for sim_dict0 in self.sim_dict:
                 for par_name in sim_dict0:
@@ -130,62 +276,160 @@ class Simulation:
 
         self.config += ' NO-INTERACTIVE'
 
-    def compile(self):
-        """Compiles ALF. Clones a new repository if alf_dir does not exist."""
-        compile_alf(self.alf_dir, self.branch, self.config)
+        self.custom_obs = {}
 
-    def run(self):
-        """Prepares simulation directory and runs ALF."""
+    def compile(self, verbosity=0):
+        """
+        Compile ALF.
+
+        Parameters
+        ----------
+        verbosity : int, default=0
+            0: Don't echo make reciepes.
+            1: Echo make reciepes.
+            else: Print make tracing information.
+        """
+        compile_alf(self.alf_src.alf_dir, config=self.config,
+                    verbosity=verbosity)
+
+    def run(self, copy_bin=False, only_prep=False):
+        """
+        Prepare simulation directory and run ALF.
+
+        Parameters
+        ----------
+        copy_bin : bool, default=False
+            Copy ALF binary into simulation folder.
+        only_prep : bool, default=False
+            Do not run ALF, but only prepare directory.
+        """
         if self.tempering:
-            _prep_sim_dir(self.alf_dir, self.sim_dir,
+            _prep_sim_dir(self.alf_src, self.sim_dir,
                           self.ham_name, self.sim_dict[0])
             for i, sim_dict in enumerate(self.sim_dict):
-                _prep_sim_dir(self.alf_dir,
+                _prep_sim_dir(self.alf_src,
                               os.path.join(self.sim_dir, "Temp_{}".format(i)),
                               self.ham_name, sim_dict)
         else:
-            _prep_sim_dir(self.alf_dir, self.sim_dir,
+            _prep_sim_dir(self.alf_src, self.sim_dir,
                           self.ham_name, self.sim_dict)
 
-        env = getenv(self.config, self.alf_dir)
+        env = getenv(self.config, self.alf_src.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
-        executable = os.path.join(self.alf_dir, 'Prog', 'ALF.out')
+        executable = os.path.join(self.alf_src.alf_dir, 'Prog', 'ALF.out')
+        if copy_bin:
+            shutil.copy(executable, self.sim_dir)
+            executable = os.path.join(self.sim_dir, 'ALF.out')
+        if only_prep:
+            return
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
                 if self.mpi:
-                    command = [self.mpiexec, '-n', str(self.n_mpi), executable]
+                    command = [self.mpiexec, '-n', str(self.n_mpi),
+                               *self.mpiexec_args, executable]
                 else:
                     command = executable
                 subprocess.run(command, check=True, env=env)
             except subprocess.CalledProcessError as ALF_crash:
                 print('Error while running {}.'.format(executable))
                 print('parameters:')
-                with open('parameters') as f:
-                    print(f.read())
+                # with open('parameters', 'r') as f:
+                #     print(f.read())
                 raise Exception('Error while running {}.'.format(executable)) \
                     from ALF_crash
 
-    def analysis(self):
-        """Performs default analysis on Monte Carlo data."""
+    def get_directories(self):
+        """Return list of directories connected to this simulation."""
         if self.tempering:
-            for i in range(len(self.sim_dict)):
-                analysis(self.alf_dir,
-                         os.path.join(self.sim_dir, "Temp_{}".format(i)),
-                         hdf5=self.hdf5)
+            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
+                           for i in range(len(self.sim_dict))]
         else:
-            analysis(self.alf_dir, self.sim_dir, hdf5=self.hdf5)
+            directories = [self.sim_dir]
+        return directories
 
-    def get_obs(self, names=None):
-        """Returns dictionary containing anaysis results from observables.
+    def print_info_file(self):
+        """Print info file(s) that get generated by ALF."""
+        for directory in self.get_directories():
+            filename = os.path.join(directory, 'info')
+            if os.path.exists(filename):
+                print('===== {} ====='.format(filename))
+                with open(filename, 'r') as f:
+                    print(f.read())
+            else:
+                print('{} does not exist.'.format(filename))
+                return
 
-        Currently only scalar and equal time correlators.
-        If names is None: gets all observables, else the ones listed in names.
+    def check_warmup(self, names):
         """
-        return get_obs(self.sim_dir, names)
+        Plot bins to determine n_skip.
+
+        Parameters
+        ----------
+        names : list of str
+            Names of Observables to check.
+        """
+        check_warmup(self.get_directories(), names, custom_obs=self.custom_obs)
+
+    def check_rebin(self, names):
+        """
+        Plot error vs n_rebin to control autocorrelation.
+
+        Parameters
+        ----------
+        names : list of str
+            Names of Observables to check.
+        """
+        check_rebin(self.get_directories(), names, custom_obs=self.custom_obs)
+
+    def analysis(self, python_version=True,
+                 symmetry=None, do_tau=True, always=False):
+        """
+        Perform default analysis on Monte Carlo data.
+
+        Parameters
+        ----------
+        python_version : bool, default=True
+            Use python version of analysis.
+            The non-python version is legacy and does not support all
+            postprocessing features.
+        symmetry : list of functions, optional
+            See :func:`alf_ana.analysis.analysis`.
+        do_tau : bool, default=True
+            Analyze time-displaced correlation functions. Setting this to False
+            speeds up analysis and makes result files much smaller.
+        always : bool, default=False
+            Do not skip if parameters and bins are older than results.
+        """
+        for directory in self.get_directories():
+            if python_version:
+                analysis(
+                    directory,
+                    custom_obs=self.custom_obs,
+                    symmetry=symmetry,
+                    do_tau=do_tau,
+                    always=always,
+                    )
+            else:
+                analysis_fortran(self.alf_src.alf_dir, directory,
+                                 hdf5=self.hdf5)
+
+    def get_obs(self, python_version=True):
+        """Return Pandas DataFrame containing anaysis results from observables.
+
+        The non-python version is legacy and does not support all
+        postprocessing features, e.g. time-displaced observables.
+        """
+        if python_version:
+            return load_res(self.get_directories())
+
+        dicts = {}
+        for directory in self.get_directories():
+            dicts[directory] = get_obs(directory, names=None)
+        return pd.DataFrame(dicts).transpose()
 
 
-def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
+def _prep_sim_dir(alf_src, sim_dir, ham_name, sim_dict):
     print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
     if not os.path.exists(sim_dir):
         print('Create new directory.')
@@ -194,18 +438,16 @@ def _prep_sim_dir(alf_dir, sim_dir, ham_name, sim_dict):
     with cd(sim_dir):
         if 'confout_0' in os.listdir() or 'confout_0.h5' in os.listdir():
             print('Resuming previous run.')
-        copyfile(os.path.join(alf_dir, 'Scripts_and_Parameters_files', 'Start',
-                              'seeds'),
+        shutil.copyfile(os.path.join(
+            alf_src.alf_dir, 'Scripts_and_Parameters_files', 'Start', 'seeds'),
                  'seeds')
-        params = set_param(ham_name, sim_dict)
+        params = set_param(alf_src, ham_name, sim_dict)
         write_parameters(params)
         out_to_in(verbose=False)
 
 
 def _convert_par_to_str(parameter):
-    """Converts a given parameter value to a string that can be
-    written into a parameter file.
-    """
+    """Convert a given parameter value to a string for parameter file."""
     if isinstance(parameter, bool):
         if parameter:
             return '.T.'
@@ -223,24 +465,24 @@ def _convert_par_to_str(parameter):
 
 
 def write_parameters(params):
-    """Writes nameslists to file 'parameters'"""
+    """Write nameslists to file 'parameters'."""
     with open('parameters', 'w') as file:
         for namespace in params:
             file.write("&{}\n".format(namespace))
             for var in params[namespace]:
                 file.write('{} = {}  ! {}\n'.format(
                     var,
-                    _convert_par_to_str(params[namespace][var][0]),
-                    params[namespace][var][1]
+                    _convert_par_to_str(params[namespace][var]['value']),
+                    params[namespace][var]['comment']
                     ))
             file.write("/\n\n")
 
 
-def directory_name(ham_name, sim_dict):
-    """Returns name of directory for simulations, given a set of simulation
+def directory_name(alf_src, ham_name, sim_dict):
+    """Return name of directory for simulations, given a set of simulation
     parameters.
     """
-    p_list = params_list(ham_name)
+    p_list = alf_src.get_params_names(ham_name, include_generic=False)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
         dirname = 'temper_{}_'.format(ham_name)
@@ -267,22 +509,23 @@ def _update_var(params, var, value):
     for name in params:
         for var2 in params[name]:
             if var2.lower() == var.lower():
-                params[name][var2][0] = value
+                params[name][var2]['value'] = value
                 return params
     raise Exception('"{}" does not correspond to a parameter'.format(var))
 
 
-def set_param(ham_name, sim_dict):
-    """Returns dictionary containing all parameters needed by ALF.
+def set_param(alf_src, ham_name, sim_dict):
+    """Return dictionary containing all parameters needed by ALF.
 
     Input: Dictionary with chosen set of <parameter: value> pairs.
     Output: Dictionary containing all namelists needed by ALF.
     """
-    params = default_params(ham_name)
+    params = alf_src.get_default_params(ham_name)
 
     params["VAR_ham_name"] = {
-        "ham_name": [ham_name, "Name of Hamiltonian"]
+        "ham_name": {'value': ham_name, 'comment': "Name of Hamiltonian"}
     }
+    params.move_to_end('VAR_ham_name', last=False)
 
     for name, value in sim_dict.items():
         params = _update_var(params, name, value)
@@ -294,7 +537,7 @@ def getenv(config, alf_dir='.'):
     with cd(alf_dir):
         subprocess.run(
             ['bash', '-c',
-             '. ./configure.sh {} || exit 1 && env > environment'
+             '. ./configure.sh {} > /dev/null || exit 1 && env > environment'
              .format(config)],
             check=True)
         with open('environment', 'r') as f:
@@ -310,9 +553,39 @@ def getenv(config, alf_dir='.'):
     return env
 
 
-def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
-                url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
-    """Compile ALF. Clone a new repository if alf_dir does not exist."""
+def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
+                branch=None,
+                config='GNU noMPI',
+                url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git',
+                verbosity=0
+                ):
+    """
+    Compile ALF. Clone a new repository if alf_dir does not exist.
+
+    Parameters
+    ----------
+    alf_dir : path-like object, optional
+        Directory containing the ALF source code. If the directory does
+        not exist, the source code will be fetched from a server.
+        Defaults to environment variable $ALF_DIR if present, otherwise
+        to './ALF'.
+    branch : str, optional
+        If specified, this will be checked out by git.
+    config : str, default='GNU noMPI'
+        Arguments for `configure.sh`.
+    url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
+        Address from where to clone ALF if alf_dir not exists.
+    verbosity : int, default=0
+        0: Don't echo make reciepes.
+        1: Echo make reciepes.
+        else: Print make tracing information.
+    """
+    if verbosity == 0:
+        makeflags = ['-s']
+    elif verbosity == 1:
+        makeflags = []
+    else:
+        makeflags = ['--trace']
 
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
@@ -333,16 +606,16 @@ def compile_alf(alf_dir='ALF', branch=None, config='GNU noMPI',
                 raise Exception('Error while checking out {}'.format(branch)) \
                     from git_checkout_failed
         env = getenv(config)
-        print('Compiling ALF... ', end='')
-        subprocess.run(['make', 'clean'], check=True, env=env)
-        subprocess.run(['make', 'ana'], check=True, env=env)
-        subprocess.run(['make', 'program'], check=True, env=env)
+        print('Compiling ALF... ')
+        subprocess.run(['make', *makeflags, 'clean'], check=True, env=env)
+        subprocess.run(['make', *makeflags, 'all'], check=True, env=env)
         print('Done.')
 
 
 def out_to_in(verbose=False):
-    """Renames all the output configurations confout_* to confin_*
-    to continue the Monte Carlo simulation where the previous stopped.
+    """Rename all output configurations confout_* to confin_*.
+
+    For continuing the Monte Carlo simulation where the previous stopped.
     """
     for name in os.listdir():
         if name.startswith('confout_'):
@@ -352,9 +625,13 @@ def out_to_in(verbose=False):
             os.replace(name, name2)
 
 
-def analysis(alf_dir, sim_dir='.', hdf5=False):
-    """Perform the default analysis on all files ending in _scal, _eq or _tau
-    in directory sim_dir.
+################ Legacy ################
+
+
+def analysis_fortran(alf_dir, sim_dir='.', hdf5=False):
+    """Perform the default analysis unsing ALFs own analysis routines
+    on all files ending in _scal, _eq or _tau in directory sim_dir. Not fully
+    supported.
     """
     env = os.environ.copy()
     env['OMP_NUM_THREADS'] = '1'
@@ -383,24 +660,42 @@ def analysis(alf_dir, sim_dir='.', hdf5=False):
 
 
 def get_obs(sim_dir, names=None):
-    """Returns dictionary containing anaysis results from observables.
+    """Return dictionary with analysis results from Fortran analysis (legacy).
 
-    Currently only scalar and equal time correlators.
-    If names is None: gets all observables, else the ones listed in names
+    Only scalar observables and equal time correlators.
+    If names is None: gets all observables, else the ones listed in names.
     """
     obs = {}
     if names is None:
         names = os.listdir(sim_dir)
     for name in names:
         if name.endswith('_scalJ'):
-            obs[name] = _read_scalJ(os.path.join(sim_dir, name))
-        if name.endswith('_eqJK') or name.endswith('_eqJR'):
-            obs[name] = _read_eqJ(os.path.join(sim_dir, name))
+            name0 = name[:-1]
+            temp = _read_scalJ(os.path.join(sim_dir, name))
+            obs[name0+'_sign'] = temp['sign'][0]
+            obs[name0+'_sign_err'] = temp['sign'][1]
+            for i, temp2 in enumerate(temp['obs']):
+                name2 = '{}{}'.format(name0, i)
+                obs[name2] = temp['obs'][i, 0]
+                obs[name2+'_err'] = temp['obs'][i, 1]
+        if name.endswith('_eqJK'):
+            name0 = name[:-2]+name[-1]
+            temp = _read_eqJ(os.path.join(sim_dir, name))
+            obs[name0] = temp['dat'][..., 0] + 1j*temp['dat'][..., 1]
+            obs[name0+'_err'] = temp['dat'][..., 2] + 1j*temp['dat'][..., 3]
+            obs[name0+'_k'] = temp['k']
+        if name.endswith('_eqJR'):
+            name0 = name[:-2]+name[-1]
+            temp = _read_eqJ(os.path.join(sim_dir, name))
+            obs[name0] = temp['dat'][..., 0] + 1j*temp['dat'][..., 1]
+            obs[name0+'_err'] = temp['dat'][..., 2] + 1j*temp['dat'][..., 3]
+            obs[name0+'_r'] = temp['r']
     return obs
 
 
 def _read_scalJ(name):
-    """Returns dictionary containing anaysis results from scalar observable.
+    """Return dictionary with Fortran analysis
+    results from scalar observable. (legacy)
     """
     with open(name) as f:
         lines = f.readlines()
@@ -417,8 +712,8 @@ def _read_scalJ(name):
 
 
 def _read_eqJ(name):
-    """Returns dictionary containing anaysis results from equal time
-    correlation function
+    """Return dictionary with Fortran analysis results from equal time
+    correlation function. (legacy)
     """
     with open(name) as f:
         lines = f.readlines()

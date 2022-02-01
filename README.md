@@ -13,6 +13,9 @@ The package implements ALF's python interface. `pyALF` greatly simplifies using 
 
 * Python
 * Jupyter
+* Prerequisites for analysis (issue 21) Python packages:
+  * llvmlite
+  * f90nml
 * the libraries Lapack and Blas
 * a Fortran compiler, such as gfortran or ifort,
 
