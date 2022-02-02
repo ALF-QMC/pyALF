@@ -47,7 +47,7 @@ def del_bins(filename, N0, N):
         fileobj[dset_name].resize(dat.shape)
         fileobj[dset_name][:] = dat
 
-    with h5py.File(filename, 'r+') as f:
+    with h5py.File(filename, 'r+') as f:          # pylint: disable=no-member
         for o in f:
             if o.endswith('_scal') or o.endswith('_eq') \
                or o.endswith('_tau') or o.endswith('_hist'):
@@ -64,7 +64,7 @@ def del_bins(filename, N0, N):
 
 def show_obs(filename):
     """Show observables and their number of bins in ALF HDF5 file."""
-    with h5py.File(filename, 'r') as f:
+    with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         print("Scalar observables:")
         for o in f:
             if o.endswith('_scal'):
@@ -95,7 +95,7 @@ def bin_count(filename):
 
     Assumes all observables have same number of bins.
     """
-    with h5py.File(filename, 'r') as f:
+    with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         N_bins = 0
         for o in f:
             if o.endswith('_scal') or o.endswith('_eq') \

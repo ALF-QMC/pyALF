@@ -60,6 +60,7 @@ def analysis(directory,
             except OSError:
                 pass
 
+        # pylint: disable=no-member
         with h5py.File(os.path.join(directory, 'data.h5'), "r") as f:
             params = {}
             for name in f['parameters']:

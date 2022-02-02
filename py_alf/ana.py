@@ -209,7 +209,7 @@ def read_scal(directory, obs_name, bare_bins=False):
     if 'data.h5' in os.listdir(directory):
         filename = os.path.join(directory, 'data.h5')
 
-        with h5py.File(filename, "r") as f:
+        with h5py.File(filename, "r") as f:       # pylint: disable=no-member
             obs = f[obs_name + "/obser"]  # Indices: bins, n_obs, re/im
             obs_c = obs[..., 0] + 1j * obs[..., 1]
             N_obs = obs_c.shape[1]
@@ -280,7 +280,7 @@ def read_hist(directory, obs_name, bare_bins=False):
     if 'data.h5' in os.listdir(directory):
         filename = os.path.join(directory, 'data.h5')
 
-        with h5py.File(filename, "r") as f:
+        with h5py.File(filename, "r") as f:       # pylint: disable=no-member
             obs = f[obs_name + "/obser"]  # Indices: bins, n_classes
             sign = f[obs_name + "/sign"]  # Indices: bins
             above = f[obs_name + "/above"]  # Indices: bins
@@ -371,7 +371,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
 
     if 'data.h5' in os.listdir(directory):
         filename = os.path.join(directory, 'data.h5')
-        with h5py.File(filename, "r") as f:
+        with h5py.File(filename, "r") as f:       # pylint: disable=no-member
             latt = Lattice(f[obs_name]["lattice"].attrs)
 
             obs = f[obs_name + "/obser"]
