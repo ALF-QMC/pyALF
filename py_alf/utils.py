@@ -1,14 +1,14 @@
 """Utility functions for handling ALF HDF5 files."""
 # pylint: disable=invalid-name
-# pylint: disable=consider-using-f-string
+# py lint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2022, The ALF Project"
 __license__ = "GPL"
 
-import h5py
 import os
 
+import h5py
 import numpy as np
 
 
@@ -27,6 +27,7 @@ def find_sim_dirs(root_in='.'):
     """
     dirs = []
     for root, folders, files in os.walk(root_in):
+        del folders
         if 'data.h5' in files:
             dirs.append(root)
     dirs.sort()

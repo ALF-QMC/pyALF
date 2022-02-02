@@ -3,7 +3,7 @@ Provides interfaces for compiling, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
-# pylint: disable=consider-using-f-string
+# py lint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2020-2022, The ALF Project"

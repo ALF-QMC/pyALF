@@ -97,11 +97,11 @@ class Parameters:
 
     def set_N_skip(self, parameter):
         """Update N_skip."""
-        self.set_parameter('n_skip', parameter)
+        self._set_parameter('n_skip', parameter)
 
     def set_N_rebin(self, parameter):
         """Update N_rebin."""
-        self.set_parameter('n_rebin', parameter)
+        self._set_parameter('n_rebin', parameter)
 
     def N_min(self):
         """Get minimal number of bins, given the parameters in this object."""

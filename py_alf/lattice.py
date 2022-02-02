@@ -179,7 +179,7 @@ class Lattice:
         cmap = mpl.cm.ScalarMappable(
             mpl.colors.Normalize(
                 vmin=data.min(), vmax=data.max()),
-            mpl.cm.Greys)
+            mpl.cm.Greys)  # pylint: disable=no-member
 
         _plot_2d(self.r, self.a1, self.a2, ax, data, cmap)
         fig.colorbar(cmap, ax=ax, shrink=0.6)
@@ -202,7 +202,7 @@ class Lattice:
         cmap = mpl.cm.ScalarMappable(
             mpl.colors.Normalize(
                 vmin=data.min(), vmax=data.max()),
-            mpl.cm.Greys)
+            mpl.cm.Greys)  # pylint: disable=no-member
 
         _plot_2d(self.k, self.b1, self.b2, ax, data, cmap)
         fig.colorbar(cmap, ax=ax, shrink=0.6)
@@ -288,7 +288,7 @@ def _calc_patch(a1, a2):
 
 
 def _init0(L1, L2, a1, a2):
-    from alf_f2py import alf_f2py  # pylint: disable=E0611,C0415
+    from alf_f2py import alf_f2py  # pylint: disable=E0611,C0415,import-error
     alf_f2py.lattice_out(L1, L2, a1, a2)
 
     b1 = np.copy(alf_f2py.la_b1_p)
