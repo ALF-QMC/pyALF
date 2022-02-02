@@ -11,7 +11,7 @@ from matplotlib.backends.backend_tkagg import (
 # from matplotlib.backend_bases import key_press_handler
 import matplotlib.pyplot as plt
 
-from alf_ana.ana import Parameters, ReadObs, read_scal
+from . ana import Parameters, ReadObs, read_scal
 
 
 def check_warmup(directories, names, custom_obs={}):

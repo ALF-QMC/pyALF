@@ -9,11 +9,11 @@ __license__ = "GPL"
 import os
 from argparse import ArgumentParser
 
-from alf_ana.util import find_sim_dirs
-from alf_ana.check_warmup import check_warmup
-from alf_ana.check_rebin import check_rebin
-from alf_ana.analysis import analysis
-from alf_ana.ana import load_res
+from py_alf.utils import find_sim_dirs
+from py_alf.check_warmup import check_warmup
+from py_alf.check_rebin import check_rebin
+from py_alf.analysis import analysis
+from py_alf.ana import load_res
 
 
 def _get_arg_parser():

@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import f90nml
 
-from alf_ana.lattice import Lattice
+from . lattice import Lattice
 
 
 def symmetrize(latt, syms, dat):

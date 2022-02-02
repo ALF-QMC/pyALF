@@ -11,7 +11,7 @@ from matplotlib.backends.backend_tkagg import (
 import matplotlib.pyplot as plt
 
 
-from alf_ana.ana import Parameters, jack, error, read_scal, ReadObs
+from . ana import Parameters, jack, error, read_scal, ReadObs
 
 
 def check_rebin(directories, names, Nmax0=100, custom_obs={}):
