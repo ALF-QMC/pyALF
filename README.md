@@ -61,31 +61,6 @@ alf_run.py -h
 ```
 
 
-## Files and directories
-
-```
- pyALF/
-    └── py_alf/
-        └── __init__.py
-        └── cli/
-             └── What is currently in /Scripts
-        ├── alf_source.py
-        ├── simulation.py
-        ├── lattice.py
-        └── ...
-    ├── doc/
-    ├── Notebooks/
-    └── Scripts/
-```
-
-* `py_alf/` - provides interfaces for compilig, running and postprocessing ALF in Python
-* `default_variables.py` - defines dictionaries containing all ALF parameters with default values
-* `Run.py` - helper script for compiling, running and testing ALF
-* `Sims` - configuration for running directly from the command line
-* `Notebooks` - directory containing Jupyter notebooks
-
-
-
 ## License
 The various works that make up the ALF project are placed under licenses that put
 a strong emphasis on the attribution of the original authors and the sharing of the contained knowledge.
