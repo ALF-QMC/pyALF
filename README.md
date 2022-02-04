@@ -9,7 +9,7 @@ A Python package building on top of [ALF](https://git.physik.uni-wuerzburg.de/AL
 * Postprocessing and displaying the data obtained during the simulation
 
 It introduces:
-* The Python module `py_alf`, exposing all the packages utility to Python.
+* The Python module `py_alf`, exposing all the package's utility to Python.
 * A set of command line tools in the folder `py_alf/cli`, that make it easy to levarate pyALF from a Unix shell.
 * Jupyter notebooks in the folder `Notebooks`, serving as an easy introduction to QMC and ALF
 * Python Scripts in the folder `Scripts` that can be run to reproduce benchmark results for established models
