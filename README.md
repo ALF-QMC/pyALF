@@ -2,7 +2,7 @@
 
 ## pyALF
 
-A Python package building on top of ALF, meant to simplify the different steps of working with [ALF](https://git.physik.uni-wuerzburg.de/ALF/ALF), including:
+A Python package building on top of [ALF](https://git.physik.uni-wuerzburg.de/ALF/ALF), meant to simplify the different steps of working with ALF, including:
 
 * Obtaining and compiling the ALF source code
 * Preparing and running simulations
