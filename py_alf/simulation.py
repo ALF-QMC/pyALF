@@ -17,8 +17,8 @@ import shutil
 import numpy as np
 import pandas as pd
 
-from . check_warmup import check_warmup
-from . check_rebin import check_rebin
+from . __init__ import check_warmup, check_rebin
+# from . check_rebin_tk import check_rebin_tk
 from . analysis import analysis
 from . ana import load_res
 from . alf_source import ALF_source
@@ -81,12 +81,6 @@ class Simulation:
     hdf5 : bool, default=True
         Whether to compile ALF with HDF5.
         Full postprocessing support only exists with HDF5.
-
-    Attributes
-    ----------
-    custom_obs : dict, default={}
-        Defines additional observables derived from existing observables.
-        See :func:`alf_ana.analysis.analysis`.
     """
 
     def __init__(self, alf_src, ham_name, sim_dict, **kwargs):
@@ -161,8 +155,6 @@ class Simulation:
             self.config += ' HDF5'
 
         self.config += ' NO-INTERACTIVE'
-
-        self.custom_obs = {}
 
     def compile(self, verbosity=0):
         """
@@ -246,7 +238,7 @@ class Simulation:
                 print('{} does not exist.'.format(filename))
                 return
 
-    def check_warmup(self, names):
+    def check_warmup(self, names, **kwargs):
         """
         Plot bins to determine n_skip.
 
@@ -255,9 +247,9 @@ class Simulation:
         names : list of str
             Names of Observables to check.
         """
-        check_warmup(self.get_directories(), names, custom_obs=self.custom_obs)
+        check_warmup(self.get_directories(), names, **kwargs)
 
-    def check_rebin(self, names):
+    def check_rebin(self, names, **kwargs):
         """
         Plot error vs n_rebin to control autocorrelation.
 
@@ -266,12 +258,13 @@ class Simulation:
         names : list of str
             Names of Observables to check.
         """
-        check_rebin(self.get_directories(), names, custom_obs=self.custom_obs)
+        check_rebin(self.get_directories(), names, **kwargs)
 
-    def analysis(self, python_version=True,
-                 symmetry=None, do_tau=True, always=False):
+    def analysis(self, python_version=True, **kwargs):
         """
         Perform default analysis on Monte Carlo data.
+
+        Calls :func:`alf_ana.analysis`, if run with `python_version=True`.
 
         Parameters
         ----------
@@ -280,7 +273,7 @@ class Simulation:
             The non-python version is legacy and does not support all
             postprocessing features.
         symmetry : list of functions, optional
-            See :func:`alf_ana.analysis.analysis`.
+            See :func:`alf_ana.analysis`.
         do_tau : bool, default=True
             Analyze time-displaced correlation functions. Setting this to False
             speeds up analysis and makes result files much smaller.
@@ -289,13 +282,7 @@ class Simulation:
         """
         for directory in self.get_directories():
             if python_version:
-                analysis(
-                    directory,
-                    custom_obs=self.custom_obs,
-                    symmetry=symmetry,
-                    do_tau=do_tau,
-                    always=always,
-                    )
+                analysis(directory, **kwargs)
             else:
                 analysis_fortran(self.alf_src.alf_dir, directory,
                                  hdf5=self.hdf5)

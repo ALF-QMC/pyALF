@@ -10,8 +10,8 @@ import os
 from argparse import ArgumentParser
 
 from py_alf.utils import find_sim_dirs
-from py_alf.check_warmup import check_warmup
-from py_alf.check_rebin import check_rebin
+from py_alf.check_warmup_tk import check_warmup_tk
+from py_alf.check_rebin_tk import check_rebin_tk
 from py_alf.analysis import analysis
 from py_alf.ana import load_res
 
@@ -74,10 +74,10 @@ if __name__ == '__main__':
         directories = find_sim_dirs('.')
 
     if args.check_warmup and (args.check_list is not None):
-        check_warmup(directories, args.check_list, custom_obs=custom_obs)
+        check_warmup_tk(directories, args.check_list, custom_obs=custom_obs)
 
     if args.check_rebin and (args.check_list is not None):
-        check_rebin(directories, args.check_list, custom_obs=custom_obs)
+        check_rebin_tk(directories, args.check_list, custom_obs=custom_obs)
 
     if args.do_analysis:
         # TODO: Add MPI support
