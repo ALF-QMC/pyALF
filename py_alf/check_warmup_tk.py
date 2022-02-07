@@ -1,16 +1,13 @@
-#!/usr/bin/env python3
 """Plot bins to determine n_skip."""
+# pylint: disable=invalid-name
 
-import math
 import tkinter as tk
 import numpy as np
 
-from scipy.optimize import curve_fit
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
-import matplotlib.pyplot as plt
 
-from . ana import Parameters, ReadObs, read_scal
+from . ana import Parameters
 from . check_common import _get_bins, _replot, _create_fig
 
 
@@ -28,7 +25,7 @@ class check_warmup_tk():
         Defines additional observables derived from existing observables.
         See :func:`alf_ana.analysis.analysis`.
     """
-    
+
     def __init__(self, directories, names, custom_obs={}):
         self.directories = directories
         self.names = names
@@ -49,12 +46,12 @@ class check_warmup_tk():
 
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        
+
         self._next()
 
         frame = tk.Frame(self.root)
         frame.pack(side=tk.BOTTOM)
-    
+
         nmax_frame = tk.Frame(frame)
         nmax_frame.pack(side=tk.LEFT)
         nmax_label = tk.Label(nmax_frame, text='N_max:')
@@ -65,7 +62,7 @@ class check_warmup_tk():
         nmax_button = tk.Button(
             nmax_frame, text="Set", command=self._set_nmax)
         nmax_button.pack(side=tk.RIGHT)
-    
+
         nskip_frame = tk.Frame(frame)
         nskip_frame.pack(side=tk.LEFT)
         nskip_label = tk.Label(nskip_frame, text='N_skip:')
@@ -76,7 +73,7 @@ class check_warmup_tk():
         nskip_button = tk.Button(
             nskip_frame, text="Set", command=self._set_nskip)
         nskip_button.pack(side=tk.RIGHT)
-    
+
         button_frame = tk.LabelFrame(frame, text='Quit')
         button_frame.pack(side=tk.RIGHT)
         button_next = tk.Button(
@@ -124,5 +121,3 @@ class check_warmup_tk():
         self.canvas.draw()
         self.Nmax_str.set(str(Nmax))
         self.N_skip_str.set(str(self.par.N_skip()))
-
-    

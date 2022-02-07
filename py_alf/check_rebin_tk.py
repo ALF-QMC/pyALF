@@ -1,18 +1,13 @@
-#!/usr/bin/env python3
 """Plot error vs n_rebin."""
+# pylint: disable=invalid-name
 
-import math
 import tkinter as tk
 
-import numpy as np
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
-# from matplotlib.backend_bases import key_press_handler
-import matplotlib.pyplot as plt
 
-
-from . ana import Parameters, jack, error, read_scal, ReadObs
-from . check_common import _create_fig, _rebin_err, _plot_errors, _get_errors
+from . ana import Parameters
+from . check_common import _create_fig, _plot_errors, _get_errors
 
 
 class check_rebin_tk():
@@ -31,33 +26,33 @@ class check_rebin_tk():
         Defines additional observables derived from existing observables.
         See :func:`alf_ana.analysis.analysis`.
     """
-    
+
     def __init__(self, directories, names, Nmax0=100, custom_obs={}):
         self.directories = directories
         self.names = names
         self.Nmax0 = Nmax0
         self.custom_obs = custom_obs
         self.root = tk.Tk()
-    
+
         self.n_dir_var = tk.IntVar(master=self.root, value=-1)
         self.directory_var = tk.StringVar(master=self.root)
-    
+
         self.N_rebin_str = tk.StringVar()
-    
+
         self.fig, self.axs = _create_fig(len(self.names))
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
-    
+
         toolbar = NavigationToolbar2Tk(self.canvas, self.root)
         toolbar.update()
-    
+
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        
+
         self._next()
-    
+
         frame = tk.Frame(self.root)
         frame.pack(side=tk.BOTTOM)
-    
+
         nskip_frame = tk.Frame(frame)
         nskip_frame.pack(side=tk.LEFT)
         nskip_label = tk.Label(nskip_frame, text='N_rebin:')
@@ -68,7 +63,7 @@ class check_rebin_tk():
         nskip_button = tk.Button(
             nskip_frame, text="Set", command=self._set_nrebin)
         nskip_button.pack(side=tk.RIGHT)
-    
+
         button_frame = tk.LabelFrame(frame, text='Quit')
         button_frame.pack(side=tk.RIGHT)
         button_next = tk.Button(
@@ -77,7 +72,7 @@ class check_rebin_tk():
         button_quit = tk.Button(
             button_frame, text="Finish", command=self._quit)
         button_quit.pack(side=tk.RIGHT)
-    
+
         tk.mainloop()
 
     def _set_nrebin(self):
@@ -103,10 +98,10 @@ class check_rebin_tk():
         self.root.wm_title(
             '{} N_rebin vs error'.format(self.directory_var.get()))
         self.par = Parameters(self.directory_var.get())
-        
+
         _plot_errors(
             self.axs,
-            _get_errors(self.directory_var.get(), self.names, 
+            _get_errors(self.directory_var.get(), self.names,
                         self.custom_obs, self.Nmax0),
             self.names, self.custom_obs
         )
@@ -115,5 +110,3 @@ class check_rebin_tk():
             self.verts.append(ax.axvline(x=self.par.N_rebin(), color="red"))
         self.canvas.draw()
         self.N_rebin_str.set(str(self.par.N_rebin()))
-
-        # 

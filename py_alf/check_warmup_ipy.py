@@ -1,3 +1,5 @@
+"""Plot bins to determine n_skip."""
+# pylint: disable=invalid-name
 
 import math
 
@@ -7,7 +9,26 @@ from . ana import Parameters
 
 
 def check_warmup_ipy(directories, names, custom_obs={}, ncols=3):
-    return CheckWarmupIpy(directories, names, custom_obs={}, ncols=3).gui
+    """
+    Plot bins to determine n_skip in a Jupyter Widget.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories with bins to check.
+    names : list of str
+        Names of observables to check.
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        See :func:`alf_ana.analysis.analysis`.
+
+    Returns
+    -------
+    Jupyter Widget
+        A graphical user interface based on ipywidgets
+    """
+    return CheckWarmupIpy(
+        directories, names, custom_obs=custom_obs, ncols=ncols).gui
 
 
 class CheckWarmupIpy:
@@ -18,12 +39,12 @@ class CheckWarmupIpy:
         self.names = names
         self.custom_obs = custom_obs
         self.ncols = ncols
-        
+
         self.init_dir()
         self.select.observe(self.update_select, 'value')
         self.nskip.observe(self.update_nskip, 'value')
         self.nmax.observe(self.update_nmax, 'value')
-    
+
     def init_dir(self):
         with self.log:
             self.bins = _get_bins(
@@ -40,14 +61,15 @@ class CheckWarmupIpy:
             self.nskip.value = self.par.N_skip()
             self.nmax.max = nmax
             self.nmax.value = nmax
-    
-    
+
     def update_select(self, change):
+        del change
         with self.log:
             # display(change)
             self.init_dir()
-            
+
     def update_nskip(self, change):
+        del change
         with self.log:
             if self.nskip.value == self.par.N_skip():
                 return
@@ -58,7 +80,8 @@ class CheckWarmupIpy:
                 _replot(ax, name, bins, self.par.N_skip())
             for ax in self.axs[-self.ncols:]:
                 ax.set_xlabel('Bin number')
-            
+
     def update_nmax(self, change):
+        del change
         with self.log:
             self.axs[0].set_xlim(0.5, self.nmax.value+0.5)

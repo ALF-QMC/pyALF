@@ -1,10 +1,35 @@
+"""Plot error vs n_rebin."""
+# pylint: disable=invalid-name
+
 from . check_common import _plot_errors, _get_errors
 from . init_layout import init_layout
 from . ana import Parameters
 
+
 def check_rebin_ipy(directories, names, custom_obs={}, Nmax0=100, ncols=3):
+    """
+    Plot error vs n_rebin in a Jupyter Widget.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories with bins to check.
+    names : list of str
+        Names of observables to check.
+    Nmax0 : int, default=100
+        Biggest n_rebin to consider. The default is 100.
+    custom_obs : dict, default={}
+        Defines additional observables derived from existing observables.
+        See :func:`alf_ana.analysis.analysis`.
+
+    Returns
+    -------
+    Jupyter Widget
+        A graphical user interface based on ipywidgets
+    """
     return CheckRebinIpy(
-        directories, names, custom_obs={}, Nmax0=100, ncols=3).gui
+        directories, names, custom_obs=custom_obs, Nmax0=Nmax0, ncols=ncols).gui
+
 
 class CheckRebinIpy:
     def __init__(self, directories, names, custom_obs={}, Nmax0=100, ncols=3):
@@ -16,7 +41,7 @@ class CheckRebinIpy:
         self.custom_obs = custom_obs
         self.Nmax0 = Nmax0
         self.ncols = ncols
-        
+
         self.init_dir()
         self.select.observe(self.update_select, 'value')
         self.nrebin.observe(self.update_nrebin, 'value')
@@ -36,14 +61,15 @@ class CheckRebinIpy:
                 self.verts.append(ax.axvline(x=self.nrebin.value, color="red"))
             for ax in self.axs[-self.ncols:]:
                 ax.set_xlabel('N_rebin')
-    
-    
+
     def update_select(self, change):
+        del change
         with self.log:
             # display(change)
             self.init_dir()
-            
+
     def update_nrebin(self, change):
+        del change
         with self.log:
             if self.nrebin.value == self.par.N_rebin():
                 return
