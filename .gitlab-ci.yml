@@ -11,8 +11,8 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py python3-ipywidgets git curl libghc-zlib-dev
-    - pip3 install f90nml pylint
+    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
+    - pip3 install f90nml pylint ipywidgets
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
     - $linter -E py_alf/
@@ -33,8 +33,8 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py python3-ipywidgets
-    - pip install f90nml pylint
+    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py
+    - pip install f90nml pylint ipywidgets
     - pylint py_alf/
     
 .test_branch_template: &test_branch_definition
@@ -42,8 +42,8 @@ variables:
     - if: '$BRANCH_T'
       when: always
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py python3-ipywidgets git curl libghc-zlib-dev
-    - pip install f90nml
+    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
+    - pip install f90nml ipywidgets
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/compilers/bin:$PATH"
     - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/comm_libs/mpi/bin:$PATH"

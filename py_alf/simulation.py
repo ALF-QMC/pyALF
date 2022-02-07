@@ -246,6 +246,8 @@ class Simulation:
         ----------
         names : list of str
             Names of Observables to check.
+        **kwargs : dict, optional
+            Extra arguments for :func:`alf_ana.check_warmup`.
         """
         check_warmup(self.get_directories(), names, **kwargs)
 
@@ -257,6 +259,8 @@ class Simulation:
         ----------
         names : list of str
             Names of Observables to check.
+        **kwargs : dict, optional
+            Extra arguments for :func:`alf_ana.check_rebin`.
         """
         check_rebin(self.get_directories(), names, **kwargs)
 
@@ -272,13 +276,9 @@ class Simulation:
             Use python version of analysis.
             The non-python version is legacy and does not support all
             postprocessing features.
-        symmetry : list of functions, optional
-            See :func:`alf_ana.analysis`.
-        do_tau : bool, default=True
-            Analyze time-displaced correlation functions. Setting this to False
-            speeds up analysis and makes result files much smaller.
-        always : bool, default=False
-            Do not skip if parameters and bins are older than results.
+        **kwargs : dict, optional
+            Extra arguments for :func:`alf_ana.analysis`, if run with
+            `python_version=True`.
         """
         for directory in self.get_directories():
             if python_version:
