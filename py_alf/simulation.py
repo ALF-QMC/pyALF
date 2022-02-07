@@ -21,8 +21,6 @@ from . check_warmup_tk import check_warmup_tk
 from . check_rebin_tk import check_rebin_tk
 from . check_warmup_ipy import check_warmup_ipy
 from . check_rebin_ipy import check_rebin_ipy
-# from . __init__ import check_warmup, check_rebin
-# from . check_rebin_tk import check_rebin_tk
 from . analysis import analysis
 from . ana import load_res
 from . alf_source import ALF_source
