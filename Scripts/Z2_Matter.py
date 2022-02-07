@@ -9,7 +9,6 @@ Created on Sat Aug 29 05:20:44 2020
 import numpy as np                         # Numerical library
 from py_alf import ALF_source, Simulation  # Interface with ALF
 
-sims = []                                  # List of Simulation instances
 sim_dict = {"Model": "Z2_Matter", 
             "Lattice_type": "Square", 
             "L1": 8 , "L2": 8, 
@@ -29,35 +28,19 @@ sim_dict = {"Model": "Z2_Matter",
             "Propose_S0"         : False, 
             "Nwrap"   : 10,
             }
-sim = Simulation(ALF_source(), 'Z2_Matter', sim_dict,
-                 branch = 'master', 
-                 machine= 'Intel',
-                 mpi    = True,
-                 n_mpi  = 12 ,
-                 )
-sims.append(sim)
+sim = Simulation(
+    ALF_source(branch='master'),
+    'Z2_Matter',
+    sim_dict,
+    machine='Intel',
+    mpi=True,
+    n_mpi=12,
+    )
 
-sims[0].compile(target = "Z2_Matter")
-#Con = np.empty((len(sims), 2))         # Matrix for storing energy values
-#Uf  = np.empty((len(sims),))
-#Spin= np.empty((len(sims),16,2,2,4))
-#K   = np.empty((len(sims),16,2))           
-for i, sim in enumerate(sims):
-     print (sim.sim_dir)
-     sim.run()
-     print (sim.sim_dir)
-     sim.analysis() 
-#    Uf[i] = sim.sim_dict['Ham_Uf']                             # Store Uf value
-#    Con[i] = sim.get_obs(['Constraint_scalJ'])['Constraint_scalJ']['obs']  # Store constraint
-#    Spin[i]= sim.get_obs(['SpinZ_eqJK'])['SpinZ_eqJK']['dat']
-#    K[i]   = sim.get_obs(['SpinZ_eqJK'])['SpinZ_eqJK']['k']
-#
-#
-#with open('Constraint.dat', 'w') as file:
-#    for i in range(len(sims) ):
-#        file.write('%6.6f\t' % (Uf[i])) 
-#        file.write('%6.6f\t' % (Con[i,0])) 
-#        file.write('%6.6f\t' % (Con[i,1])) 
-#        file.write('%6.6f\t' % (Spin[i,15,1,1,0])) 
-#        file.write('%6.6f\t' % (Spin[i,15,1,1,1]))
-#        file.write('\n') 
+sims.compile()
+sim.run()
+sim.analysis()
+res = sim.get_obs()
+
+# Save all results in a single file
+res.to_pickle('Z2_Matter.pkl')

@@ -9,7 +9,6 @@ Created on Sat Aug 29 05:20:44 2020
 import numpy as np                         # Numerical library
 from py_alf import ALF_source, Simulation  # Interface with ALF
 
-sims = []                                # Vector of Simulation instances
 sim_dict = {"Model": "tV", 
             "Lattice_type": "Square", 
             "L1": 14 , "L2": 1, 
@@ -29,17 +28,15 @@ sim_dict = {"Model": "tV",
             }
         
 
-sim = Simulation(ALF_source(), 'tV', sim_dict,
-                 branch = 'master',
+sim = Simulation(ALF_source(branch='master'), 'tV', sim_dict,
                  machine= 'gnu',
                  mpi    = False,
                  n_mpi  = 24)
-sims.append(sim)
 
-sims[0].compile(target = "tV")
- 
-for i, sim in enumerate(sims):
-    print (sim.sim_dir)
-    sim.run()
-    print (sim.sim_dir)
-    sim.analysis() 
+sims.compile()
+sim.run()
+sim.analysis()
+res = sim.get_obs()
+
+# Save all results in a single file
+res.to_pickle('tV.pkl')
