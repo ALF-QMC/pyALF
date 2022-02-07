@@ -1,14 +1,14 @@
 """Utility functions for handling ALF HDF5 files."""
 # pylint: disable=invalid-name
-# pylint: disable=consider-using-f-string
+# py lint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2022, The ALF Project"
 __license__ = "GPL"
 
-import h5py
 import os
 
+import h5py
 import numpy as np
 
 
@@ -27,6 +27,7 @@ def find_sim_dirs(root_in='.'):
     """
     dirs = []
     for root, folders, files in os.walk(root_in):
+        del folders
         if 'data.h5' in files:
             dirs.append(root)
     dirs.sort()
@@ -46,7 +47,7 @@ def del_bins(filename, N0, N):
         fileobj[dset_name].resize(dat.shape)
         fileobj[dset_name][:] = dat
 
-    with h5py.File(filename, 'r+') as f:
+    with h5py.File(filename, 'r+') as f:          # pylint: disable=no-member
         for o in f:
             if o.endswith('_scal') or o.endswith('_eq') \
                or o.endswith('_tau') or o.endswith('_hist'):
@@ -63,7 +64,7 @@ def del_bins(filename, N0, N):
 
 def show_obs(filename):
     """Show observables and their number of bins in ALF HDF5 file."""
-    with h5py.File(filename, 'r') as f:
+    with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         print("Scalar observables:")
         for o in f:
             if o.endswith('_scal'):
@@ -94,7 +95,7 @@ def bin_count(filename):
 
     Assumes all observables have same number of bins.
     """
-    with h5py.File(filename, 'r') as f:
+    with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         N_bins = 0
         for o in f:
             if o.endswith('_scal') or o.endswith('_eq') \

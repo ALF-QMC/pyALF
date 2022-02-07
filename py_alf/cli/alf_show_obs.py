@@ -13,7 +13,7 @@ __license__ = "GPL"
 import os
 from argparse import ArgumentParser
 
-from alf_ana.util import show_obs, find_sim_dirs
+from py_alf.utils import show_obs, find_sim_dirs
 
 
 def _get_arg_parser():

@@ -14,7 +14,7 @@ __license__ = "GPL"
 
 from argparse import ArgumentParser
 
-from alf_ana.util import del_bins
+from py_alf.utils import del_bins
 
 
 def _get_arg_parser():

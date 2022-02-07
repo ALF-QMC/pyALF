@@ -5,8 +5,8 @@ import pickle
 import h5py
 import numpy as np
 
-from alf_ana.ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
-                         ana_eq, write_res_eq, ana_tau, write_res_tau)
+from . ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
+                   ana_eq, write_res_eq, ana_tau, write_res_tau)
 
 
 def analysis(directory,
@@ -60,6 +60,7 @@ def analysis(directory,
             except OSError:
                 pass
 
+        # pylint: disable=no-member
         with h5py.File(os.path.join(directory, 'data.h5'), "r") as f:
             params = {}
             for name in f['parameters']:
