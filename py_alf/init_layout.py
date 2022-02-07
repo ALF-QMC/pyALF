@@ -90,4 +90,4 @@ def init_layout(names, ncols=3, n_plots=5, int_names=('N_max:', 'N_skip:')):
     accordion = widgets.Accordion(children=[log])
     accordion.set_title(0, 'Log')
     gui = widgets.VBox([fig.canvas, controls, accordion])
-    return gui, log, axs, *int_texts, select
+    return (gui, log, axs, *int_texts, select)
