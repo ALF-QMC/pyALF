@@ -17,7 +17,11 @@ import shutil
 import numpy as np
 import pandas as pd
 
-from . __init__ import check_warmup, check_rebin
+from . check_warmup_tk import check_warmup_tk
+from . check_rebin_tk import check_rebin_tk
+from . check_warmup_ipy import check_warmup_ipy
+from . check_rebin_ipy import check_rebin_ipy
+# from . __init__ import check_warmup, check_rebin
 # from . check_rebin_tk import check_rebin_tk
 from . analysis import analysis
 from . ana import load_res
@@ -238,7 +242,7 @@ class Simulation:
                 print('{} does not exist.'.format(filename))
                 return
 
-    def check_warmup(self, names, **kwargs):
+    def check_warmup(self, names, gui='tk', **kwargs):
         """
         Plot bins to determine n_skip.
 
@@ -246,12 +250,20 @@ class Simulation:
         ----------
         names : list of str
             Names of Observables to check.
+        gui : {'tk', 'ipy'}
+            Whether to use Tkinter or Jupyter Widget for GUI. default: 'tk'
         **kwargs : dict, optional
-            Extra arguments for :func:`alf_ana.check_warmup`.
+            Extra arguments for :func:`alf_ana.check_warmup_tk` or
+            :func:`alf_ana.check_warmup_ipy`.
         """
-        check_warmup(self.get_directories(), names, **kwargs)
+        if gui == 'tk':
+            check_warmup_tk(self.get_directories(), names, **kwargs)
+        elif gui == 'ipy':
+            return check_warmup_ipy(self.get_directories(), names, **kwargs)
+        else:
+            raise Exception(f'Illegal value gui={gui}')
 
-    def check_rebin(self, names, **kwargs):
+    def check_rebin(self, names, gui='tk', **kwargs):
         """
         Plot error vs n_rebin to control autocorrelation.
 
@@ -259,10 +271,18 @@ class Simulation:
         ----------
         names : list of str
             Names of Observables to check.
+        gui : {'tk', 'ipy'}
+            Whether to use Tkinter or Jupyter Widget for GUI. default: 'tk'
         **kwargs : dict, optional
-            Extra arguments for :func:`alf_ana.check_rebin`.
+            Extra arguments for :func:`alf_ana.check_rebin_tk` or
+            :func:`alf_ana.check_rebin_ipy`.
         """
-        check_rebin(self.get_directories(), names, **kwargs)
+        if gui == 'tk':
+            check_rebin_tk(self.get_directories(), names, **kwargs)
+        elif gui == 'ipy':
+            return check_rebin_ipy(self.get_directories(), names, **kwargs)
+        else:
+            raise Exception(f'Illegal value gui={gui}')
 
     def analysis(self, python_version=True, **kwargs):
         """

@@ -2,6 +2,12 @@
 pyALF, a Python package for the Algorithms for Lattice Fermions (ALF).
 """
 
+# Module containing low-level analysis functions
+from . import ana
+
+# Module containing utility function
+from . import utils
+
 # Classes
 from . alf_source import ALF_source
 from . simulation import Simulation
@@ -31,9 +37,3 @@ def check_rebin(*args, gui='tk', **kwargs):
         return check_rebin_ipy(*args, **kwargs)
     else:
         raise Exception(f'Illegal value gui={gui}')
-
-# Module containing low-level analysis functions
-from . import ana
-
-# Module containing utility function
-from . import utils
