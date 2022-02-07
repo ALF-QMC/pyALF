@@ -11,7 +11,7 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
+    - apt-get update && apt-get install -y python3-pip python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
     - pip3 install f90nml pylint ipywidgets
     - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
     - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
@@ -33,7 +33,7 @@ variables:
       - py_alf.py
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py
+    - apt-get update && apt-get install -y python3-pip python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py
     - pip install f90nml pylint ipywidgets
     - pylint py_alf/
     
@@ -42,7 +42,7 @@ variables:
     - if: '$BRANCH_T'
       when: always
   script:
-    - apt-get update && apt-get install -y python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
+    - apt-get update && apt-get install -y python3-pip python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
     - pip install f90nml ipywidgets
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/compilers/bin:$PATH"
@@ -63,8 +63,8 @@ create_sphinx:
     paths:
       - docs/_build/
   script:
-      - apt-get update && apt install -y python3-pandas python3-numba python3-tk python3-sphinx python3-numpydoc python3-sphinx-argparse latexmk
-      - pip install f90nml
+      - apt-get update && apt install -y  python3-pip python3-pandas python3-numba python3-tk python3-sphinx python3-numpydoc python3-sphinx-argparse latexmk
+      - pip install f90nml ipywidgets
       - export PYTHONPATH="$PWD:$PYTHONPATH"
       - cd docs/
       - make html
