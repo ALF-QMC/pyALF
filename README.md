@@ -19,7 +19,7 @@ It introduces:
 
 * Python3
 * Jupyter
-* Prerequisites for analysis Python packages:
+* The following Python packages:
   * h5py
   * numpy
   * pandas
@@ -27,7 +27,7 @@ It introduces:
   * numba
   * scipy
   * tkinter
-  * Jupyter Widgets (=ipywidgets)
+  * ipywidgets
   * ipympl
   * f90nml
 * the libraries Lapack and Blas
