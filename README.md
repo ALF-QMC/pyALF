@@ -28,6 +28,7 @@ It introduces:
   * scipy
   * tkinter
   * Jupyter Widgets (=ipywidgets)
+  * ipympl
   * f90nml
 * the libraries Lapack and Blas
 * a Fortran compiler, such as gfortran or ifort,
