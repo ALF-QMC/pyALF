@@ -23,6 +23,18 @@ from . check_warmup_ipy import check_warmup_ipy
 from . check_rebin_ipy import check_rebin_ipy
 
 def check_warmup(*args, gui='tk', **kwargs):
+    """
+    Plot bins to determine n_skip.
+
+    Calls either :func:`py_alf.check_warmup_tk` or
+    :func:`py_alf.check_warmup_ipy`. 
+
+    Parameters
+    ----------
+    *args
+    gui : {"tk", "ipy"}
+    **kwargs
+    """
     if gui == 'tk':
         check_warmup_tk(*args, **kwargs)
     elif gui == 'ipy':
@@ -31,6 +43,18 @@ def check_warmup(*args, gui='tk', **kwargs):
         raise Exception(f'Illegal value gui={gui}')
 
 def check_rebin(*args, gui='tk', **kwargs):
+    """
+    Plot error vs n_rebin in a Jupyter Widget.
+
+    Calls either :func:`py_alf.check_rebin_tk` or
+    :func:`py_alf.check_rebin_ipy`. 
+
+    Parameters
+    ----------
+    *args
+    gui : {"tk", "ipy"}
+    **kwargs
+    """
     if gui == 'tk':
         check_rebin_tk(*args, **kwargs)
     elif gui == 'ipy':
