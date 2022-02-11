@@ -20,15 +20,13 @@ for Ham_Uf in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 
                 "L1": 4 , "L2": 4,
                 "Ham_Uf": Ham_Uf,
                 "Beta": 5.0,
-                #"Nsweep": 500,
-                "Nsweep": 1,
+                "Nsweep": 500,
                 "NBin": 400,
                 "Ltau": 0}
     sim = Simulation(alf_src, 'Kondo', sim_dict,
                      machine= 'Intel',
                      mpi    = True,
-                     #n_mpi  = 12
-                     n_mpi  = 4
+                     n_mpi  = 12
                      )
     sims.append(sim)
 sims[0].compile()        
