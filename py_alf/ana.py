@@ -361,7 +361,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         Number of orbitals.
     N_tau : int
         Number of imaginary time steps.
-    dtau : TYPE
+    dtau : float
         Imaginary time step length.
     latt : Lattice
         See :class:`py_alf.Lattice`.
@@ -478,9 +478,9 @@ class ReadObs:
         Directory containing the observable.
     obs_name : str
         Name of observable.
-    bare_bins : TYPE, default=False
+    bare_bins : bool, default=False
         Do not perform skipping, rebinning, or jackknife resampling.
-    substract_back : TYPE, default=True
+    substract_back : bool, default=True
         Substract background. Applies to correlation functions.
     """
 
