@@ -24,7 +24,7 @@ class check_rebin_tk():
         Biggest n_rebin to consider. The default is 100.
     custom_obs : dict, default={}
         Defines additional observables derived from existing observables.
-        See :func:`alf_ana.analysis.analysis`.
+        See :func:`py_alf.analysis`.
     """
 
     def __init__(self, directories, names, Nmax0=100, custom_obs={}):

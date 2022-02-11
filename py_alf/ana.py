@@ -364,7 +364,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
     dtau : TYPE
         Imaginary time step length.
     latt : Lattice
-        See :class:`alf_ana.lattice.Lattice`.
+        See :class:`py_alf.Lattice`.
     """
     par = Parameters(directory, obs_name)
     filename = os.path.join(directory, 'data.h5')

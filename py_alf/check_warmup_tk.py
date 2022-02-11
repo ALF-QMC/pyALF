@@ -22,7 +22,7 @@ class check_warmup_tk():
         Names of observables to check.
     custom_obs : dict, default={}
         Defines additional observables derived from existing observables.
-        See :func:`alf_ana.analysis.analysis`.
+        See :func:`py_alf.analysis`.
     """
 
     def __init__(self, directories, names, custom_obs={}):

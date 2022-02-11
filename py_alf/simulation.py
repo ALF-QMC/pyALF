@@ -251,8 +251,8 @@ class Simulation:
         gui : {'tk', 'ipy'}
             Whether to use Tkinter or Jupyter Widget for GUI. default: 'tk'
         **kwargs : dict, optional
-            Extra arguments for :func:`alf_ana.check_warmup_tk` or
-            :func:`alf_ana.check_warmup_ipy`.
+            Extra arguments for :func:`py_alf.check_warmup_tk` or
+            :func:`py_alf.check_warmup_ipy`.
         """
         if gui == 'tk':
             check_warmup_tk(self.get_directories(), names, **kwargs)
@@ -272,8 +272,8 @@ class Simulation:
         gui : {'tk', 'ipy'}
             Whether to use Tkinter or Jupyter Widget for GUI. default: 'tk'
         **kwargs : dict, optional
-            Extra arguments for :func:`alf_ana.check_rebin_tk` or
-            :func:`alf_ana.check_rebin_ipy`.
+            Extra arguments for :func:`py_alf.check_rebin_tk` or
+            :func:`py_alf.check_rebin_ipy`.
         """
         if gui == 'tk':
             check_rebin_tk(self.get_directories(), names, **kwargs)
@@ -286,7 +286,7 @@ class Simulation:
         """
         Perform default analysis on Monte Carlo data.
 
-        Calls :func:`alf_ana.analysis`, if run with `python_version=True`.
+        Calls :func:`py_alf.analysis`, if run with `python_version=True`.
 
         Parameters
         ----------
@@ -295,7 +295,7 @@ class Simulation:
             The non-python version is legacy and does not support all
             postprocessing features.
         **kwargs : dict, optional
-            Extra arguments for :func:`alf_ana.analysis`, if run with
+            Extra arguments for :func:`py_alf.analysis`, if run with
             `python_version=True`.
         """
         for directory in self.get_directories():

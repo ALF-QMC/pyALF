@@ -34,7 +34,7 @@ def analysis(directory,
              'function': some_function,}
 
         `some_list` contains observable names to be read by
-        :class:`alf_ana.ana.ReadObs`. Jackknife bins and kwargs from
+        :class:`py_alf.ana.ReadObs`. Jackknife bins and kwargs from
         `some_dict` are handed to `some_function` with a separate call for
         each bin.
     do_tau : bool, default=True
