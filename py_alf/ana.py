@@ -4,6 +4,7 @@
 # pylint: disable=missing-function-docstring
 
 import os
+import shutil
 import pickle
 
 import h5py
@@ -69,8 +70,9 @@ class Parameters:
             self.obs_name = obs_name.lower()
 
     def write_nml(self):
-        """Write namelist to file."""
-        self._nml.write(self.filename, force=True)
+        """Write namelist to file. Preseves comments."""
+        f90nml.patch(self.filename, self._nml, self.filename+'_temp')
+        shutil.move(self.filename+'_temp', self.filename)
 
     def _get_parameter(self, parameter_name):
         try:
