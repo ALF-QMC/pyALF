@@ -49,11 +49,10 @@ class CheckRebinIpy:
     def init_dir(self):
         with self.log:
             self.par = Parameters(self.select.value)
-            _plot_errors(
-                self.axs,
-                _get_errors(self.select.value, self.names, self.custom_obs,
-                            self.Nmax0),
-                self.names, self.custom_obs)
+            errors = _get_errors(
+                self.select.value, self.names, self.custom_obs, self.Nmax0)
+            _plot_errors(self.axs, errors, self.names, self.custom_obs)
+            self.nrebin.max = len(errors[0])
             self.nrebin.value = self.par.N_rebin()
 
             self.verts = []
