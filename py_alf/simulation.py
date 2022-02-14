@@ -77,9 +77,8 @@ class Simulation:
     stab : str, optional
         Stabilization strategy employed by ALF.
         Possible values: "STAB1", "STAB2", "STAB3", "LOG". Not case sensitive.
-    devel : bool, default=True
+    devel : bool, default=False
         Compile with additional flags for development and debugging.
-        The default is False.
     hdf5 : bool, default=True
         Whether to compile ALF with HDF5.
         Full postprocessing support only exists with HDF5.
