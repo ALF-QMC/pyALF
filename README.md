@@ -15,6 +15,8 @@ It introduces:
 * Jupyter notebooks in the folder `Notebooks`, serving as an easy introduction to QMC and ALF
 * Python Scripts in the folder `Scripts` that can be run to reproduce benchmark results for established models
 
+The **preliminary documentation** can be found [here](http://gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu).
+
 ## Prerequisites
 
 * Python3
