@@ -29,6 +29,7 @@ def analysis(directory,
         Defines additional observables derived from existing observables.
         The key of each entry is the observable name and the value is a
         dictionary with the format::
+
             {'needs': some_list,
              'kwargs': some_dict,
              'function': some_function,}
