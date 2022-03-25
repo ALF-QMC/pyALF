@@ -77,7 +77,7 @@ class CheckWarmupIpy:
             self.par.set_N_skip(self.nskip.value)
             self.par.write_nml()
             for ax, name, bins in zip(self.axs, self.names, self.bins):
-                _replot(ax, name, bins, self.par.N_skip())
+                _replot(ax, name, bins, self.par.N_skip(), self.nmax.value)
             for ax in self.axs[-self.ncols:]:
                 ax.set_xlabel('Bin number')
 

@@ -54,8 +54,10 @@ def _get_bins(directory, names, custom_obs):
     return res
 
 
-def _replot(ax, obs_name, bins, N_skip):
+def _replot(ax, obs_name, bins, N_skip, nmax=None):
     N_bins = len(bins)
+    if nmax is None:
+        nmax = N_bins
 
     x = np.arange(1, N_bins+1)
     bins1 = bins[N_skip:]
@@ -64,7 +66,7 @@ def _replot(ax, obs_name, bins, N_skip):
     ax.clear()
     ax.set_title(obs_name)
     ax.grid(True)
-    ax.set_xlim(0.5, len(bins)+0.5)
+    ax.set_xlim(0.5, nmax+0.5)
 
     ax.plot(range(1, N_bins+1), bins)
     ax.plot(x1, bins1, '.')
