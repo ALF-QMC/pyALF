@@ -8,6 +8,7 @@ __license__ = "GPL"
 
 import os
 from argparse import ArgumentParser
+import importlib.util
 
 from py_alf.utils import find_sim_dirs
 from py_alf.check_warmup_tk import check_warmup_tk
@@ -18,7 +19,7 @@ from py_alf.ana import load_res
 
 def _get_arg_parser():
     parser = ArgumentParser(
-        description='Script for postprocessing monte carlo bins.',
+        description='Script for postprocessing Monte Carlo bins.',
         )
     parser.add_argument(
         '--check_warmup', '--warmup', action="store_true",
@@ -32,6 +33,10 @@ def _get_arg_parser():
     parser.add_argument(
         '--do_analysis', '--ana', action="store_true",
         help='Do analysis.')
+    parser.add_argument(
+        '--always', action="store_true",
+        help='Do not skip analysis if parameters and bins '
+             'are older than results.')
     parser.add_argument(
         '--gather', action="store_true",
         help='Gather all analysis results in one file.')
@@ -52,6 +57,14 @@ def _get_arg_parser():
     return parser
 
 
+def import_module(module_name, path):
+    """Dynamically import module from given path."""
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 if __name__ == '__main__':
     parser = _get_arg_parser()
     args = parser.parse_args()
@@ -59,14 +72,24 @@ if __name__ == '__main__':
     if args.custom_obs is None:
         custom_obs = {}
     else:
-        with open(os.path.expanduser(args.custom_obs)) as f:
-            exec(f.read())
+        try:
+            custom_obs_mod = import_module(
+                'custom_obs', os.path.expanduser(args.custom_obs))
+        except FileNotFoundError as custom_obs_not_found:
+            raise Exception(f'"{args.custom_obs}" not found.') \
+                from custom_obs_not_found
+        custom_obs = custom_obs_mod.custom_obs
 
     if args.symmetry is None:
         symmetry = None
     else:
-        with open(os.path.expanduser(args.symmetry)) as f:
-            exec(f.read())
+        try:
+            symmetry_mod = import_module(
+                'symmetry', os.path.expanduser(args.symmetry))
+        except FileNotFoundError as symmetry_not_found:
+            raise Exception(f'"{args.symmetry}" not found.') \
+                from symmetry_not_found
+        symmetry = symmetry_mod.symmetry
 
     if args.directories:
         directories = args.directories
@@ -83,7 +106,7 @@ if __name__ == '__main__':
         # TODO: Add MPI support
         for directory in directories:
             analysis(directory, custom_obs=custom_obs, symmetry=symmetry,
-                     do_tau=not args.no_tau)
+                     do_tau=not args.no_tau, always=args.always)
 
     if args.gather:
         df = load_res(directories)

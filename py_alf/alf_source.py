@@ -78,7 +78,7 @@ class ALF_source:
             return module
 
         try:
-            parse_ham_mode = import_module(
+            parse_ham_mod = import_module(
                 'parse_ham',
                 os.path.join(self.alf_dir, 'Prog', 'parse_ham_mod.py'))
         except FileNotFoundError as parse_ham_not_found:
@@ -89,7 +89,7 @@ class ALF_source:
                     from parse_ham_not_found
         try:
             default_parameters_generic = import_module(
-                'parse_ham',
+                'default_parameters_generic',
                 os.path.join(self.alf_dir, 'Prog',
                              'default_parameters_generic.py'))
         except FileNotFoundError as default_parameters_generic_not_found:
@@ -111,7 +111,7 @@ class ALF_source:
             filename = os.path.join(self.alf_dir, 'Prog', 'Hamiltonians',
                                     'Hamiltonian_{}_smod.F90'.format(ham_name))
             # print('Hamiltonian:', ham_name)
-            self.default_parameters[ham_name] = parse_ham_mode.parse(filename)
+            self.default_parameters[ham_name] = parse_ham_mod.parse(filename)
             # pprint.pprint(self.default_parameters[ham_name])
 
     def get_ham_names(self):
