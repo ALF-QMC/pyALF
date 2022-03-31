@@ -23,10 +23,11 @@ def _get_arg_parser():
         )
     parser.add_argument(
         '--check_warmup', '--warmup', action="store_true",
-        help='Check warmup.')
+        help='Check warmup. Opens new window.')
     parser.add_argument(
         '--check_rebin', '--rebin', action="store_true",
-        help='Check rebinning for controlling autocorrelation.')
+        help='Check rebinning for controlling autocorrelation. '
+             'Opens new window.')
     parser.add_argument(
         '-l', '--check_list', nargs='+', default=None,
         help='List of observables to check for warmup and rebinning.')
@@ -39,17 +40,22 @@ def _get_arg_parser():
              'are older than results.')
     parser.add_argument(
         '--gather', action="store_true",
-        help='Gather all analysis results in one file.')
+        help='Gather all analysis results in one file named "gathered.pkl", '
+             'representing a pickled pandas DataFrame.')
     parser.add_argument(
         '--no_tau', action="store_true",
         help='Skip time displaced correlations.')
     parser.add_argument(
         '--custom_obs', default=os.getenv('ALF_CUSTOM_OBS', None),
         help='File that defines custom observables. '
+             'This file has to define the object custom_obs, '
+             'needed by py_alf.analysis. '
              '(default: os.getenv("ALF_CUSTOM_OBS", None))')
     parser.add_argument(
         '--symmetry', '--sym', default=None,
-        help='File that defines lattice symmetries.')
+        help='File that defines lattice symmetries. '
+             'This file has to define the object symmetry, '
+             'needed by py_alf.analysis. (default: None))')
     parser.add_argument(
         'directories', nargs='*',
         help='Directories to analyze. If empty, analyzes all \
