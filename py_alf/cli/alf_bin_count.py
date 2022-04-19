@@ -19,7 +19,7 @@ from py_alf.utils import bin_count, find_sim_dirs
 
 def _get_arg_parser():
     parser = ArgumentParser(
-        description='Count number of bins in ALF HDF5 file(s), assuming all'
+        description='Count number of bins in ALF HDF5 file(s), assuming all '
                     'observables have the same number of bins.',
         )
     parser.add_argument(

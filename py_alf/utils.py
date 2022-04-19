@@ -42,7 +42,7 @@ def del_bins(filename, N0, N):
     filename: str
         Name of HDF5 file.
     N0: int
-        Number of first N0 bins to leave.
+        Number of first N0 bins to keep.
     N: int
         Number of bins to remove after first N0 bins.
     """

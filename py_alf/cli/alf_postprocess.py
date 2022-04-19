@@ -58,8 +58,9 @@ def _get_arg_parser():
              'needed by py_alf.analysis. (default: None))')
     parser.add_argument(
         'directories', nargs='*',
-        help='Directories to analyze. If empty, analyzes all \
-            directories containing file "data.h5" it can find.')
+        help='Directories to analyze. If empty, analyzes all '
+            'directories containing file "data.h5" it can find, '
+            'starting from the current working directory.')
     return parser
 
 

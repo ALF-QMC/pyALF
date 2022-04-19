@@ -27,10 +27,10 @@ def _get_arg_parser():
         help='Number of bins to remove after first N0 bins.')
     parser.add_argument(
         '--N0', type=int, default=0,
-        help='Number of first N0 bins to leave. (default=0)')
+        help='Number of first N0 bins to keep. (default=0)')
     parser.add_argument(
         'filename', nargs=1,
-        help='Name of HDF5 file..')
+        help='Name of HDF5 file.')
     return parser
 
 

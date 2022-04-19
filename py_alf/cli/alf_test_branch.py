@@ -67,25 +67,25 @@ def _get_arg_parser():
              "(default: './test_pars.json')")
     parser.add_argument(
         '--alfdir', default=os.getenv('ALF_DIR', './ALF'),
-        help="Path to ALF directory. (default: os.getenv('ALF_DIR', './ALF')")
+        help="Path to ALF directory. (default: os.getenv('ALF_DIR', './ALF'))")
     parser.add_argument(
         '--branch_R', default="master",
-        help='Reference branch.      (default: master)')
+        help='Reference branch.                      (default: master)')
     parser.add_argument(
         '--branch_T', default="master",
-        help='Branch to test.        (default: master)')
+        help='Branch to test.                        (default: master)')
     parser.add_argument(
         '--machine', default="GNU",
-        help='Machine configuration                (default: "GNU")')
+        help='Machine configuration.                 (default: "GNU")')
     parser.add_argument(
         '--mpi', action='store_true',
-        help='mpi run                              (default: False)')
+        help='Do MPI run(s).                         (default: False)')
     parser.add_argument(
         '--n_mpi', default=4,
-        help='number of mpi processes              (default: 4)')
+        help='Number of MPI processes.               (default: 4)')
     parser.add_argument(
         '--mpiexec', default="mpiexec",
-        help='Command used for starting a MPI run  (default: "mpiexec")')
+        help='Command used for starting an MPI run.  (default: "mpiexec")')
     parser.add_argument(
         '--mpiexec_args', default='',
         help='Additional arguments to MPI executable.')
