@@ -27,7 +27,7 @@ def _get_arg_parser():
         help="File defining simulations parameters. Each line starts with "
              "the Hamiltonian name and a comma, after wich follows a dict "
              "in JSON format for the parameters. "
-             "A line that says stop can be used to interrupt."
+             "A line that says stop can be used to interrupt. "
              "(default: './Sims')")
     parser.add_argument(
         '--branch', default=None,
@@ -36,8 +36,8 @@ def _get_arg_parser():
         '--machine', default='GNU',
         help="Machine configuration                (default: 'GNU')")
     parser.add_argument(
-        '--mpi', default=False,
-        help='mpi run                              (default: False)')
+        '--mpi', action="store_true",
+        help='mpi run')
     parser.add_argument(
         '--n_mpi', default=4,
         help='number of mpi processes              (default: 4)')
@@ -47,6 +47,9 @@ def _get_arg_parser():
     parser.add_argument(
         '--mpiexec_args', default='',
         help='Additional arguments to MPI executable.')
+    parser.add_argument(
+        '--do_analysis', '--ana', action="store_true",
+        help='Run default analysis after each simulation.')
     return parser
 
 
@@ -82,5 +85,6 @@ if __name__ == "__main__":
             )
         sim.compile()
         sim.run()
-        sim.analysis()
+        if args.do_analysis:
+            sim.analysis()
     print("Done")
