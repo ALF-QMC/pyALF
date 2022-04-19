@@ -49,13 +49,13 @@ class Simulation:
     alf_src : ALF_source
         Objet representing ALF source code.
     ham_name : str
-        Name of the hamiltonian.
+        Name of the Hamiltonian.
     sim_dict : dict or list of dicts
         Dictionary specfying parameters owerwriting defaults.
         Can be a list of dictionaries to enable parallel tempering.
     sim_dir : path-like object, optional
         Directory in which the Monte Carlo will be run.
-        If not specified, sim_dir will be generated from sim_dict.
+        If not specified, sim_dir is generated from sim_dict.
     sim_root : path-like object, default="ALF_data"
         Directory to prepend to sim_dir.
     mpi : bool, default=False
@@ -178,9 +178,9 @@ class Simulation:
         Parameters
         ----------
         copy_bin : bool, default=False
-            Copy ALF binary into simulation folder.
+            Copy ALF binary into simulation directory.
         only_prep : bool, default=False
-            Do not run ALF, but only prepare directory.
+            Do not run ALF, only prepare simulation directory.
         """
         if self.tempering:
             _prep_sim_dir(self.alf_src, self.sim_dir,
@@ -246,7 +246,7 @@ class Simulation:
         Parameters
         ----------
         names : list of str
-            Names of Observables to check.
+            Names of observables to check.
         gui : {'tk', 'ipy'}
             Whether to use Tkinter or Jupyter Widget for GUI. default: 'tk'
         **kwargs : dict, optional
@@ -267,7 +267,7 @@ class Simulation:
         Parameters
         ----------
         names : list of str
-            Names of Observables to check.
+            Names of observables to check.
         gui : {'tk', 'ipy'}
             Whether to use Tkinter or Jupyter Widget for GUI. default: 'tk'
         **kwargs : dict, optional
@@ -290,8 +290,8 @@ class Simulation:
         Parameters
         ----------
         python_version : bool, default=True
-            Use python version of analysis.
-            The non-python version is legacy and does not support all
+            Use Python version of analysis.
+            The non-Python version is legacy and does not support all
             postprocessing features.
         **kwargs : dict, optional
             Extra arguments for :func:`py_alf.analysis`, if run with

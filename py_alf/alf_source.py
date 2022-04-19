@@ -39,12 +39,12 @@ class ALF_source:
     alf_dir : path-like object, default=os.getenv('ALF_DIR', './ALF')
         Directory containing the ALF source code. If the directory does
         not exist, the source code will be fetched from a server.
-        Defaults to environment variable $ALF_DIR if present, otherwise
+        Defaults to environment variable $ALF_DIR if defined, otherwise
         to './ALF'.
     branch : str, optional
         If specified, this will be checked out by git.
     url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
-        Address from where to clone ALF if alf_dir not exists.
+        Address from where to clone ALF if alf_dir does not exist.
     """
 
     def __init__(self, alf_dir=os.getenv('ALF_DIR', './ALF'), branch=None,
@@ -130,7 +130,7 @@ class ALF_source:
 
     def get_params_names(self, ham_name, include_generic=True):
         """Return list of parameter names for hamiltonian,
-        transformed in all upper case.
+        transformed in all uppercase.
         """
         p_list = []
         for nlist_name, nlist in self.default_parameters[ham_name].items():

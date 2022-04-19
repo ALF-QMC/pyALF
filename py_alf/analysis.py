@@ -12,7 +12,7 @@ from . ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
 def analysis(directory,
              symmetry=None, custom_obs=None, do_tau=True, always=False):
     """
-    Perform analysis in given directory.
+    Perform analysis in the given directory.
 
     Results are written to the pickled dictionary `res.pkl` and in plain text
     in the folder `res/`.
@@ -23,7 +23,7 @@ def analysis(directory,
         Directory containing Monte Carlo bins.
     symmetry : list of functions, optional
         List of functions reppresenting symmetry operations on lattice,
-        including unity. Will be used to symmetrize lattice-type
+        including unity. It is used to symmetrize lattice-type
         observables.
     custom_obs : dict, default={}
         Defines additional observables derived from existing observables.

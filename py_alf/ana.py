@@ -22,6 +22,7 @@ def symmetrize(latt, syms, dat):
     Parameters
     ----------
     latt : Lattice
+        See :class:`py_alf.Lattice`.
     syms : list
         List of symmetry operations, including the identity of the form
         sym(latt, i) -> i_tranformed
@@ -114,7 +115,7 @@ def rebin(X, N_rebin):
     """Combine each N_rebin bins into one bin.
 
     If the number of bins (=N0) is not an integer multiple of N_rebin,
-    the last N0 modulo N_rebin bins get dismissed.
+    the last N0 modulo N_rebin bins are discarded.
     """
     if N_rebin == 1:
         return X
@@ -129,13 +130,14 @@ def rebin(X, N_rebin):
 
 def jack(X, par, N_skip=None, N_rebin=None):
     """
-    Create jackknife bins out of input bins after after skipping and rebinning.
+    Create jackknife bins out of input bins after skipping and rebinning.
 
     Parameters
     ----------
     X : array-like object
         Input bins. Bins run over first index.
-    par : Parameters
+    par : :class:`Parameters`
+        Parameters object.
     N_skip : int, default=par.N_skip()
         Number of bins to skip.
     N_rebin : int, default=par.N_rebin()
@@ -194,8 +196,9 @@ def read_scal(directory, obs_name, bare_bins=False):
     Parameters
     ----------
     directory : path-like object
-        Directory containing the observabel.
+        Directory containing the observable.
     obs_name : str
+        Name of the observable.
     bare_bins : bool, default=False
         Do not perform skipping, rebinning, or jackknife resampling.
 
@@ -255,8 +258,9 @@ def read_hist(directory, obs_name, bare_bins=False):
     Parameters
     ----------
     directory : path-like object
-        Directory containing the observabel.
+        Directory containing the observable.
     obs_name : str
+        Name of the observable.
     bare_bins : bool, default=False
         Do not perform skipping, rebinning, or jackknife resampling.
 
@@ -344,8 +348,9 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
     Parameters
     ----------
     directory : path-like object
-        Directory containing the observabel.
+        Directory containing the observable.
     obs_name : str
+        Name of the observable.
     bare_bins : bool, default=False
         Do not perform skipping, rebinning, or jackknife resampling.
     substract_back : bool, default=True
@@ -571,7 +576,7 @@ def ana_scal(directory, obs_name):
     directory : path-like object
         Directory containing the observable.
     obs_name : str
-        Name of observable.
+        Name of the observable.
     """
     J_obs, J_sign, N_obs = ReadObs(directory, obs_name).all()
 
@@ -604,7 +609,7 @@ def ana_hist(directory, obs_name):
 
 
 def ana_eq(directory, obs_name, sym=None):
-    """Analyze given equal-time collalators.
+    """Analyze given equal-time correlators.
 
     If sym is given, it symmetrizes the bins prior to calculating the error.
     Cf. :func:`symmetrize`.
@@ -639,7 +644,7 @@ def ana_eq(directory, obs_name, sym=None):
 
 
 def ana_tau(directory, obs_name, sym=None):
-    """Analyze given timedisplaced corralators.
+    """Analyze given time-displaced correlators.
 
     If sym is given, it symmetrizes the bins prior to calculating the error.
     Cf. :func:`symmetrize`.
@@ -760,8 +765,8 @@ def load_res(directories):
     """
     Read analysis results from multiple simulations.
 
-    Reads from pickled dictionaries 'res.pkl' and returns everything
-    in single pandas DataFrame with one row per simulation.
+    Read from pickled dictionaries 'res.pkl' and return everything
+    in a single pandas DataFrame with one row per simulation.
 
     Parameters
     ----------

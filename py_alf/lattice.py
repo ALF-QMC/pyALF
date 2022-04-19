@@ -20,13 +20,13 @@ class Lattice:
     ----------
     *args : dict, tuple, or list
 
-        if dict: {'L1': L1, 'L2': L2, 'a1': a1, 'a2': a2}
+        if dict: {'L1': L1, 'L2': L2, 'a1': a1, 'a2': a2}.
 
-        if tuple or list: [L1, L2, a1, a2]
+        if tuple or list: [L1, L2, a1, a2].
 
-        L1, L2: 2d vector defining periodic boundary conditions
+        L1, L2: 2d vector defining periodic boundary conditions.
 
-        a1, a2: 2d primitive vectors
+        a1, a2: 2d primitive vectors.
 
     init_version : int, default=1
         init_version=0 uses compiled Fortran, which is faster but not supported

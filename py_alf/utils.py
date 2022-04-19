@@ -37,9 +37,14 @@ def find_sim_dirs(root_in='.'):
 def del_bins(filename, N0, N):
     """Delete N bins in all observables of the specified HDF5-file.
 
-    filename: Name of HDF5 file
-    N0: Number of first N0 bins to leave
-    N: Number of bins to remove after first N0 bins
+    Parameters
+    ----------
+    filename: str
+        Name of HDF5 file.
+    N0: int
+        Number of first N0 bins to leave.
+    N: int
+        Number of bins to remove after first N0 bins.
     """
     def reshape(fileobj, dset_name, N0, N):
         dset = fileobj[dset_name]
@@ -63,7 +68,13 @@ def del_bins(filename, N0, N):
 
 
 def show_obs(filename):
-    """Show observables and their number of bins in ALF HDF5 file."""
+    """Show observables and their number of bins in the given ALF HDF5 file.
+
+    Parameters
+    ----------
+    filename: str
+        Name of HDF5 file.
+    """
     with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         print("Scalar observables:")
         for o in f:
@@ -91,9 +102,14 @@ def show_obs(filename):
 
 
 def bin_count(filename):
-    """Count number of bins in ALF HDF5 file.
+    """Count number of bins in the given ALF HDF5 file.
 
-    Assumes all observables have same number of bins.
+    Assumes all observables have the same number of bins.
+
+    Parameters
+    ----------
+    filename: str
+        Name of HDF5 file.
     """
     with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         N_bins = 0
