@@ -782,11 +782,22 @@ def load_res(directories):
     if not isinstance(directories, list):
         directories = [directories]
     li = []
+    directories_in = []
     for directory in directories:
         print(directory)
-        with open(os.path.join(directory, 'res.pkl'), 'rb') as f:
-            dictionary = pickle.load(f)
+        try:
+            with open(os.path.join(directory, 'res.pkl'), 'rb') as f:
+                dictionary = pickle.load(f)
+        except FileNotFoundError:
+            print(f"No file named 'res.pkl' in {directory}, skipping.")
+            continue
+        directories_in.append(directory)
+        with h5py.File(os.path.join(directory, 'data.h5'), "r") as f:
+            dictionary.update(f['parameters'].attrs)
+
+            dictionary['lattice'] = {}
+            dictionary['lattice'].update(f["lattice"].attrs)
         li.append(dictionary)
 
-    df = pd.DataFrame(li, index=directories)
+    df = pd.DataFrame(li, index=directories_in)
     return df
