@@ -78,6 +78,9 @@ def _get_arg_parser():
         '--machine', default="GNU",
         help='Machine configuration.                 (default: "GNU")')
     parser.add_argument(
+        '--devel', action='store_true',
+        help='Compile with additional flags for development and debugging.')
+    parser.add_argument(
         '--mpi', action='store_true',
         help='Do MPI run(s).                         (default: False)')
     parser.add_argument(
@@ -110,7 +113,8 @@ if __name__ == "__main__":
         test = test_branch(
             alf_dir, sim_dict, args.branch_R, args.branch_T,
             machine=args.machine, mpi=args.mpi, n_mpi=args.n_mpi,
-            mpiexec=args.mpiexec, mpiexec_args=mpiexec_args
+            mpiexec=args.mpiexec, mpiexec_args=mpiexec_args,
+            devel=args.devel
             )
         with open('test.txt', 'a') as f:
             f.write('{}: {}\n'.format(sim_name, test))
