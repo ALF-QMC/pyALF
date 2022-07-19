@@ -80,7 +80,7 @@ Then the scripts can simply be called by their names, try e.g.
 alf_run.py -h
 ```
 
-For a full list of command line scripts see [here](gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/reference/cli.html)
+For a full list of command line scripts see [here](gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/reference/cli.html).
 
 ### Use module `py_alf` in custom scripts
 
