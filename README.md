@@ -15,7 +15,7 @@ It introduces:
 * Jupyter notebooks in the folder `Notebooks`, serving as an easy introduction to QMC and ALF
 * Python Scripts in the folder `Scripts` that can be run to reproduce benchmark results for established models
 
-The **preliminary documentation** can be found [here](http://gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu).
+The **documentation** can be found [here](http://gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu).
 
 ## Prerequisites
 
@@ -32,12 +32,12 @@ The **preliminary documentation** can be found [here](http://gitpages.physik.uni
   * ipywidgets
   * ipympl
   * f90nml
-* the libraries Lapack and Blas
-* a Fortran compiler, such as gfortran or ifort,
+* The libraries Lapack and Blas
+* A Fortran compiler, such as gfortran or ifort,
 
 where the last two are required by the main package [ALF](https://git.physik.uni-wuerzburg.de/ALF).
 
-Also, add pyALF's path to your environment variable `PYTHONPATH`. In Linux, this can be achieved, e.g., by adding the following line to `.bashrc`:
+Also, add pyALF's path to your environment variable `PYTHONPATH`. In Linux, this can be achieved, e.g., by adding the following line to `~/.bashrc` if the used shell if bash or `~/.zshrc`, if the shell is zsh:
 
 ```bash
 export PYTHONPATH="/local/path/to/pyALF:$PYTHONPATH"
@@ -45,7 +45,14 @@ export PYTHONPATH="/local/path/to/pyALF:$PYTHONPATH"
 
 ## Usage
 
-Jupyter notebooks [are run](https://jupyter.readthedocs.io/en/latest/running.html) through a Jupyter server started, e.g., from the command line:
+There are multiple ways to use pyALF, which roughly breaks down into three approaches:
+* Using Jupyter notebooks
+* Using the command line interface
+* Use the module `py_alf` in custom scripts
+
+### Jupyter notebooks
+
+A convenient way to use pyALF is through Jupyter notebooks. They [are run](https://jupyter.readthedocs.io/en/latest/running.html) through a Jupyter server started, e.g., from the command line:
 
 ```bash
 jupyter-notebook
@@ -57,14 +64,27 @@ or
 jupyter-lab
 ```
 
-which opens the "notebook dashboard" in your default browser, where you can navigate through your file structure to the pyALF directory. There you will find the interface's core module, `py_alf.py`, some auxiliary files, and a number of notebooks.
+which opens the "notebook dashboard" in your default browser, from where one can open the sample notebooks in `Notebooks/` and create new notebooks.
 
-However, pyALF can also be used to start a simulation from the command line, without starting a Jupyter server. For instance, check the help message:
+### Command line interface
+
+pyALF also delivers a set of command line scripts, located in the folder `/py_alf/cli/`, to be use from a UNIX shell. For convenient access, it makes sense to add the folder to the environment variable `PATH`:
 
 ```bash
 export PATH="/path/to/pyALF/py_alf/cli:$PATH"
+```
+
+Then the scripts can simply be called by their names, try e.g. 
+
+```bash
 alf_run.py -h
 ```
+
+For a full list of command line scripts see [here](gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/reference/cli.html)
+
+### Use module `py_alf` in custom scripts
+
+Finally, one can also use the module module `py_alf` in custon Python scripts, which is analogous to the usage in Jupyter notebooks minus some interactivity.
 
 ## License
 
