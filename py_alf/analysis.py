@@ -10,6 +10,7 @@ import numpy as np
 from . ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
                    ana_eq, write_res_eq, ana_tau, write_res_tau,
                    custom_obs_get_dtype_len)
+from . exceptions import TooFewBinsError
 
 
 def analysis(directory,
@@ -156,7 +157,11 @@ def analysis(directory,
     print("Scalar observables:")
     for obs_name in list_scal:
         print(obs_name)
-        sign, dat = ana_scal(directory, obs_name)
+        try:
+            sign, dat = ana_scal(directory, obs_name)
+        except TooFewBinsError:
+            print("Too few bins, skipping.")
+            continue
 
         dic[obs_name+'_sign'] = sign[0]
         dic[obs_name+'_sign_err'] = sign[1]
@@ -173,7 +178,11 @@ def analysis(directory,
     print("Histogram observables:")
     for obs_name in list_hist:
         print(obs_name)
-        sign, above, below, dat, upper, lower = ana_hist(directory, obs_name)
+        try:
+            sign, above, below, dat, upper, lower = ana_hist(directory, obs_name)
+        except TooFewBinsError:
+            print("Too few bins, skipping.")
+            continue
 
         hist = {}
         hist['dat'] = dat
@@ -194,8 +203,12 @@ def analysis(directory,
     print("Equal time observables:")
     for obs_name in list_eq:
         print(obs_name)
-        sign, m_k, e_k, m_k_sum, e_k_sum, m_r, e_r, m_r_sum, e_r_sum, latt = \
-            ana_eq(directory, obs_name, sym=symmetry)
+        try:
+            sign, m_k, e_k, m_k_sum, e_k_sum, m_r, e_r, m_r_sum, e_r_sum, latt = \
+                ana_eq(directory, obs_name, sym=symmetry)
+        except TooFewBinsError:
+            print("Too few bins, skipping.")
+            continue
 
         write_res_eq(directory, obs_name,
                      m_k, e_k, m_k_sum, e_k_sum,
@@ -220,8 +233,12 @@ def analysis(directory,
         print("Time displaced observables:")
         for obs_name in list_tau:
             print(obs_name)
-            sign, m_k, e_k, m_r, e_r, dtau, latt = \
-                ana_tau(directory, obs_name, sym=symmetry)
+            try:
+                sign, m_k, e_k, m_r, e_r, dtau, latt = \
+                    ana_tau(directory, obs_name, sym=symmetry)
+            except TooFewBinsError:
+                print("Too few bins, skipping.")
+                continue
 
             write_res_tau(directory, obs_name,
                           m_k, e_k, m_r, e_r, dtau, latt)
