@@ -1,4 +1,6 @@
 """Supplies the default analysis routine."""
+# pylint: disable=invalid-name
+
 import os
 import pickle
 
@@ -6,7 +8,8 @@ import h5py
 import numpy as np
 
 from . ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
-                   ana_eq, write_res_eq, ana_tau, write_res_tau)
+                   ana_eq, write_res_eq, ana_tau, write_res_tau,
+                   custom_obs_get_dtype_len)
 
 
 def analysis(directory,
@@ -25,7 +28,7 @@ def analysis(directory,
         List of functions reppresenting symmetry operations on lattice,
         including unity. It is used to symmetrize lattice-type
         observables.
-    custom_obs : dict, default={}
+    custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         The key of each entry is the observable name and the value is a
         dictionary with the format::
@@ -129,10 +132,12 @@ def analysis(directory,
                          for obs_name in obs_spec['needs']]
 
                 N_bins = jacks[0].N_bins
-                dtype = obs_spec['function'](
-                        *[x for j in jacks for x in j.slice(0)],
-                        **obs_spec['kwargs']).dtype
-                J = np.empty(N_bins, dtype=dtype)
+                dtype, length = custom_obs_get_dtype_len(obs_spec, jacks)
+                if length == 1:
+                    shape = (N_bins,)
+                else:
+                    shape = (N_bins, length)
+                J = np.empty(shape, dtype=dtype)
                 for i in range(N_bins):
                     J[i] = obs_spec['function'](
                         *[x for j in jacks for x in j.slice(i)],

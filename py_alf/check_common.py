@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-from . ana import Parameters, ReadObs, read_scal, jack, error
+from . ana import (Parameters, ReadObs, read_scal,
+                   jack, error, custom_obs_get_dtype_len)
 
 
 def _create_fig(N):
@@ -39,7 +40,10 @@ def _get_bins(directory, names, custom_obs):
                     for o in obs_spec['needs']]
             N_bins = Bins[0].N_bins
 
-            bins = np.empty(N_bins)
+            dtype, length = custom_obs_get_dtype_len(obs_spec, Bins)
+            del dtype
+            bins = np.empty((N_bins, length))
+
             for i in range(N_bins):
                 bins[i] = obs_spec['function'](
                     *[x for b in Bins for x in b.slice(i)],
@@ -48,8 +52,9 @@ def _get_bins(directory, names, custom_obs):
             print(obs_name)
             bins_c, sign, N_obs = read_scal(directory, obs_name,
                                             bare_bins=True)
+            del N_obs
 
-            bins = bins_c[:, 0] / sign[:]
+            bins = bins_c[:, 0].real / sign[:]
         res.append(bins)
     return res
 
@@ -68,18 +73,31 @@ def _replot(ax, obs_name, bins, N_skip, nmax=None):
     ax.grid(True)
     ax.set_xlim(0.5, nmax+0.5)
 
-    ax.plot(range(1, N_bins+1), bins)
-    ax.plot(x1, bins1, '.')
+    try:
+        N_obs = bins1.shape[1]
+    except IndexError:
+        N_obs = 1
+    for i in range(N_obs):
+        if N_obs == 1:
+            bins2 = bins1
+        else:
+            bins2 = bins1[:, i]
 
-    m = np.mean(bins1)
-    ax.plot([1, N_bins], [m, m])
-    ax.plot([N_skip+1], [m], 'o')
+        p = ax.plot(range(1, N_bins+1), bins)
+        color=p[0].get_color()
+        ax.plot(x1, bins2, '.', c=color)
 
-    def func(x, y0, a):
-        return y0 + a*x
-    popt, pcov = curve_fit(func, x1, bins1)
-    ax.plot(x1, func(x1, *popt))
-    print(m, popt[1]/m)
+        m = np.mean(bins2)
+        ax.plot([1, N_bins], [m, m], c=color, ls='-.')
+        ax.plot([N_skip+1], [m], 'o', c="red")
+
+        def func(x, y0, a):
+            return y0 + a*x
+        popt, pcov = curve_fit(func, x1, bins2)
+        del pcov
+        ax.plot(x1, func(x1, *popt), c=color)
+        print(m, popt[1]/m)
+    ax.axvline(x=N_skip+0.5, color="red")
 
 
 def _rebin_err(bins, N_skip, Nmax):
@@ -97,7 +115,7 @@ def _plot_errors(axs, errs, obs_names, custom_obs):
     for ax, err, obs_name in zip(axs, errs, obs_names):
         ax.clear()
         ax.grid(True)
-        ax.set_title('{}_err'.format(obs_name))
+        ax.set_title(f'{obs_name}_err')
         if obs_name in custom_obs:
             ax.plot(range(1, len(err)+1), err)
             ax.set_ylim(err.min(), err.max())
@@ -119,29 +137,32 @@ def _get_errors(directory, names, custom_obs, Nmax0):
 
             N_bins1 = bins[0].N_bins - N_skip
             Nmax = min(N_bins1 // 3, Nmax0)
-            err = np.empty(Nmax)
+            dtype, length = custom_obs_get_dtype_len(obs_spec, bins)
+            err = np.empty((Nmax, length))
 
-            for N in range(1, Nmax+1):
-                jacks = [x for b in bins for x in b.jack(N)]
+            for N_rebin in range(1, Nmax+1):
+                jacks = [x for b in bins for x in b.jack(N_rebin)]
 
                 N_bins = len(jacks[0])
-                J = np.empty(N_bins, dtype=jacks[0].dtype)
-                print(N_bins)
+                J = np.empty((N_bins, length), dtype=dtype)
+                print(f'{N_rebin}*{N_bins}={N_rebin*N_bins}')
                 for i in range(N_bins):
                     J[i] = obs_spec['function'](*[x[i] for x in jacks],
                                                 **obs_spec['kwargs'])
                 m, e = error(J)
-                err[N-1] = e
+                del m
+                err[N_rebin-1] = e
         elif obs_name.endswith('_scal'):
             print(obs_name)
             bins_c, sign, N_obs = read_scal(directory, obs_name,
                                             bare_bins=True)
+            del sign, N_obs
             N_bins = bins_c.shape[0] - N_skip
             Nmax = min(N_bins // 3, Nmax0)
             err = _rebin_err(bins_c, N_skip, Nmax)
         else:
             raise Exception(f'Illegal observable {obs_name}')
-        print(err)
+        # print(err)
         res.append(err)
     return res
 
