@@ -79,7 +79,7 @@ def _replot(ax, obs_name, bins, N_skip, nmax=None):
         N_obs = 1
     for i in range(N_obs):
         if N_obs == 1:
-            bins2 = bins1
+            bins2 = bins1.reshape((len(x1),))
         else:
             bins2 = bins1[:, i]
 
