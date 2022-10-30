@@ -37,4 +37,4 @@ def _get_arg_parser():
 if __name__ == '__main__':
     parser = _get_arg_parser()
     args = parser.parse_args()
-    del_bins(args.filename, args.N0, args.N)
+    del_bins(args.filename[0], args.N0, args.N)

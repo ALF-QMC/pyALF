@@ -79,11 +79,11 @@ class Lattice:
 
     def periodic_boundary_k(self, k):
         """Apply periodic boundary conditions on vector in k space."""
-        return _periodic_boundary(np.array(k), self.BZ1, self.BZ2)
+        return _periodic_boundary(np.array(k, dtype=float), self.BZ1, self.BZ2)
 
     def periodic_boundary_r(self, r):
         """Apply periodic boundary conditions on vector in r space."""
-        return _periodic_boundary(np.array(r), self.L1, self.L2)
+        return _periodic_boundary(np.array(r, dtype=float), self.L1, self.L2)
 
     def r_to_n(self, r):
         """Map vector in r space to integer running over all lattice points."""

@@ -13,6 +13,7 @@ import pandas as pd
 import f90nml
 
 from . lattice import Lattice
+from . exceptions import TooFewBinsError
 
 
 def symmetrize(latt, syms, dat):
@@ -579,6 +580,8 @@ def ana_scal(directory, obs_name):
         Name of the observable.
     """
     J_obs, J_sign, N_obs = ReadObs(directory, obs_name).all()
+    if len(J_obs) < 2:
+        raise TooFewBinsError()
 
     sign = error(J_sign)
 
@@ -594,6 +597,8 @@ def ana_hist(directory, obs_name):
     """Analyze given histogram observables."""
     J_obs, J_sign, J_above, J_below, N_classes, upper, lower = \
         ReadObs(directory, obs_name).all()
+    if len(J_obs) < 2:
+        raise TooFewBinsError()
 
     sign = error(J_sign)
     above = error(J_above)
@@ -618,6 +623,8 @@ def ana_eq(directory, obs_name, sym=None):
         ReadObs(directory, obs_name).all()
     del J_back, N_tau, dtau
     N_bins = len(J_sign)
+    if N_bins < 2:
+        raise TooFewBinsError()
 
     J_obs = J_obs.reshape((N_bins, N_orb, N_orb, latt.N))
 
@@ -651,6 +658,8 @@ def ana_tau(directory, obs_name, sym=None):
     """
     J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt = \
         ReadObs(directory, obs_name).all()
+    if len(J_obs) < 2:
+        raise TooFewBinsError()
     del J_back, N_orb, N_tau
     N_bins = len(J_sign)
 
@@ -801,3 +810,18 @@ def load_res(directories):
 
     df = pd.DataFrame(li, index=directories_in)
     return df
+
+
+def custom_obs_get_dtype_len(obs_spec, bins):
+    sample = obs_spec['function'](
+                    *[x for b in bins for x in b.slice(0)],
+                    **obs_spec['kwargs'])
+    dypte = sample.dtype
+    if np.ndim(sample) == 0:
+        length = 1
+    elif np.ndim(sample) == 1:
+        length = len(sample)
+    else:
+        raise Exception(
+            "Only scalar or one-dimensional custom_obs allowed")
+    return dypte, length
