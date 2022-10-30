@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+
+disable=
+  duplicate-code,
+  consider-using-f-string
+
+[TYPECHECK]
+# Some Versions of pylint complain about h5py.File
+ignored-modules=h5py
