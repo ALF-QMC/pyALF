@@ -5,6 +5,9 @@
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 
+import os
+from ctypes import CDLL, POINTER, c_int, c_double, byref
+
 import numpy as np
 from numba import jit
 
@@ -28,12 +31,12 @@ class Lattice:
 
         a1, a2: 2d primitive vectors.
 
-    init_version : int, default=1
-        init_version=0 uses compiled Fortran, which is faster but not supported
-        right now.
+    init_version : int, default=0
+        init_version=0 uses compiled Fortran, while init_version=1 uses native
+        Python.
     """
 
-    def __init__(self, *args, init_version=1):
+    def __init__(self, *args, init_version=0):
         if len(args) == 1:
             self.L1 = np.array(args[0]["L1"], dtype=float)
             self.L2 = np.array(args[0]["L2"], dtype=float)
@@ -55,6 +58,7 @@ class Lattice:
         else:
             if init_version == 0:
                 init = _init0(self.L1, self.L2, self.a1, self.a2)
+                #init = init_lattice(self.L1, self.L2, self.a1, self.a2)
             elif init_version == 1:
                 init = _init1(self.L1, self.L2, self.a1, self.a2)
 
@@ -288,54 +292,64 @@ def _calc_patch(a1, a2):
 
 
 def _init0(L1, L2, a1, a2):
-    from alf_f2py import alf_f2py  # pylint: disable=E0611,C0415,import-error
-    alf_f2py.lattice_out(L1, L2, a1, a2)
+    lattices_fortran = CDLL(
+        os.path.join(
+            os.path.dirname(__file__),
+            'lattices_x86-64.so'
+        )
+    )
+    ndim = c_int(len(L1))
+    lattices_fortran.make_lattice_c(
+        ndim,
+        L1.ctypes.data_as(POINTER(c_double)),
+        L2.ctypes.data_as(POINTER(c_double)),
+        a1.ctypes.data_as(POINTER(c_double)),
+        a2.ctypes.data_as(POINTER(c_double))
+        )
+    ndim = ndim.value
 
-    b1 = np.copy(alf_f2py.la_b1_p)
-    b2 = np.copy(alf_f2py.la_b2_p)
-    b1_perp = np.copy(alf_f2py.la_b1_perp_p)
-    b2_perp = np.copy(alf_f2py.la_b2_perp_p)
-    BZ1 = np.copy(alf_f2py.la_bz1_p)
-    BZ2 = np.copy(alf_f2py.la_bz2_p)
+    L = c_int()
+    lattices_fortran.get_l(byref(L))
+    L = L.value
 
-    N = alf_f2py.la_list.shape[0]
-    L = (alf_f2py.la_invlist.shape[1]-1)//2
+    N = c_int()
+    lattices_fortran.get_n(byref(N))
+    N = N.value
 
-    listr = np.copy(alf_f2py.la_list)
-    listk = np.copy(alf_f2py.la_listk)
+    BZ1 = np.empty(ndim, dtype=np.double)
+    BZ2 = np.empty(ndim, dtype=np.double)
+    b1 = np.empty(ndim, dtype=np.double)
+    b2 = np.empty(ndim, dtype=np.double)
+    b1_perp = np.empty(ndim, dtype=np.double)
+    b2_perp = np.empty(ndim, dtype=np.double)
+    listr = np.empty((N, ndim), dtype=np.int32, order='F')
+    invlistr = np.empty((2*L+1, 2*L+1), dtype=np.int32, order='F')
+    nnlistr = np.empty((N, 3, 3), dtype=np.int32, order='F')
+    listk = np.empty((N, ndim), dtype=np.int32, order='F')
+    invlistk = np.empty((2*L+1, 2*L+1), dtype=np.int32, order='F')
+    nnlistk = np.empty((N, 3, 3), dtype=np.int32, order='F')
+    imj = np.empty((N, N), dtype=np.int32, order='F')
 
-    invlistr = np.empty((2*L+1, 2*L+1), dtype=np.int32)
-    np.copyto(invlistr[-L:, -L:], alf_f2py.la_invlist[:L, :L])
-    np.copyto(invlistr[-L:, :L+1], alf_f2py.la_invlist[:L, L:2*L+1])
-    np.copyto(invlistr[:L+1, -L:], alf_f2py.la_invlist[L:2*L+1, :L])
-    np.copyto(invlistr[:L+1, :L+1], alf_f2py.la_invlist[L:2*L+1, L:2*L+1])
-    invlistr -= 1
+    lattices_fortran.get_arrays(
+        c_int(ndim),
+        c_int(L),
+        c_int(N),
+        BZ1.ctypes.data_as(POINTER(c_int)),
+        BZ2.ctypes.data_as(POINTER(c_int)),
+        b1.ctypes.data_as(POINTER(c_int)),
+        b2.ctypes.data_as(POINTER(c_int)),
+        b1_perp.ctypes.data_as(POINTER(c_int)),
+        b2_perp.ctypes.data_as(POINTER(c_int)),
+        listr.ctypes.data_as(POINTER(c_int)),
+        invlistr.ctypes.data_as(POINTER(c_int)),
+        nnlistr.ctypes.data_as(POINTER(c_int)),
+        listk.ctypes.data_as(POINTER(c_int)),
+        invlistk.ctypes.data_as(POINTER(c_int)),
+        nnlistk.ctypes.data_as(POINTER(c_int)),
+        imj.ctypes.data_as(POINTER(c_int)),
+    )
 
-    invlistk = np.empty((2*L+1, 2*L+1), dtype=np.int32)
-    np.copyto(invlistk[-L:, -L:], alf_f2py.la_invlistk[:L, :L])
-    np.copyto(invlistk[-L:, :L+1], alf_f2py.la_invlistk[:L, L:2*L+1])
-    np.copyto(invlistk[:L+1, -L:], alf_f2py.la_invlistk[L:2*L+1, :L])
-    np.copyto(invlistk[:L+1, :L+1], alf_f2py.la_invlistk[L:2*L+1, L:2*L+1])
-    invlistk -= 1
-
-    nnlistr = np.empty((N, 3, 3), dtype=np.int32)
-    np.copyto(nnlistr[:, -1:, -1:], alf_f2py.la_nnlist[:, :1, :1])
-    np.copyto(nnlistr[:, -1:, :2], alf_f2py.la_nnlist[:, :1, 1:3])
-    np.copyto(nnlistr[:, :2, -1:], alf_f2py.la_nnlist[:, 1:3, :1])
-    np.copyto(nnlistr[:, :2, :2], alf_f2py.la_nnlist[:, 1:3, 1:3])
-    nnlistr -= 1
-
-    nnlistk = np.empty((N, 3, 3), dtype=np.int32)
-    np.copyto(nnlistk[:, -1:, -1:], alf_f2py.la_nnlistk[:, :1, :1])
-    np.copyto(nnlistk[:, -1:, :2], alf_f2py.la_nnlistk[:, :1, 1:3])
-    np.copyto(nnlistk[:, :2, -1:], alf_f2py.la_nnlistk[:, 1:3, :1])
-    np.copyto(nnlistk[:, :2, :2], alf_f2py.la_nnlistk[:, 1:3, 1:3])
-    nnlistk -= 1
-
-    imj = np.copy(alf_f2py.la_imj)
-    imj -= 1
-
-    alf_f2py.lattice_out_clean()
+    lattices_fortran.clear_lattice_c()
 
     return(BZ1, BZ2, b1, b2,
            b1_perp, b2_perp, L, N,
@@ -351,8 +365,8 @@ def _init1(L1, L2, a1, a2):
     # Compute the Reciprocal Lattice vectors.
     mat = np.array([[a1[0], a1[1]], [a2[0], a2[1]]])
     mat2 = 2. * np.pi * np.linalg.inv(mat)
-    BZ1 = np.copy(mat2[0])
-    BZ2 = np.copy(mat2[1])
+    BZ1 = np.copy(mat2[:,0])
+    BZ2 = np.copy(mat2[:,1])
 
     # K-space Quantization  from periodicity in L1_p and L2_p
     X = 2. * np.pi / (np.dot(BZ1, L1) * np.dot(BZ2, L2)
@@ -363,8 +377,8 @@ def _init1(L1, L2, a1, a2):
     # Compute b1_perp, b2_perp
     mat = np.array([[b1[0], b1[1]], [b2[0], b2[1]]])
     mat2 = np.linalg.inv(mat)
-    b1_perp = mat2[0]
-    b2_perp = mat2[1]
+    b1_perp = mat2[:,0]
+    b2_perp = mat2[:,1]
 
     # Count the number of Lattice points and setup list, invlist
     N1 = abs(int(round(np.dot(BZ1, L1) / (2.*np.pi))))
@@ -400,6 +414,9 @@ def _init1(L1, L2, a1, a2):
             if in_latt:
                 listr[nc] = [i1, i2]
                 nc += 1
+    if not nc == N:
+        print(L, nc, N)
+        raise Exception('Error in initialsation of Lattice')
 
     nc = 0
     listk = np.empty((N, ndim), dtype=np.int32)
