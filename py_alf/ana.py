@@ -806,6 +806,10 @@ def load_res(directories):
 
             dictionary['lattice'] = {}
             dictionary['lattice'].update(f["lattice"].attrs)
+            try:
+                dictionary['lattice']['orbitals'] = np.copy(f["lattice/orbitals"])
+            except KeyError:
+                print('No orbital locations saved.')
         li.append(dictionary)
 
     df = pd.DataFrame(li, index=directories_in)
