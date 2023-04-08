@@ -84,7 +84,10 @@ def _replot(ax, obs_name, bins, N_skip, nmax=None):
             bins2 = bins1[:, i]
 
         p = ax.plot(range(1, N_bins+1), bins)
-        color=p[0].get_color()
+        if N_obs == 1:
+            color = None
+        else:
+            color = p[0].get_color()
         ax.plot(x1, bins2, '.', c=color)
 
         m = np.mean(bins2)
