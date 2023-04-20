@@ -7,6 +7,7 @@
 
 import os
 from ctypes import CDLL, POINTER, c_int, c_double, byref
+import platform
 
 import numpy as np
 from numba import jit
@@ -292,10 +293,18 @@ def _calc_patch(a1, a2):
 
 
 def _init0(L1, L2, a1, a2):
+    if platform.machine() == 'x86_64':
+        lattices_bin = 'lattices_x86-64.so'
+    elif platform.machine() == 'arm64':
+        lattices_bin = 'lattices_armv8.4-a.so'
+    else:
+        raise Exception('No lattices binary for this system architecture. '
+            'Please contact pyALF maintainers.')
+
     lattices_fortran = CDLL(
         os.path.join(
             os.path.dirname(__file__),
-            'lattices_x86-64.so'
+            lattices_bin
         )
     )
     ndim = c_int(len(L1))
