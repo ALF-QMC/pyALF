@@ -193,14 +193,14 @@ class Simulation:
             _prep_sim_dir(self.alf_src, self.sim_dir,
                           self.ham_name, self.sim_dict)
 
-        env = getenv(self.config, self.alf_src.alf_dir)
-        env['OMP_NUM_THREADS'] = str(self.n_omp)
         executable = os.path.join(self.alf_src.alf_dir, 'Prog', 'ALF.out')
         if copy_bin:
             shutil.copy(executable, self.sim_dir)
             executable = os.path.join(self.sim_dir, 'ALF.out')
         if only_prep:
             return
+        env = getenv(self.config, self.alf_src.alf_dir)
+        env['OMP_NUM_THREADS'] = str(self.n_omp)
         with cd(self.sim_dir):
             print('Run {}'.format(executable))
             try:
