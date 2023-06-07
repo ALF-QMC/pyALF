@@ -133,7 +133,7 @@ class Simulation:
         if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
 
-        if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC-NG']:
+        if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC-NG', 'INTELLLVM', 'INTELX']:
             raise Exception('Illegal value machine={}'.format(machine))
 
         if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
