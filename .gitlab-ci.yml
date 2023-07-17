@@ -18,8 +18,11 @@ variables:
     - $linter -E py_alf/
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - export PATH="$PWD/py_alf/cli:$PATH"
+    - cd tests && ./test_lattice_init.py && cd ..
     - adduser --system --disabled-password tester
     - mkdir test && chown tester test && cd test
+    - mkdir NUMBA_CACHE_DIR && chown tester NUMBA_CACHE_DIR
+    - export NUMBA_CACHE_DIR="$PWD/NUMBA_CACHE_DIR"
     - runuser -m -u tester -- alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file ../py_alf/cli/Sims
 
 .warn_template: &warn_definition
@@ -52,6 +55,8 @@ variables:
     - export PATH="$PWD/py_alf/cli:$PATH"
     - adduser --system --disabled-password tester
     - mkdir test && chown tester test && cd test
+    - mkdir NUMBA_CACHE_DIR && chown tester NUMBA_CACHE_DIR
+    - export NUMBA_CACHE_DIR="$PWD/NUMBA_CACHE_DIR"
     - echo "localhost slots=4" > myhostfile
     - runuser -m -u tester -- alf_test_branch.py --sim_pars ../py_alf/cli/test_pars.json --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
 
