@@ -6,6 +6,7 @@
 # pylint: disable=too-many-statements
 
 import os
+import sys
 from ctypes import CDLL, POINTER, c_int, c_double, byref
 import platform
 
@@ -14,6 +15,7 @@ from numba import jit
 
 
 _cache = {}
+_use_fortran_init = True
 
 
 class Lattice:
@@ -32,12 +34,13 @@ class Lattice:
 
         a1, a2: 2d primitive vectors.
 
-    init_version : int, default=0
-        init_version=0 uses compiled Fortran, while init_version=1 uses native
-        Python.
+    force_python_init : bool, default=False
+        Force the usage of Python version of the initialization. 
+        Default behaviour is to first try compiled Fortran and fall back to
+        Python if that fails.
     """
 
-    def __init__(self, *args, init_version=0):
+    def __init__(self, *args, force_python_init=False):
         if len(args) == 1:
             self.L1 = np.array(args[0]["L1"], dtype=float)
             self.L2 = np.array(args[0]["L2"], dtype=float)
@@ -57,10 +60,22 @@ class Lattice:
              self.listk, self.invlistk, self.nnlistk,
              self.imj, self.r, self.k) = _cache[s]
         else:
-            if init_version == 0:
-                init = _init0(self.L1, self.L2, self.a1, self.a2)
-                #init = init_lattice(self.L1, self.L2, self.a1, self.a2)
-            elif init_version == 1:
+            global _use_fortran_init
+            if _use_fortran_init and (not force_python_init):
+                try:
+                    init = _init0(self.L1, self.L2, self.a1, self.a2)
+                except OSError:
+                    print("Compiled Fortran lattice initialisazion does not work, "
+                          "falling back to Python version", file=sys.stderr)
+                    _use_fortran_init = False
+                    init = _init1(self.L1, self.L2, self.a1, self.a2)
+                except NotImplementedError:
+                    print('No lattices binary for this system architecture: '
+                          f'"{platform.machine()}".'
+                          'Falling back to Python version', file=sys.stderr)
+                    _use_fortran_init = False
+                    init = _init1(self.L1, self.L2, self.a1, self.a2)
+            else:
                 init = _init1(self.L1, self.L2, self.a1, self.a2)
 
             (self.BZ1, self.BZ2, self.b1, self.b2,
@@ -298,8 +313,9 @@ def _init0(L1, L2, a1, a2):
     elif platform.machine() == 'arm64':
         lattices_bin = 'lattices_armv8.4-a.so'
     else:
-        raise Exception('No lattices binary for this system architecture. '
-            'Please contact pyALF maintainers.')
+        raise NotImplementedError(
+            'No lattices binary for this system architecture: '
+            f'"{platform.machine()}". Please contact pyALF maintainers.')
 
     lattices_fortran = CDLL(
         os.path.join(
