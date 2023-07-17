@@ -21,6 +21,8 @@ variables:
     - cd tests && ./test_lattice_init.py && cd ..
     - adduser --system --disabled-password tester
     - mkdir test && chown tester test && cd test
+    - mkdir NUMBA_CACHE_DIR && chown tester NUMBA_CACHE_DIR
+    - export NUMBA_CACHE_DIR="$PWD/NUMBA_CACHE_DIR"
     - runuser -m -u tester -- alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file ../py_alf/cli/Sims
 
 .warn_template: &warn_definition
