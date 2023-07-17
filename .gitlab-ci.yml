@@ -18,6 +18,7 @@ variables:
     - $linter -E py_alf/
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - export PATH="$PWD/py_alf/cli:$PATH"
+    - cd tests && ./test_lattice_init.py && cd ..
     - adduser --system --disabled-password tester
     - mkdir test && chown tester test && cd test
     - runuser -m -u tester -- alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file ../py_alf/cli/Sims
