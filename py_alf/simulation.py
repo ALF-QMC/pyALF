@@ -169,9 +169,9 @@ class Simulation:
             else: Print make tracing information.
         """
         compile_alf(self.alf_src.alf_dir, config=self.config,
-                    verbosity=verbosity)
+                    verbosity=verbosity, branch=self.alf_src.branch)
 
-    def run(self, copy_bin=False, only_prep=False):
+    def run(self, copy_bin=False, only_prep=False, bin_in_sim_dir=False):
         """
         Prepare simulation directory and run ALF.
 
@@ -181,6 +181,9 @@ class Simulation:
             Copy ALF binary into simulation directory.
         only_prep : bool, default=False
             Do not run ALF, only prepare simulation directory.
+        bin_in_sim_dir : bool, default=False
+            Assume that the ALF binary is already present in simultation
+            directory and use this.
         """
         if self.tempering:
             _prep_sim_dir(self.alf_src, self.sim_dir,
@@ -196,6 +199,8 @@ class Simulation:
         executable = os.path.join(self.alf_src.alf_dir, 'Prog', 'ALF.out')
         if copy_bin:
             shutil.copy(executable, self.sim_dir)
+            executable = os.path.join(self.sim_dir, 'ALF.out')
+        if bin_in_sim_dir:
             executable = os.path.join(self.sim_dir, 'ALF.out')
         if only_prep:
             return
