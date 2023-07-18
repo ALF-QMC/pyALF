@@ -18,20 +18,19 @@ import numpy as np
 from py_alf import ALF_source, Simulation
 
 
-def test_branch(alf_dir, pars, branch_R, branch_T, tmpdir,
+def test_branch(sim_name, alf_dir, pars, branch_R, branch_T, tmpdir,
                 prepare_run=True, run=True, analyze=True, **kwargs):
     ham_name = pars[0]
     sim_dict = pars[1]
 
     sim_R = Simulation(
         ALF_source(alf_dir=alf_dir, branch=branch_R),
-        ham_name, sim_dict, **kwargs
+        ham_name, sim_dict, sim_dir=sim_name, **kwargs
         )
     sim_T = Simulation(
         ALF_source(alf_dir=alf_dir, branch=branch_T),
-        ham_name, sim_dict, **kwargs
+        ham_name, sim_dict, sim_dir=sim_name+'_test', **kwargs
         )
-    sim_T.sim_dir = sim_T.sim_dir + '_test'
 
     if prepare_run:
         executable_R = os.path.join(tmpdir, f'ALF_{sim_R.config.replace(" ", "_")}_reference.out')
@@ -144,7 +143,7 @@ if __name__ == "__main__":
     print(f'Caching executables in {tmpdir.name}.')
     for sim_name, sim_dict in sim_pars.items():
         test = test_branch(
-            alf_dir, sim_dict, args.branch_R, args.branch_T, tmpdir.name,
+            sim_name, alf_dir, sim_dict, args.branch_R, args.branch_T, tmpdir.name,
             prepare_run=(not args.no_prep), run=(not args.no_sim),
             analyze=(not args.no_analyze),
             machine=args.machine, mpi=args.mpi, n_mpi=args.n_mpi,
