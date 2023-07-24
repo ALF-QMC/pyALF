@@ -1,29 +1,25 @@
 variables:
   BRANCH_R: "master"
+
+default:
+  tags: [k8s]
   
 .test_template: &test_definition
   rules:
     - if: '$BRANCH_T'
       when: never
     - changes:
-      - Run.py
-      - default_variables.py
-      - py_alf.py
+      - py_alf
+      - tests
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y python3-pip python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
-    - pip3 install f90nml pylint ipywidgets
-    - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
-    - if [ $(command -v pylint3) ]; then linter='pylint3'; else linter='pylint'; fi
-    - $linter -E py_alf/
+    - export PATH="$HOME/.local/bin:$PATH"
+    - pip install pylint
+    - pylint -E py_alf/
     - export PYTHONPATH="$PWD:$PYTHONPATH"
     - export PATH="$PWD/py_alf/cli:$PATH"
     - cd tests && ./test_lattice_init.py && cd ..
-    - adduser --system --disabled-password tester
-    - mkdir test && chown tester test && cd test
-    - mkdir NUMBA_CACHE_DIR && chown tester NUMBA_CACHE_DIR
-    - export NUMBA_CACHE_DIR="$PWD/NUMBA_CACHE_DIR"
-    - runuser -m -u tester -- alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file ../py_alf/cli/Sims
+    - alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
 .warn_template: &warn_definition
   allow_failure: true
@@ -31,86 +27,51 @@ variables:
     - if: '$BRANCH_T'
       when: never
     - changes:
-      - Run.py
-      - default_variables.py
-      - py_alf.py
+      - py_alf
       - .gitlab-ci.yml
   script:
-    - apt-get update && apt-get install -y python3-pip python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py
-    - pip install f90nml pylint ipywidgets
+    - export PATH="$HOME/.local/bin:$PATH"
+    - pip install pylint
     - pylint py_alf/
-    
-.test_branch_template: &test_branch_definition
-  rules:
-    - if: '$BRANCH_T'
-      when: always
-  script:
-    - apt-get update && apt-get install -y python3-pip python3-numpy python3-pandas python3-h5py python3-numba python3-mpi4py git curl libghc-zlib-dev
-    - pip install f90nml ipywidgets
-    - export PYTHONPATH="$PWD:$PYTHONPATH"
-    - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/compilers/bin:$PATH"
-    - export PATH="/opt/nvidia/hpc_sdk/Linux_x86_64/2021/comm_libs/mpi/bin:$PATH"
-    - if [ "$MACHINE" = "INTEL" ]; then . /opt/intel/oneapi/setvars.sh; fi
-    - export PYTHONPATH="$PWD:$PYTHONPATH"
-    - export PATH="$PWD/py_alf/cli:$PATH"
-    - adduser --system --disabled-password tester
-    - mkdir test && chown tester test && cd test
-    - mkdir NUMBA_CACHE_DIR && chown tester NUMBA_CACHE_DIR
-    - export NUMBA_CACHE_DIR="$PWD/NUMBA_CACHE_DIR"
-    - echo "localhost slots=4" > myhostfile
-    - runuser -m -u tester -- alf_test_branch.py --sim_pars ../py_alf/cli/test_pars.json --branch_R $BRANCH_R --branch_T $BRANCH_T --machine $MACHINE --mpiexec_args "--hostfile $PWD/myhostfile"
 
 
-Test_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
+Test_Bullseye:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
   variables:
     MACHINE: "GNU"
   <<: *test_definition
 
-Test_Bullseye:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
+Test_Bookworm:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bookworm
   variables:
     MACHINE: "GNU"
   <<: *test_definition
   
-Test-PGI:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-pgi-21-03
+Test_PGI:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye-pgi-21-03
   variables:
     MACHINE: "PGI"
   <<: *test_definition
 
-Test-Intel-21:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort-python3
+Test_Intel21:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye-intel
   variables:
     MACHINE: "INTEL"
+  <<: *test_definition
+
+Test_IntelLatest:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/intel
+  variables:
+    MACHINE: "INTEL"
+  <<: *test_definition
+
+Test_IntelLLVM:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/intel
+  variables:
+    MACHINE: "INTELLLVM"
   <<: *test_definition
 
 
 Warn_Bullseye:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
   <<: *warn_definition
-
-
-Test_branch_Buster:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:buster-gfortran-blas-lapack-fftw-hdf5-scipy3
-  variables:
-    MACHINE: "GNU"
-  <<: *test_branch_definition
-
-Test_branch_Bullseye:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-gfortran-blas-lapack-fftw-hdf5-scipy3
-  variables:
-    MACHINE: "GNU"
-  <<: *test_branch_definition
-  
-Test_branch-PGI:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-pgi-21-03
-  variables:
-    MACHINE: "PGI"
-  <<: *test_branch_definition
-
-Test_branch-Intel-21:
-  image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bullseye-intel-oneapi-ifort-python3
-  variables:
-    MACHINE: "INTEL"
-  <<: *test_branch_definition
