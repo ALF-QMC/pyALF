@@ -58,7 +58,7 @@ class ALF_source:
             try:
                 subprocess.run(["git", "clone", url, self.alf_dir], check=True)
             except subprocess.CalledProcessError as git_clone_failed:
-                raise Exception('Error while cloning repository') \
+                raise RuntimeError('Error while cloning repository') \
                     from git_clone_failed
         if branch is not None:
             with cd(self.alf_dir):
@@ -66,7 +66,7 @@ class ALF_source:
                 try:
                     subprocess.run(['git', 'checkout', branch], check=True)
                 except subprocess.CalledProcessError as git_checkout_failed:
-                    raise Exception(
+                    raise RuntimeError(
                         'Error while checking out {}'.format(branch)) \
                         from git_checkout_failed
 
@@ -82,7 +82,7 @@ class ALF_source:
                 'parse_ham',
                 os.path.join(self.alf_dir, 'Prog', 'parse_ham_mod.py'))
         except FileNotFoundError as parse_ham_not_found:
-            raise Exception(
+            raise FileNotFoundError(
                 "parse_ham_mod.py not found. "
                 "Directory {} ".format(self.alf_dir) +
                 "does not contain a supported ALF code.") \
@@ -93,7 +93,7 @@ class ALF_source:
                 os.path.join(self.alf_dir, 'Prog',
                              'default_parameters_generic.py'))
         except FileNotFoundError as default_parameters_generic_not_found:
-            raise Exception(
+            raise FileNotFoundError(
                 "default_parameters_generic.py not found. "
                 "Directory {} ".format(self.alf_dir) +
                 "does not contain a supported ALF code.") \

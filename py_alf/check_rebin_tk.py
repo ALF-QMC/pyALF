@@ -22,16 +22,21 @@ class check_rebin_tk():
         Names of observables to check.
     Nmax0 : int, default=100
         Biggest n_rebin to consider. The default is 100.
-    custom_obs : dict, default={}
+    custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
     """
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-few-public-methods
 
-    def __init__(self, directories, names, Nmax0=100, custom_obs={}):
+    def __init__(self, directories, names, Nmax0=100, custom_obs=None):
         self.directories = directories
         self.names = names
         self.Nmax0 = Nmax0
-        self.custom_obs = custom_obs
+        if custom_obs is None:
+            custom_obs = {}
+        else:
+            self.custom_obs = custom_obs
         self.root = tk.Tk()
 
         self.n_dir_var = tk.IntVar(master=self.root, value=-1)

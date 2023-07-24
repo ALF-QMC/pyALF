@@ -2,6 +2,7 @@
 # pylint: disable=invalid-name
 # pylint: disable=too-many-branches
 # pylint: disable=missing-function-docstring
+# pylint: disable=unbalanced-tuple-unpacking
 
 import os
 import shutil
@@ -224,7 +225,7 @@ def read_scal(directory, obs_name, bare_bins=False):
     else:
         filename = os.path.join(directory, obs_name)
 
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='UTF-8') as f:
             lines = f.readlines()
 
         N_bins = len(lines)
@@ -282,6 +283,7 @@ def read_hist(directory, obs_name, bare_bins=False):
     lower : float
         Lower bound.
     """
+    # pylint: disable=too-many-locals
     par = Parameters(directory, obs_name)
 
     if 'data.h5' in os.listdir(directory):
@@ -307,7 +309,7 @@ def read_hist(directory, obs_name, bare_bins=False):
     else:
         filename = os.path.join(directory, obs_name)
 
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='UTF-8') as f:
             lines = f.readlines()
 
         N_bins = len(lines)
@@ -374,6 +376,9 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
     latt : Lattice
         See :class:`py_alf.Lattice`.
     """
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-nested-blocks
     par = Parameters(directory, obs_name)
     filename = os.path.join(directory, 'data.h5')
 
@@ -396,7 +401,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
             dtau = f[obs_name].attrs['dtau']
     else:
         filename = os.path.join(directory, obs_name)
-        with open(filename+'_info', 'r') as f:
+        with open(filename+'_info', 'r', encoding='UTF-8') as f:
             lines = f.readlines()
         # Channel = lines[1].split(':')[1].strip()
         N_tau = int(lines[2].split(':')[1])
@@ -410,14 +415,15 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         latt = Lattice(L1_p, L2_p, a1_p, a2_p)
         N_unit = latt.N
 
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding='UTF-8') as f:
             lines = f.readlines()
 
         N_bins0 = len(lines) / (1 + N_orb + N_unit + N_unit*N_tau*N_orb**2)
         N_bins = int(round(N_bins0))
         if N_bins0 - N_bins > 1e-10:
-            raise Exception('Error in read_latt_plaintxt: File "{}" \
-                            lines number does not fit'.format(filename))
+            raise RuntimeError(
+                f'Error in read_latt_plaintxt: File "{filename}" '
+                'lines number does not fit.')
 
         latt = Lattice(L1_p, L2_p, a1_p, a2_p)
 
@@ -491,6 +497,7 @@ class ReadObs:
     substract_back : bool, default=True
         Substract background. Applies to correlation functions.
     """
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, directory, obs_name,
                  bare_bins=False, substract_back=True):
@@ -509,7 +516,7 @@ class ReadObs:
              self.N_classes, self.upper, self.lower) = \
                 read_hist(directory, obs_name, bare_bins)
         else:
-            raise Exception('Error in ReadObs.init')
+            raise TypeError('Error in ReadObs.init: Unknow observable type.')
         self.N_bins = self.J_obs.shape[0]
 
     def all(self):
@@ -522,7 +529,7 @@ class ReadObs:
         if self.obs_name.endswith('_hist'):
             return (self.J_obs, self.J_sign, self.J_above, self.J_below,
                     self.N_classes, self.upper, self.lower)
-        raise Exception('Error in ReadObs.all')
+        raise TypeError('Error in ReadObs.all: Unknow observable type.')
 
     def slice(self, n):
         """Return n-th bin."""
@@ -534,7 +541,7 @@ class ReadObs:
         if self.obs_name.endswith('_hist'):
             return (self.J_obs[n], self.J_sign[n], self.J_above[n],
                     self.J_below[n], self.N_classes, self.upper, self.lower)
-        raise Exception('Error in ReadObs.slice')
+        raise TypeError('Error in ReadObs.slice: Unknow observable type.')
 
     def jack(self, N_rebin):
         """
@@ -546,7 +553,7 @@ class ReadObs:
             Overwrite N_rebin from parameters.
         """
         if not self.bare_bins:
-            raise Exception('Object has to be created with `bare_bins=True`.')
+            raise TypeError('Object has to be created with `bare_bins=True`.')
         par = Parameters(self.directory)
         J_obs_temp = jack(self.J_obs, par, N_rebin=N_rebin)
         N = len(J_obs_temp)
@@ -566,7 +573,7 @@ class ReadObs:
                     jack(self.J_above, par, N_rebin=N_rebin),
                     jack(self.J_below, par, N_rebin=N_rebin),
                     N*[self.N_classes], N*[self.upper], N*[self.lower])
-        raise Exception('Error in ReadObs.jack')
+        raise TypeError('Error in ReadObs.jack: Unknow observable type.')
 
 
 def ana_scal(directory, obs_name):
@@ -595,6 +602,7 @@ def ana_scal(directory, obs_name):
 
 def ana_hist(directory, obs_name):
     """Analyze given histogram observables."""
+    # pylint: disable=too-many-locals
     J_obs, J_sign, J_above, J_below, N_classes, upper, lower = \
         ReadObs(directory, obs_name).all()
     if len(J_obs) < 2:
@@ -619,6 +627,7 @@ def ana_eq(directory, obs_name, sym=None):
     If sym is given, it symmetrizes the bins prior to calculating the error.
     Cf. :func:`symmetrize`.
     """
+    # pylint: disable=too-many-locals
     J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt = \
         ReadObs(directory, obs_name).all()
     del J_back, N_tau, dtau
@@ -656,6 +665,7 @@ def ana_tau(directory, obs_name, sym=None):
     If sym is given, it symmetrizes the bins prior to calculating the error.
     Cf. :func:`symmetrize`.
     """
+    # pylint: disable=too-many-locals
     J_obs, J_back, J_sign, N_orb, N_tau, dtau, latt = \
         ReadObs(directory, obs_name).all()
     if len(J_obs) < 2:
@@ -684,6 +694,8 @@ def ana_tau(directory, obs_name, sym=None):
 def write_res_eq(directory, obs_name,
                  m_k, e_k, m_k_sum, e_k_sum,
                  m_r, e_r, m_r_sum, e_r_sum, latt):
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-arguments
     N_orb = m_k.shape[0]
     header = ['kx', 'ky']
     out = latt.k
@@ -749,6 +761,7 @@ def write_res_eq(directory, obs_name,
 
 
 def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
+    # pylint: disable=too-many-arguments
     N_tau = m_k.shape[0]
     taus = np.linspace(0., (N_tau-1)*dtau, num=N_tau)
 
@@ -826,6 +839,6 @@ def custom_obs_get_dtype_len(obs_spec, bins):
     elif np.ndim(sample) == 1:
         length = len(sample)
     else:
-        raise Exception(
+        raise TypeError(
             "Only scalar or one-dimensional custom_obs allowed")
     return dypte, length

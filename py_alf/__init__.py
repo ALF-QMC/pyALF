@@ -1,6 +1,7 @@
 """
 pyALF, a Python package for the Algorithms for Lattice Fermions (ALF).
 """
+# pylint: disable=inconsistent-return-statements
 
 # Module containing low-level analysis functions
 from . import ana
@@ -40,7 +41,7 @@ def check_warmup(*args, gui='tk', **kwargs):
     elif gui == 'ipy':
         return check_warmup_ipy(*args, **kwargs)
     else:
-        raise Exception(f'Illegal value gui={gui}')
+        raise TypeError(f'Illegal value gui={gui}')
 
 def check_rebin(*args, gui='tk', **kwargs):
     """
@@ -60,4 +61,4 @@ def check_rebin(*args, gui='tk', **kwargs):
     elif gui == 'ipy':
         return check_rebin_ipy(*args, **kwargs)
     else:
-        raise Exception(f'Illegal value gui={gui}')
+        raise TypeError(f'Illegal value gui={gui}')
