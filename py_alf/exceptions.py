@@ -1,4 +1,4 @@
 """Exceptions for pyALF"""
 
 class TooFewBinsError(Exception):
-    pass
+    """Triggered when observable has too few bins for analysis."""

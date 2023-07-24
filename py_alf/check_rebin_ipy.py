@@ -6,7 +6,7 @@ from . init_layout import init_layout
 from . ana import Parameters
 
 
-def check_rebin_ipy(directories, names, custom_obs={}, Nmax0=100, ncols=3):
+def check_rebin_ipy(directories, names, custom_obs=None, Nmax0=100, ncols=3):
     """
     Plot error vs n_rebin in a Jupyter Widget.
 
@@ -18,7 +18,7 @@ def check_rebin_ipy(directories, names, custom_obs={}, Nmax0=100, ncols=3):
         Names of observables to check.
     Nmax0 : int, default=100
         Biggest n_rebin to consider. The default is 100.
-    custom_obs : dict, default={}
+    custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
 
@@ -32,21 +32,47 @@ def check_rebin_ipy(directories, names, custom_obs={}, Nmax0=100, ncols=3):
 
 
 class CheckRebinIpy:
-    def __init__(self, directories, names, custom_obs={}, Nmax0=100, ncols=3):
+    """
+    Plot error vs n_rebin in a Jupyter Widget.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories with bins to check.
+    names : list of str
+        Names of observables to check.
+    Nmax0 : int, default=100
+        Biggest n_rebin to consider. The default is 100.
+    custom_obs : dict, default=None
+        Defines additional observables derived from existing observables.
+        See :func:`py_alf.analysis`.
+
+    Returns
+    -------
+    Jupyter Widget
+        A graphical user interface based on ipywidgets
+    """
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-few-public-methods
+    def __init__(self, directories, names, custom_obs=None, Nmax0=100, ncols=3):
         self.gui, self.log, self.axs, self.nrebin, self.select = \
             init_layout(directories, n_plots=len(names), ncols=ncols,
                         int_names=('N_rebin:',))
         self.nrebin.min = 1
         self.names = names
-        self.custom_obs = custom_obs
+        if custom_obs is None:
+            custom_obs = {}
+        else:
+            self.custom_obs = custom_obs
         self.Nmax0 = Nmax0
         self.ncols = ncols
 
-        self.init_dir()
-        self.select.observe(self.update_select, 'value')
-        self.nrebin.observe(self.update_nrebin, 'value')
+        self._init_dir()
+        self.select.observe(self._update_select, 'value')
+        self.nrebin.observe(self._update_nrebin, 'value')
 
-    def init_dir(self):
+    def _init_dir(self):
         with self.log:
             self.par = Parameters(self.select.value)
             errors = _get_errors(
@@ -61,13 +87,13 @@ class CheckRebinIpy:
             for ax in self.axs[-self.ncols:]:
                 ax.set_xlabel('N_rebin')
 
-    def update_select(self, change):
+    def _update_select(self, change):
         del change
         with self.log:
             # display(change)
-            self.init_dir()
+            self._init_dir()
 
-    def update_nrebin(self, change):
+    def _update_nrebin(self, change):
         del change
         with self.log:
             if self.nrebin.value == self.par.N_rebin():

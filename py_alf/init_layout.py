@@ -1,4 +1,5 @@
 """Create Jupyter widget layout for Check_Warmup and Check_Rebin."""
+# pylint: disable=invalid-name
 import math
 
 import ipywidgets as widgets
@@ -30,6 +31,7 @@ def _create_fig(N, ncols=2):
 
 def init_layout(names, ncols=3, n_plots=5, int_names=('N_max:', 'N_skip:')):
     """Create Jupyter widget layout for Check_Warmup and Check_Rebin."""
+    # pylint: disable=too-many-locals
     select = widgets.Select(
         options=names,
         rows=3,
@@ -69,6 +71,8 @@ def init_layout(names, ncols=3, n_plots=5, int_names=('N_max:', 'N_skip:')):
     log = widgets.Output()
 
     def button_next_clicked(b):
+        # pylint: disable=no-member
+        del b
         with log:
             if len(select.options) > select.index+1:
                 select.index += 1
@@ -77,6 +81,7 @@ def init_layout(names, ncols=3, n_plots=5, int_names=('N_max:', 'N_skip:')):
     button_next.on_click(button_next_clicked)
 
     def button_clear_clicked(b):
+        del b
         log.clear_output()
     button_clear.on_click(button_clear_clicked)
 

@@ -48,6 +48,9 @@ def analysis(directory,
     always : bool, default=False
         Do not skip if parameters and bins are older than results.
     """
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     print('### Analyzing {} ###'.format(directory))
     print(os.getcwd())
 

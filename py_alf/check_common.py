@@ -1,5 +1,6 @@
 """Common resources for check_warmup and check_rebin."""
 # pylint: disable=invalid-name
+# pylint: disable=too-many-locals
 
 import math
 
@@ -96,7 +97,7 @@ def _replot(ax, obs_name, bins, N_skip, nmax=None):
 
         def func(x, y0, a):
             return y0 + a*x
-        popt, pcov = curve_fit(func, x1, bins2)
+        popt, pcov, *_ = curve_fit(func, x1, bins2)
         del pcov
         ax.plot(x1, func(x1, *popt), c=color)
         print(m, popt[1]/m)
@@ -108,7 +109,7 @@ def _rebin_err(bins, N_skip, Nmax):
     res = np.empty((Nmax, N_obs, 2))
     for N in range(1, Nmax+1):
         J = jack(bins, par=None, N_skip=N_skip, N_rebin=N)
-        m, e = error(J[:, :])
+        m, e = error(J[:, :])  # pylint: disable=unbalanced-tuple-unpacking
         res[N-1, :, 0] = m
         res[N-1, :, 1] = e
     return res
@@ -152,7 +153,7 @@ def _get_errors(directory, names, custom_obs, Nmax0):
                 for i in range(N_bins):
                     J[i] = obs_spec['function'](*[x[i] for x in jacks],
                                                 **obs_spec['kwargs'])
-                m, e = error(J)
+                m, e = error(J)  # pylint: disable=unbalanced-tuple-unpacking
                 del m
                 err[N_rebin-1] = e
         elif obs_name.endswith('_scal'):
@@ -164,7 +165,7 @@ def _get_errors(directory, names, custom_obs, Nmax0):
             Nmax = min(N_bins // 3, Nmax0)
             err = _rebin_err(bins_c, N_skip, Nmax)
         else:
-            raise Exception(f'Illegal observable {obs_name}')
+            raise TypeError(f'Illegal observable {obs_name}')
         # print(err)
         res.append(err)
     return res

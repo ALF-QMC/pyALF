@@ -1,9 +1,5 @@
 """Implamemts bravais lattice object."""
 # pylint: disable=invalid-name
-# pylint: disable=too-many-instance-attributes
-# pylint: disable=too-many-locals
-# pylint: disable=too-many-branches
-# pylint: disable=too-many-statements
 
 import os
 import sys
@@ -39,6 +35,7 @@ class Lattice:
         Default behaviour is to first try compiled Fortran and fall back to
         Python if that fails.
     """
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, *args, force_python_init=False):
         if len(args) == 1:
@@ -60,7 +57,7 @@ class Lattice:
              self.listk, self.invlistk, self.nnlistk,
              self.imj, self.r, self.k) = _cache[s]
         else:
-            global _use_fortran_init
+            global _use_fortran_init  # pylint: disable=global-statement
             if _use_fortran_init and (not force_python_init):
                 try:
                     init = _init0(self.L1, self.L2, self.a1, self.a2)
@@ -114,7 +111,7 @@ class Lattice:
         n = self.invlistr[n1, n2]
 
         if not np.allclose(r1, self.r[n]):
-            raise Exception(f'r not found {r} {r1} {n1} {n2} {n} {self.r[n]}')
+            raise RuntimeError(f'r not found {r} {r1} {n1} {n2} {n} {self.r[n]}')
         return n
 
     def k_to_n(self, k):
@@ -126,7 +123,7 @@ class Lattice:
         n = self.invlistk[n1, n2]
 
         if not np.allclose(k1, self.k[n]):
-            raise Exception(f'k not found {k} {k1} {n1} {n2} {n} {self.k[n]}')
+            raise RuntimeError(f'k not found {k} {k1} {n1} {n2} {n} {self.k[n]}')
         return n
 
     def fourier_K_to_R(self, X):
@@ -138,7 +135,7 @@ class Lattice:
         Last index of output runs over all lattice points in r space.
         """
         if X.shape[-1] != self.N:
-            raise Exception("Last index of X has wrong number of elements")
+            raise TypeError("Last index of X has wrong number of elements")
         Y = np.zeros(X.shape, dtype=X.dtype)
         for i in range(self.N):
             for j in range(self.N):
@@ -155,7 +152,7 @@ class Lattice:
         Last index of output runs over all lattice points in k space.
         """
         if X.shape[-1] != self.N:
-            raise Exception("Last index of X has wrong number of elements")
+            raise TypeError("Last index of X has wrong number of elements")
         Y = np.zeros(X.shape, dtype=X.dtype)
         for i in range(self.N):
             for j in range(self.N):
@@ -192,6 +189,7 @@ class Lattice:
         data : iterable
             Index corresponds to coordinates.
         """
+        # pylint: disable=import-outside-toplevel
         import matplotlib.pyplot as plt
         import matplotlib as mpl
 
@@ -215,6 +213,7 @@ class Lattice:
         data : iterable
             Index corresponds to coordinates.
         """
+        # pylint: disable=import-outside-toplevel
         import matplotlib.pyplot as plt
         import matplotlib as mpl
 
@@ -230,7 +229,9 @@ class Lattice:
         ax.set_ylabel(r'$k_y$')
 
 
-def _plot_2d(coords, vec1, vec2, ax, data, cmap):
+def _plot_2d(coords, vec1, vec2, ax, data, cmap):  # pylint: disable=too-many-arguments
+    # pylint: disable=import-outside-toplevel
+    # pylint: disable=too-many-locals
     import matplotlib as mpl
     from matplotlib.path import Path
 
@@ -308,6 +309,7 @@ def _calc_patch(a1, a2):
 
 
 def _init0(L1, L2, a1, a2):
+    # pylint: disable=too-many-locals
     if platform.machine() == 'x86_64':
         lattices_bin = 'lattices_x86-64.so'
     elif platform.machine() == 'arm64':
@@ -385,6 +387,9 @@ def _init0(L1, L2, a1, a2):
 
 @jit(nopython=True, cache=True)
 def _init1(L1, L2, a1, a2):
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     ndim = len(L1)
 
     # Compute the Reciprocal Lattice vectors.
@@ -441,7 +446,7 @@ def _init1(L1, L2, a1, a2):
                 nc += 1
     if not nc == N:
         print(L, nc, N)
-        raise Exception('Error in initialsation of Lattice')
+        raise RuntimeError('Error in initialsation of Lattice')
 
     nc = 0
     listk = np.empty((N, ndim), dtype=np.int32)
@@ -460,7 +465,7 @@ def _init1(L1, L2, a1, a2):
                 nc += 1
     if not nc == N:
         print(L, nc, N)
-        raise Exception('Error in initialsation of Lattice')
+        raise RuntimeError('Error in initialsation of Lattice')
 
     # Setup lists of nearest neighbors
     nnlistr = np.zeros((N, 3, 3), dtype=np.int32)

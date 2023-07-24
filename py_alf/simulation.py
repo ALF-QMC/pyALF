@@ -3,7 +3,6 @@ Provides interfaces for compiling, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
-# py lint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2020-2022, The ALF Project"
@@ -86,10 +85,12 @@ class Simulation:
         Whether to compile ALF with HDF5.
         Full postprocessing support only exists with HDF5.
     """
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
 
     def __init__(self, alf_src, ham_name, sim_dict, **kwargs):
         if not isinstance(alf_src, ALF_source):
-            raise Exception('alf_src needs to be an instance of ALF_source')
+            raise TypeError('alf_src needs to be an instance of ALF_source')
         self.alf_src = alf_src
         self.ham_name = ham_name
         self.sim_dict = sim_dict
@@ -104,13 +105,13 @@ class Simulation:
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
         self.mpiexec_args = kwargs.pop('mpiexec_args', [])
         if not isinstance(self.mpiexec_args, list):
-            raise Exception('mpiexec_args has to be a list.')
+            raise TypeError('mpiexec_args has to be a list.')
         stab = kwargs.pop('stab', '').upper()
         machine = kwargs.pop('machine', 'GNU').upper()
         self.devel = kwargs.pop('devel', False)
         self.hdf5 = kwargs.pop('hdf5', True)
         if kwargs:
-            raise Exception('Unused keyword arguments: {}'.format(kwargs))
+            raise TypeError('Unused keyword arguments: {}'.format(kwargs))
 
         self.tempering = isinstance(sim_dict, list)
         if self.tempering:
@@ -124,27 +125,27 @@ class Simulation:
             for sim_dict0 in self.sim_dict:
                 for par_name in sim_dict0:
                     if par_name.upper() not in p_list:
-                        raise Exception(
+                        raise TypeError(
                             'Parameter {} not listed in default_variables'
                             .format(par_name))
         else:
             for par_name in self.sim_dict:
                 if par_name.upper() not in p_list:
-                    raise Exception(
+                    raise TypeError(
                         'Parameter {} not listed in default_variables'
                         .format(par_name))
 
         if self.mpi and self.n_mpi is None:
-            raise Exception('You have to specify n_mpi if you use MPI.')
-        
+            raise TypeError('You have to specify n_mpi if you use MPI.')
+
         if self.parallel_params and (not self.tempering):
-            raise Exception('sim_dict has to be a list to use Parallel parameters feature.')
+            raise TypeError('sim_dict has to be a list to use Parallel parameters feature.')
 
         if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC-NG', 'INTELLLVM', 'INTELX']:
-            raise Exception('Illegal value machine={}'.format(machine))
+            raise TypeError('Illegal value machine={}'.format(machine))
 
         if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
-            raise Exception('Illegal value stab={}'.format(stab))
+            raise TypeError('Illegal value stab={}'.format(stab))
 
         self.config = '{} {}'.format(machine, stab).strip()
 
@@ -230,7 +231,7 @@ class Simulation:
                 print('parameters:')
                 # with open('parameters', 'r') as f:
                 #     print(f.read())
-                raise Exception('Error while running {}.'.format(executable)) \
+                raise RuntimeError('Error while running {}.'.format(executable)) \
                     from ALF_crash
 
     def get_directories(self):
@@ -248,12 +249,13 @@ class Simulation:
             filename = os.path.join(directory, 'info')
             if os.path.exists(filename):
                 print('===== {} ====='.format(filename))
-                with open(filename, 'r') as f:
+                with open(filename, 'r', encoding='UTF-8') as f:
                     print(f.read())
             else:
                 print('{} does not exist.'.format(filename))
                 return
 
+    # pylint: disable-next=inconsistent-return-statements
     def check_warmup(self, names, gui='tk', **kwargs):
         """
         Plot bins to determine n_skip.
@@ -268,13 +270,15 @@ class Simulation:
             Extra arguments for :func:`py_alf.check_warmup_tk` or
             :func:`py_alf.check_warmup_ipy`.
         """
+        # pylint: disable=inconsistent-return-statements
         if gui == 'tk':
             check_warmup_tk(self.get_directories(), names, **kwargs)
         elif gui == 'ipy':
             return check_warmup_ipy(self.get_directories(), names, **kwargs)
         else:
-            raise Exception(f'Illegal value gui={gui}')
+            raise TypeError(f'Illegal value gui={gui}')
 
+    # pylint: disable-next=inconsistent-return-statements
     def check_rebin(self, names, gui='tk', **kwargs):
         """
         Plot error vs n_rebin to control autocorrelation.
@@ -294,7 +298,7 @@ class Simulation:
         elif gui == 'ipy':
             return check_rebin_ipy(self.get_directories(), names, **kwargs)
         else:
-            raise Exception(f'Illegal value gui={gui}')
+            raise TypeError(f'Illegal value gui={gui}')
 
     def analysis(self, python_version=True, **kwargs):
         """
@@ -366,12 +370,12 @@ def _convert_par_to_str(parameter):
     if isinstance(parameter, str):
         return '"{}"'.format(parameter)
 
-    raise Exception('Error in "_convert_par_to_str": unrecognized type')
+    raise TypeError('Error in "_convert_par_to_str": unrecognized type')
 
 
 def write_parameters(params):
     """Write nameslists to file 'parameters'."""
-    with open('parameters', 'w') as file:
+    with open('parameters', 'w', encoding='UTF-8') as file:
         for namespace in params:
             file.write("&{}\n".format(namespace))
             for var in params[namespace]:
@@ -416,7 +420,7 @@ def _update_var(params, var, value):
             if var2.lower() == var.lower():
                 params[name][var2]['value'] = value
                 return params
-    raise Exception('"{}" does not correspond to a parameter'.format(var))
+    raise TypeError('"{}" does not correspond to a parameter'.format(var))
 
 
 def set_param(alf_src, ham_name, sim_dict):
@@ -445,7 +449,7 @@ def getenv(config, alf_dir='.'):
              '. ./configure.sh {} > /dev/null || exit 1 && env > environment'
              .format(config)],
             check=True)
-        with open('environment', 'r') as f:
+        with open('environment', 'r', encoding='UTF-8') as f:
             lines = f.readlines()
     env = {}
     for line in lines:
@@ -499,7 +503,7 @@ def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
         try:
             subprocess.run(["git", "clone", url, alf_dir], check=True)
         except subprocess.CalledProcessError as git_clone_failed:
-            raise Exception('Error while cloning repository') \
+            raise RuntimeError('Error while cloning repository') \
                 from git_clone_failed
 
     with cd(alf_dir):
@@ -508,7 +512,7 @@ def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
             try:
                 subprocess.run(['git', 'checkout', branch], check=True)
             except subprocess.CalledProcessError as git_checkout_failed:
-                raise Exception('Error while checking out {}'.format(branch)) \
+                raise RuntimeError('Error while checking out {}'.format(branch)) \
                     from git_checkout_failed
         env = getenv(config)
         print('Compiling ALF... ')
@@ -580,6 +584,7 @@ def get_obs(sim_dir, names=None):
             obs[name0+'_sign'] = temp['sign'][0]
             obs[name0+'_sign_err'] = temp['sign'][1]
             for i, temp2 in enumerate(temp['obs']):
+                del temp2
                 name2 = '{}{}'.format(name0, i)
                 obs[name2] = temp['obs'][i, 0]
                 obs[name2+'_err'] = temp['obs'][i, 1]
@@ -602,7 +607,7 @@ def _read_scalJ(name):
     """Return dictionary with Fortran analysis
     results from scalar observable. (legacy)
     """
-    with open(name) as f:
+    with open(name, encoding='UTF-8') as f:
         lines = f.readlines()
     N_obs = int((len(lines)-2)/2)
 
@@ -620,7 +625,7 @@ def _read_eqJ(name):
     """Return dictionary with Fortran analysis results from equal time
     correlation function. (legacy)
     """
-    with open(name) as f:
+    with open(name, encoding='UTF-8') as f:
         lines = f.readlines()
 
     if name.endswith('K'):

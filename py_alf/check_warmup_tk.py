@@ -10,7 +10,7 @@ from . ana import Parameters
 from . check_common import _get_bins, _replot, _create_fig
 
 
-class check_warmup_tk():
+class check_warmup_tk():  # pylint: disable=too-few-public-methods
     """
     Plot bins to determine n_skip. Opens a new window.
 
@@ -20,15 +20,20 @@ class check_warmup_tk():
         Directories with bins to check.
     names : list of str
         Names of observables to check.
-    custom_obs : dict, default={}
+    custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
     """
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-locals
 
-    def __init__(self, directories, names, custom_obs={}):
+    def __init__(self, directories, names, custom_obs=None):
         self.directories = directories
         self.names = names
-        self.custom_obs = custom_obs
+        if custom_obs is None:
+            custom_obs = {}
+        else:
+            self.custom_obs = custom_obs
         self.root = tk.Tk()
 
         self.n_dir_var = tk.IntVar(master=self.root, value=-1)

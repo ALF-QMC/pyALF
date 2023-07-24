@@ -8,7 +8,7 @@ from . init_layout import init_layout
 from . ana import Parameters
 
 
-def check_warmup_ipy(directories, names, custom_obs={}, ncols=3):
+def check_warmup_ipy(directories, names, custom_obs=None, ncols=3):
     """
     Plot bins to determine n_skip in a Jupyter Widget.
 
@@ -18,7 +18,7 @@ def check_warmup_ipy(directories, names, custom_obs={}, ncols=3):
         Directories with bins to check.
     names : list of str
         Names of observables to check.
-    custom_obs : dict, default={}
+    custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
 
@@ -31,21 +31,44 @@ def check_warmup_ipy(directories, names, custom_obs={}, ncols=3):
         directories, names, custom_obs=custom_obs, ncols=ncols).gui
 
 
-class CheckWarmupIpy:
-    def __init__(self, directories, names, custom_obs={}, ncols=3):
+class CheckWarmupIpy:  # pylint: disable=too-few-public-methods
+    """
+    Plot bins to determine n_skip in a Jupyter Widget.
+
+    Parameters
+    ----------
+    directories : list of path-like objects
+        Directories with bins to check.
+    names : list of str
+        Names of observables to check.
+    custom_obs : dict, default=None
+        Defines additional observables derived from existing observables.
+        See :func:`py_alf.analysis`.
+
+    Returns
+    -------
+    Jupyter Widget
+        A graphical user interface based on ipywidgets
+    """
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, directories, names, custom_obs=None, ncols=3):
         self.gui, self.log, self.axs, self.nmax, self.nskip, self.select = \
             init_layout(directories, n_plots=len(names), ncols=ncols,
                         int_names=('N_max:', 'N_skip:'))
         self.names = names
-        self.custom_obs = custom_obs
+        if custom_obs is None:
+            custom_obs = {}
+        else:
+            self.custom_obs = custom_obs
         self.ncols = ncols
 
-        self.init_dir()
-        self.select.observe(self.update_select, 'value')
-        self.nskip.observe(self.update_nskip, 'value')
-        self.nmax.observe(self.update_nmax, 'value')
+        self._init_dir()
+        self.select.observe(self._update_select, 'value')
+        self.nskip.observe(self._update_nskip, 'value')
+        self.nmax.observe(self._update_nmax, 'value')
 
-    def init_dir(self):
+    def _init_dir(self):
+        """Initial setup of data from currently selected directory."""
         with self.log:
             self.bins = _get_bins(
                 self.select.value, self.names, self.custom_obs)
@@ -62,13 +85,13 @@ class CheckWarmupIpy:
             self.nmax.max = nmax
             self.nmax.value = nmax
 
-    def update_select(self, change):
+    def _update_select(self, change):
         del change
         with self.log:
             # display(change)
-            self.init_dir()
+            self._init_dir()
 
-    def update_nskip(self, change):
+    def _update_nskip(self, change):
         del change
         with self.log:
             if self.nskip.value == self.par.N_skip():
@@ -81,7 +104,7 @@ class CheckWarmupIpy:
             for ax in self.axs[-self.ncols:]:
                 ax.set_xlabel('Bin number')
 
-    def update_nmax(self, change):
+    def _update_nmax(self, change):
         del change
         with self.log:
             self.axs[0].set_xlim(0.5, self.nmax.value+0.5)
