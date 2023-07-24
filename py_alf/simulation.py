@@ -60,6 +60,9 @@ class Simulation:
         Directory to prepend to sim_dir.
     mpi : bool, default=False
         Employ MPI.
+    parallel_params : bool, default=False
+        Run independent parameter sets in parallel.
+        Based on parallel tempering, but without exchange steps.
     n_mpi : int, default=2
         Number of MPI processes if mpi is true.
     n_omp : int, default=1
@@ -95,6 +98,7 @@ class Simulation:
             kwargs.pop("sim_dir",
                        directory_name(alf_src, ham_name, sim_dict)))))
         self.mpi = kwargs.pop("mpi", False)
+        self.parallel_params = kwargs.pop("parallel_params", False)
         self.n_mpi = kwargs.pop("n_mpi", 2)
         self.n_omp = kwargs.pop('n_omp', 1)
         self.mpiexec = kwargs.pop('mpiexec', 'mpiexec')
@@ -121,17 +125,20 @@ class Simulation:
                 for par_name in sim_dict0:
                     if par_name.upper() not in p_list:
                         raise Exception(
-                            'Parameter {} not listet in default_variables'
+                            'Parameter {} not listed in default_variables'
                             .format(par_name))
         else:
             for par_name in self.sim_dict:
                 if par_name.upper() not in p_list:
                     raise Exception(
-                        'Parameter {} not listet in default_variables'
+                        'Parameter {} not listed in default_variables'
                         .format(par_name))
 
         if self.mpi and self.n_mpi is None:
             raise Exception('You have to specify n_mpi if you use MPI.')
+        
+        if self.parallel_params and (not self.tempering):
+            raise Exception('sim_dict has to be a list to use Parallel parameters feature.')
 
         if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC-NG', 'INTELLLVM', 'INTELX']:
             raise Exception('Illegal value machine={}'.format(machine))
@@ -148,6 +155,9 @@ class Simulation:
 
         if self.tempering:
             self.config += ' TEMPERING'
+
+        if self.parallel_params:
+            self.config += ' PARALLEL_PARAMS'
 
         if self.devel:
             self.config += ' DEVEL'
