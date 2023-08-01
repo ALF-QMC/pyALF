@@ -150,15 +150,14 @@ class Simulation:
         self.config = '{} {}'.format(machine, stab).strip()
 
         if self.mpi:
-            self.config += ' MPI'
+            if self.parallel_params:
+                self.config += ' PARALLEL_PARAMS'
+            elif self.tempering:
+                self.config += ' TEMPERING'
+            else:
+                self.config += ' MPI'
         else:
             self.config += ' NOMPI'
-
-        if self.tempering:
-            self.config += ' TEMPERING'
-
-        if self.parallel_params:
-            self.config += ' PARALLEL_PARAMS'
 
         if self.devel:
             self.config += ' DEVEL'
