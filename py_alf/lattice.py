@@ -480,21 +480,23 @@ def _init1(L1, L2, a1, a2):
                 n2 = int(round(np.dot(BZ2, x) / (2.*np.pi)))
                 nn = invlistr[(n1, n2)]
                 nnlistr[n, nd1, nd2] = nn
-                # if not np.allclose(x, _listr[nn, 0]*a1 + _listr[nn, 1]*a2):
-                #     raise Exception(
-                #       'Error in initialsation of Lattice, setting of nnlist')
+                # if not np.allclose(x, listr[nn, 0]*a1 + listr[nn, 1]*a2,
+                #                    rtol=1e-05, atol=1e-08, equal_nan=False):
+                #     raise RuntimeError(
+                #       'Error in initialsation of Lattice, setting of nnlistr'
+                #     )
 
                 d = nd1*b1 + nd2*b2
                 x = listk[n, 0]*b1 + listk[n, 1]*b2 + d
                 x = _periodic_boundary(x, BZ1, BZ2)
-                n1 = int(round(np.dot(L1, x) / (2.*np.pi)))
-                n2 = int(round(np.dot(L2, x) / (2.*np.pi)))
+                n1 = int(round(np.dot(x, b1_perp)))
+                n2 = int(round(np.dot(x, b2_perp)))
                 nn = invlistk[(n1, n2)]
                 nnlistk[n, nd1, nd2] = nn
-                # if not np.allclose(x, _listk[nn, 0]*b1 + _listk[nn, 1]*b2):
-                #     print(x, _listk[nn, 0]*b1 + _listk[nn, 1]*b2)
-                #     raise Exception
-                #     (
+                # if not np.allclose(x, listk[nn, 0]*b1 + listk[nn, 1]*b2,
+                #                    rtol=1e-05, atol=1e-08, equal_nan=False):
+                #     print(x, listk[nn, 0]*b1 + listk[nn, 1]*b2)
+                #     raise RuntimeError(
                 #       'Error in initialsation of Lattice, setting of nnlistk'
                 #     )
 
