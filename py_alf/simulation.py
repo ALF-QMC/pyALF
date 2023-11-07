@@ -452,7 +452,9 @@ def getenv(config, alf_dir='.'):
             lines = f.readlines()
     env = {}
     for line in lines:
-        if (not re.search(r"^BASH_FUNC.*%%=()", line)) and '=' in line:
+        if ((not re.search(r"^BASH_FUNC.*%%=()", line))
+            and '=' in line
+            and line[0] != ' '):
             item = line.strip().split("=", 1)
             if len(item) == 2:
                 env[item[0]] = item[1]
