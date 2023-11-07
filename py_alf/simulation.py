@@ -12,6 +12,7 @@ import os
 import re
 import subprocess
 import shutil
+import sys
 
 import numpy as np
 import pandas as pd
@@ -69,7 +70,7 @@ class Simulation:
         Additional arguments to MPI executable. E.g. the flag
         ``--hostfile /path/to/file`` is specified by
         ``mpiexec_args=['--hostfile', '/path/to/file']``
-    machine : {"GNU", "INTEL", "PGI", "SUPERMUC-NG", "JUWELS"}
+    machine : {"GNU", "INTEL", "PGI", "Other machines defined in configure.sh"}
         Compiler and environment.
     stab : str, optional
         Stabilization strategy employed by ALF.
@@ -135,9 +136,6 @@ class Simulation:
 
         if self.parallel_params and (not self.tempering):
             raise TypeError('sim_dict has to be a list to use Parallel parameters feature.')
-
-        if machine not in ['GNU', 'INTEL', 'PGI', 'JUWELS', 'SUPERMUC-NG', 'INTELLLVM', 'INTELX']:
-            raise TypeError('Illegal value machine={}'.format(machine))
 
         if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
             raise TypeError('Illegal value stab={}'.format(stab))
@@ -445,11 +443,15 @@ def set_param(alf_src, ham_name, sim_dict):
 def getenv(config, alf_dir='.'):
     """Get environment variables for compiling ALF."""
     with cd(alf_dir):
-        subprocess.run(
-            ['bash', '-c',
-             '. ./configure.sh {} > /dev/null || exit 1 && env > environment'
-             .format(config)],
-            check=True)
+        try:
+            subprocess.run(
+                ['bash', '-c',
+                '. ./configure.sh {} NO-FALLBACK > /dev/null || exit 1 &&'
+                'env > environment'.format(config)],
+                check=True)
+        except subprocess.CalledProcessError:
+            print(f'Error while running configure.sh with "{config}"\n'
+                  'Is your machine set corretly?', file=sys.stderr)
         with open('environment', 'r', encoding='UTF-8') as f:
             lines = f.readlines()
     env = {}
