@@ -15,11 +15,6 @@ import shutil
 
 import numpy as np
 import pandas as pd
-
-from . check_warmup_tk import check_warmup_tk
-from . check_rebin_tk import check_rebin_tk
-from . check_warmup_ipy import check_warmup_ipy
-from . check_rebin_ipy import check_rebin_ipy
 from . analysis import analysis
 from . ana import load_res
 from . alf_source import ALF_source
@@ -269,10 +264,13 @@ class Simulation:
             Extra arguments for :func:`py_alf.check_warmup_tk` or
             :func:`py_alf.check_warmup_ipy`.
         """
-        # pylint: disable=inconsistent-return-statements
         if gui == 'tk':
+            # pylint: disable-next=import-outside-toplevel
+            from . check_warmup_tk import check_warmup_tk
             check_warmup_tk(self.get_directories(), names, **kwargs)
         elif gui == 'ipy':
+            # pylint: disable-next=import-outside-toplevel
+            from . check_warmup_ipy import check_warmup_ipy
             return check_warmup_ipy(self.get_directories(), names, **kwargs)
         else:
             raise TypeError(f'Illegal value gui={gui}')
@@ -293,8 +291,12 @@ class Simulation:
             :func:`py_alf.check_rebin_ipy`.
         """
         if gui == 'tk':
+            # pylint: disable-next=import-outside-toplevel
+            from . check_rebin_tk import check_rebin_tk
             check_rebin_tk(self.get_directories(), names, **kwargs)
         elif gui == 'ipy':
+            # pylint: disable-next=import-outside-toplevel
+            from . check_rebin_ipy import check_rebin_ipy
             return check_rebin_ipy(self.get_directories(), names, **kwargs)
         else:
             raise TypeError(f'Illegal value gui={gui}')
