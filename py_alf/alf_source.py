@@ -102,9 +102,9 @@ class ALF_source:
         self._PARAMS_GENERIC = default_parameters_generic._PARAMS_GENERIC
 
         # Parse ALF Hamiltonians to get parameter list.
-        with open(os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list'),
-                  'r', encoding='UTF-8') as f:
-            ham_names = f.read().splitlines()
+        ham_names, ham_files = parse_ham_mod.get_ham_names_ham_files(
+            os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list')
+            )
 
         self.default_parameters = {}
         for ham_name in ham_names:
