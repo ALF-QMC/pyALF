@@ -105,13 +105,13 @@ class ALF_source:
         ham_names, ham_files = parse_ham_mod.get_ham_names_ham_files(
             os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list')
             )
+        ham_files = [os.path.join(self.alf_dir, 'Prog', ham_file) for
+                     ham_file in ham_files]
 
         self.default_parameters = {}
-        for ham_name in ham_names:
-            filename = os.path.join(self.alf_dir, 'Prog', 'Hamiltonians',
-                                    'Hamiltonian_{}_smod.F90'.format(ham_name))
+        for ham_name, ham_file in zip(ham_names, ham_files):
             # print('Hamiltonian:', ham_name)
-            self.default_parameters[ham_name] = parse_ham_mod.parse(filename)
+            self.default_parameters[ham_name] = parse_ham_mod.parse(ham_file)
             # pprint.pprint(self.default_parameters[ham_name])
 
     def get_ham_names(self):
