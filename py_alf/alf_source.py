@@ -6,7 +6,7 @@ Provides interfaces for compiling, running and postprocessing ALF in Python.
 # py lint: disable=consider-using-f-string
 
 __author__ = "Jonas Schwab"
-__copyright__ = "Copyright 2020-2022, The ALF Project"
+__copyright__ = "Copyright 2020-2024, The ALF Project"
 __license__ = "GPL"
 
 import os
@@ -101,18 +101,7 @@ class ALF_source:
 
         self._PARAMS_GENERIC = default_parameters_generic._PARAMS_GENERIC
 
-        # Parse ALF Hamiltonians to get parameter list.
-        ham_names, ham_files = parse_ham_mod.get_ham_names_ham_files(
-            os.path.join(self.alf_dir, 'Prog', 'Hamiltonians.list')
-            )
-        ham_files = [os.path.join(self.alf_dir, 'Prog', ham_file) for
-                     ham_file in ham_files]
-
-        self.default_parameters = {}
-        for ham_name, ham_file in zip(ham_names, ham_files):
-            # print('Hamiltonian:', ham_name)
-            self.default_parameters[ham_name] = parse_ham_mod.parse(ham_file)
-            # pprint.pprint(self.default_parameters[ham_name])
+        self.default_parameters = get_default_parameters(parse_ham_mod, self.alf_dir)
 
     def get_ham_names(self):
         """Return list of Hamiltonians."""
@@ -140,3 +129,29 @@ class ALF_source:
                 p_list += list(self._PARAMS_GENERIC[nlist_name])
 
         return [i.upper() for i in p_list]
+
+def get_default_parameters(parse_ham_mod, alf_dir):
+    """Return dictionary of all default parameters of Hamiltonians.
+    By parsing Hamiltonians."""
+    try:
+        ham_names, ham_files = parse_ham_mod.get_ham_names_ham_files(
+            os.path.join(alf_dir, 'Prog', 'Hamiltonians.list')
+            )
+        ham_files = [os.path.join(alf_dir, 'Prog', ham_file) for
+                    ham_file in ham_files]
+    except AttributeError:
+        # Backwards compatibility fallback
+        with open(os.path.join(alf_dir, 'Prog', 'Hamiltonians.list'),
+                    'r', encoding='UTF-8') as f:
+            ham_names = f.read().splitlines()
+        ham_files = [os.path.join(
+            alf_dir, 'Prog', 'Hamiltonians',
+            'Hamiltonian_{}_smod.F90'.format(ham_name)) for
+            ham_name in ham_names]
+
+    default_parameters = {}
+    for ham_name, ham_file in zip(ham_names, ham_files):
+        # print('Hamiltonian:', ham_name)
+        default_parameters[ham_name] = parse_ham_mod.parse(ham_file)
+        # pprint.pprint(self.default_parameters[ham_name])
+    return default_parameters
