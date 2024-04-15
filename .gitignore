@@ -3,3 +3,5 @@ __pycache__/
 ALF
 ALF_data
 docs/_build
+dist/
+pyALF.egg-info/

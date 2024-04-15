@@ -53,7 +53,7 @@ def _get_arg_parser():
     return parser
 
 
-if __name__ == "__main__":
+def _main():
     parser = _get_arg_parser()
     args = parser.parse_args()
     mpiexec_args = args.mpiexec_args.split()
@@ -62,12 +62,13 @@ if __name__ == "__main__":
 
     alf_src = ALF_source(alf_dir=alf_dir, branch=args.branch)
 
-    with open(args.sims_file, 'r') as f:
+    with open(args.sims_file, 'r', encoding="UTF-8") as f:
         simulations = f.read().splitlines()
     num_sims = 0
     ham_names = []
     sim_dicts = []
     for i, sim_str in enumerate(simulations):
+        del i
         if sim_str.strip().lower() == "stop":
             break
         num_sims += 1
@@ -88,3 +89,7 @@ if __name__ == "__main__":
         if args.do_analysis:
             sim.analysis()
     print("Done")
+
+
+if __name__ == '__main__':
+    _main()

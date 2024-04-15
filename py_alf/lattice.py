@@ -265,15 +265,15 @@ def _periodic_boundary(r, L1, L2):
 
 
 def _find_cross(x, d, a):
-    """Solve x+l*d = a/2 + g*a_perp."""
+    """Solve x+r*d = a/2 + g*a_perp."""
     mat = np.array([[d[0], d[1]], [-a[1], a[0]]])
     if np.allclose(np.linalg.det(mat), 0):
         return -1, -1
     mat2 = np.linalg.inv(mat)
 
-    l, g = np.matmul(a/2-x, mat2)
+    r, g = np.matmul(a/2-x, mat2)
 
-    return l, g
+    return r, g
 
 
 def _calc_patch(a1, a2):
@@ -289,18 +289,18 @@ def _calc_patch(a1, a2):
     d = np.array([-a0[1], a0[0]])
     while NNs:
         i_min = -1
-        l_min = np.inf
+        r_min = np.inf
         for i, a in enumerate(NNs):
-            l, g = _find_cross(x, d, a)
-            if 1e-8 < l < l_min and 1e-8 < abs(g):
+            r, g = _find_cross(x, d, a)
+            if 1e-8 < r < r_min and 1e-8 < abs(g):
                 i_min = i
-                l_min = l
-        l, g = _find_cross(x, d, a0)
-        if 1e-8 < l < l_min and 1e-8 < abs(g):
-            verts.append(x+l*d)
+                r_min = r
+        r, g = _find_cross(x, d, a0)
+        if 1e-8 < r < r_min and 1e-8 < abs(g):
+            verts.append(x+r*d)
             verts.append(np.array([0, 0]))
             return np.array(verts)
-        x += l_min*d
+        x += r_min*d
         verts.append(np.copy(x))
         a = NNs.pop(i_min)
         d = np.array([-a[1], a[0]])

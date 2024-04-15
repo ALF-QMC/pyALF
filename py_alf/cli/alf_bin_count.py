@@ -30,7 +30,7 @@ def _get_arg_parser():
     return parser
 
 
-if __name__ == '__main__':
+def _main():
     parser = _get_arg_parser()
     args = parser.parse_args()
     if args.filenames:
@@ -41,3 +41,7 @@ if __name__ == '__main__':
 
     for filename in filenames:
         bin_count(filename)
+
+
+if __name__ == '__main__':
+    _main()

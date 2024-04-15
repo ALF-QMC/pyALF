@@ -9,6 +9,7 @@ from . alf_source import ALF_source
 from . simulation import Simulation
 from . lattice import Lattice
 
+__all__ = ['ALF_source', 'Simulation', 'Lattice']
 
 
 def check_warmup(*args, gui='tk', **kwargs):

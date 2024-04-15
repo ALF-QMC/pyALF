@@ -6,7 +6,6 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
-import numpy as np                         # Numerical library
 from py_alf import ALF_source, Simulation  # Interface with ALF
 
 sim_dict = {"Model": "Hubbard", 

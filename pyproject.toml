@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools", "setuptools-git-versioning"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-git-versioning]
+enabled = true
+version_file = "VERSION"
+count_commits_from_version_file = true
+dev_template = "{tag}.post{ccount}"
+dirty_template = "{tag}.post{ccount}"
+
+[project]
+dynamic = ["version"]
+name = "pyALF"
+authors = [
+  { name="ALF Collaboration", email="alf@physik.uni-wuerzburg.de" },
+  { name="Jonas Schwab", email="jonas.schwab@uni-wuerzburg.de" },
+]
+description = "Python interface for ALF, plus scripts and Jupyter notebooks."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "f90nml",
+  "h5py",
+  "ipympl",
+  "ipywidgets",
+  "matplotlib",
+  "numba",
+  "numpy",
+  "pandas",
+  "scipy",
+]
+
+[project.optional-dependencies]
+GUI = ["tkinter"]
+
+[tool.setuptools.packages.find]
+include = ["py_alf", "py_alf.cli"]
+
+[project.urls]
+Homepage = "https://git.physik.uni-wuerzburg.de/ALF/pyALF"
+Issues = "https://git.physik.uni-wuerzburg.de/ALF/pyALF/-/issues"
+
+[project.scripts]
+alf_bin_count = 'py_alf.cli.alf_bin_count:_main'
+alf_del_bins = 'py_alf.cli.alf_del_bins:_main'
+alf_postprocess = 'py_alf.cli.alf_postprocess:_main'
+alf_run = 'py_alf.cli.alf_run:_main'
+alf_show_obs = 'py_alf.cli.alf_show_obs:_main'
+alf_test_branch = 'py_alf.cli.alf_test_branch:_main'
+minimal_ALF_run = 'py_alf.cli.minimal_ALF_run:_main'
