@@ -38,18 +38,18 @@ def _create_sims(sim_name, alf_dir, pars, branch_R, branch_T, **kwargs):
 def _prepare_runs(tmpdir, sim_R, sim_T):
     executable_R = os.path.join(tmpdir, f'ALF_{sim_R.config.replace(" ", "_")}_reference.out')
     if os.path.isfile(executable_R):
-        shutil.copy(executable_R, f'{sim_R.alf_src}/Prog/ALF.out')
+        shutil.copy(executable_R, f'{sim_R.alf_src.alf_dir}/Prog/ALF.out')
     else:
         sim_R.compile()
-        shutil.copy(f'{sim_R.alf_src}/Prog/ALF.out', executable_R)
+        shutil.copy(f'{sim_R.alf_src.alf_dir}/Prog/ALF.out', executable_R)
     sim_R.run(copy_bin=True, only_prep=True)
 
     executable_T = os.path.join(tmpdir, f'ALF_{sim_T.config.replace(" ", "_")}_test.out')
     if os.path.isfile(executable_T):
-        shutil.copy(executable_T, f'{sim_T.alf_src}/Prog/ALF.out')
+        shutil.copy(executable_T, f'{sim_T.alf_src.alf_dir}/Prog/ALF.out')
     else:
         sim_T.compile()
-        shutil.copy(f'{sim_T.alf_src}/Prog/ALF.out', executable_T)
+        shutil.copy(f'{sim_T.alf_src.alf_dir}/Prog/ALF.out', executable_T)
     sim_T.run(copy_bin=True, only_prep=True)
 
 
