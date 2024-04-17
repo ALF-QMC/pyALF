@@ -20,9 +20,7 @@ The **documentation** can be found [here](http://gitpages.physik.uni-wuerzburg.d
 ## Installation
 
 ---
-**⚠️ NOTE**
-
-In previous versions of pyALF, the installation instructions asked the users to set the environment variable `PYTHONPATH`.
+**⚠️ NOTE** In previous versions of pyALF, the installation instructions asked the users to set the environment variable `PYTHONPATH`.
 This conflicts with the newer pip package, therefore you should remove definitions of this environment variable related to pyALF.
 
 ---
