@@ -17,11 +17,12 @@ authors = [
   { name="Jonas Schwab", email="jonas.schwab@uni-wuerzburg.de" },
 ]
 description = "Python interface for ALF, plus scripts and Jupyter notebooks."
+license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -43,8 +44,10 @@ GUI = ["tkinter"]
 include = ["py_alf", "py_alf.cli"]
 
 [project.urls]
-Homepage = "https://git.physik.uni-wuerzburg.de/ALF/pyALF"
+Documentation = "https://gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/front.html"
+Repository = "https://git.physik.uni-wuerzburg.de/ALF/pyALF"
 Issues = "https://git.physik.uni-wuerzburg.de/ALF/pyALF/-/issues"
+"ALF Homepage" = "https://alf.physik.uni-wuerzburg.de/"
 
 [project.scripts]
 alf_bin_count = 'py_alf.cli.alf_bin_count:_main'
