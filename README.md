@@ -17,30 +17,40 @@ It introduces:
 
 The **documentation** can be found [here](http://gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu).
 
-## Prerequisites
+## Installation
 
-* Python3
-* Jupyter
-* The following Python packages:
-  * h5py
-  * numpy
-  * pandas
-  * matplotlib
-  * numba
-  * scipy
-  * tkinter
-  * ipywidgets
-  * ipympl
-  * f90nml
-* The libraries Lapack and Blas
-* A Fortran compiler, such as gfortran or ifort,
+---
+**⚠️ NOTE**
 
-where the last two are required by the main package [ALF](https://git.physik.uni-wuerzburg.de/ALF).
+In previous versions of pyALF, the installation instructions asked the users to set the environment variable `PYTHONPATH`.
+This conflicts with the newer pip package, therefore you should remove definitions of this environment variable related to pyALF.
 
-Also, add pyALF's path to your environment variable `PYTHONPATH`. In Linux, this can be achieved, e.g., by adding the following line to `~/.bashrc` if the used shell if bash or `~/.zshrc`, if the shell is zsh:
+---
+
+pyALF can be installed via the Python package installer [pip](https://pip.pypa.io/en/stable/).
 
 ```bash
-export PYTHONPATH="/local/path/to/pyALF:$PYTHONPATH"
+pip install pyALF
+```
+
+### Development installation
+
+If you want to develop pyALF, you can clone the repository and install it in
+[development mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html),
+which allows you to edit the files while using them like an installed package.
+For this, it is highly recommended to use a dedicated Python environment using e.g.
+[Python venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)
+or a
+[conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
+The following example shows how to install pyALF in development mode using venv.
+
+```bash
+git clone https://git.physik.uni-wuerzburg.de/ALF/pyALF.git
+cd pyALF
+python -m venv .venv
+source .venv/bin/activate
+
+pip install --editable .
 ```
 
 ## Usage
@@ -68,23 +78,20 @@ which opens the "notebook dashboard" in your default browser, from where one can
 
 ### Command line interface
 
-pyALF also delivers a set of command line scripts, located in the folder `/py_alf/cli/`, to be use from a UNIX shell. For convenient access, it makes sense to add the folder to the environment variable `PATH`:
+pyALF also delivers a set of command line scripts, to be use from a UNIX shell. For a full list of command line scripts see [here](gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/reference/cli.html).
+
+Try, e.g.
 
 ```bash
-export PATH="/path/to/pyALF/py_alf/cli:$PATH"
+alf_run -h
 ```
 
-Then the scripts can simply be called by their names, try e.g. 
+The source code for the scripts can be found in the folder `/py_alf/cli/`.
 
-```bash
-alf_run.py -h
-```
-
-For a full list of command line scripts see [here](gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/reference/cli.html).
 
 ### Use module `py_alf` in custom scripts
 
-Finally, one can also use the module module `py_alf` in custon Python scripts, which is analogous to the usage in Jupyter notebooks minus some interactivity.
+Finally, one can also use the module module `py_alf` in custom Python scripts, which is analogous to the usage in Jupyter notebooks minus some interactivity.
 
 ## License
 
