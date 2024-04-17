@@ -1,3 +1,7 @@
+stages:
+  - test
+  - build
+
 variables:
   BRANCH_R: "master"
 
@@ -5,6 +9,7 @@ default:
   tags: [k8s]
   
 .test_template: &test_definition
+  stage: test
   rules:
     - if: '$BRANCH_T'
       when: never
@@ -22,6 +27,7 @@ default:
     - alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
 .warn_template: &warn_definition
+  stage: test
   allow_failure: true
   rules:
     - if: '$BRANCH_T'
@@ -33,6 +39,19 @@ default:
     - export PATH="$HOME/.local/bin:$PATH"
     - pip install pylint
     - pylint py_alf/
+
+
+build:
+  stage: build
+  image: python:alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+  script:
+    - apk add git
+    - pip install build setuptools setuptools-git-versioning twine
+    - python -m setuptools_git_versioning 
+    - python -m build
+    - python -m twine upload dist/*
 
 
 Test_Bullseye:

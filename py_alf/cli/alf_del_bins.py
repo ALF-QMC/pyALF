@@ -34,7 +34,11 @@ def _get_arg_parser():
     return parser
 
 
-if __name__ == '__main__':
+def _main():
     parser = _get_arg_parser()
     args = parser.parse_args()
     del_bins(args.filename[0], args.N0, args.N)
+
+
+if __name__ == '__main__':
+    _main()

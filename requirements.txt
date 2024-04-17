@@ -1,0 +1,11 @@
+f90nml
+h5py
+ipympl
+ipywidgets
+matplotlib
+numba
+numpy
+pandas
+scipy
+
+# tkinter  # Optional

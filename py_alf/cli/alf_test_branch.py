@@ -18,8 +18,10 @@ import numpy as np
 from py_alf import ALF_source, Simulation
 
 
-def test_branch(sim_name, alf_dir, pars, branch_R, branch_T, tmpdir,
-                prepare_run=True, run=True, analyze=True, **kwargs):
+# def _test_branch(sim_name, alf_dir, pars, branch_R, branch_T, tmpdir,
+#                 prepare_run=True, run=True, **kwargs):
+
+def _create_sims(sim_name, alf_dir, pars, branch_R, branch_T, **kwargs):
     ham_name = pars[0]
     sim_dict = pars[1]
 
@@ -31,49 +33,46 @@ def test_branch(sim_name, alf_dir, pars, branch_R, branch_T, tmpdir,
         ALF_source(alf_dir=alf_dir, branch=branch_T),
         ham_name, sim_dict, sim_dir=sim_name+'_test', **kwargs
         )
+    return sim_R, sim_T
 
-    if prepare_run:
-        executable_R = os.path.join(tmpdir, f'ALF_{sim_R.config.replace(" ", "_")}_reference.out')
-        if os.path.isfile(executable_R):
-            shutil.copy(executable_R, f'{alf_dir}/Prog/ALF.out')
-        else:
-            sim_R.compile()
-            shutil.copy(f'{alf_dir}/Prog/ALF.out', executable_R)
-        sim_R.run(copy_bin=True, only_prep=True)
+def _prepare_runs(tmpdir, sim_R, sim_T):
+    executable_R = os.path.join(tmpdir, f'ALF_{sim_R.config.replace(" ", "_")}_reference.out')
+    if os.path.isfile(executable_R):
+        shutil.copy(executable_R, f'{sim_R.alf_src}/Prog/ALF.out')
+    else:
+        sim_R.compile()
+        shutil.copy(f'{sim_R.alf_src}/Prog/ALF.out', executable_R)
+    sim_R.run(copy_bin=True, only_prep=True)
 
-        executable_T = os.path.join(tmpdir, f'ALF_{sim_T.config.replace(" ", "_")}_test.out')
-        if os.path.isfile(executable_T):
-            shutil.copy(executable_T, f'{alf_dir}/Prog/ALF.out')
-        else:
-            sim_T.compile()
-            shutil.copy(f'{alf_dir}/Prog/ALF.out', executable_T)
-        sim_T.run(copy_bin=True, only_prep=True)
+    executable_T = os.path.join(tmpdir, f'ALF_{sim_T.config.replace(" ", "_")}_test.out')
+    if os.path.isfile(executable_T):
+        shutil.copy(executable_T, f'{sim_T.alf_src}/Prog/ALF.out')
+    else:
+        sim_T.compile()
+        shutil.copy(f'{sim_T.alf_src}/Prog/ALF.out', executable_T)
+    sim_T.run(copy_bin=True, only_prep=True)
 
-    if run:
-        sim_R.run(bin_in_sim_dir=True)
-        sim_T.run(bin_in_sim_dir=True)
 
-    if analyze:
-        sim_R.analysis()
-        obs_R = sim_R.get_obs()
-        sim_T.analysis()
-        obs_T = sim_T.get_obs()
+def _analyze(sim_R, sim_T):
+    sim_R.analysis()
+    obs_R = sim_R.get_obs()
+    sim_T.analysis()
+    obs_T = sim_T.get_obs()
+    # test_all = obs_R.equals(obs_T)
+    with open(f'{sim_R.sim_dir}.txt', 'w', encoding='UTF-8') as f:
+        test_all = True
+        for name in obs_R:
+            test = True
+            for dat_R, dat_T in zip(obs_R[name], obs_T[name]):
+                try:
+                    test_temp = np.allclose(dat_R, dat_T)
+                except TypeError:
+                    pass
+                test = test and test_temp
+            f.write('{name}: {test}\n')
+            test_all = test_all and test
 
-        # test_all = obs_R.equals(obs_T)
-        with open(f'{sim_R.sim_dir}.txt', 'w', encoding='UTF-8') as f:
-            test_all = True
-            for name in obs_R:
-                test = True
-                for dat_R, dat_T in zip(obs_R[name], obs_T[name]):
-                    try:
-                        test_temp = np.allclose(dat_R, dat_T)
-                    except TypeError:
-                        pass
-                    test = test and test_temp
-                f.write('{name}: {test}\n')
-                test_all = test_all and test
-
-        return test_all
+    return test_all
 
 
 def _get_arg_parser():
@@ -125,7 +124,7 @@ def _get_arg_parser():
     return parser
 
 
-if __name__ == "__main__":
+def _main():
     parser = _get_arg_parser()
     args = parser.parse_args()
 
@@ -139,22 +138,26 @@ if __name__ == "__main__":
         os.remove("test.txt")
 
     test_all = True
-    tmpdir = tempfile.TemporaryDirectory()
-    print(f'Caching executables in {tmpdir.name}.')
+    tmpdir = tempfile.mkdtemp()
+    print(f'Caching executables in {tmpdir}.')
     for sim_name, sim_dict in sim_pars.items():
-        test = test_branch(
-            sim_name, alf_dir, sim_dict, args.branch_R, args.branch_T, tmpdir.name,
-            prepare_run=(not args.no_prep), run=(not args.no_sim),
-            analyze=(not args.no_analyze),
+        sim_R, sim_T = _create_sims(
+            sim_name, alf_dir, sim_dict, args.branch_R, args.branch_T,
             machine=args.machine, mpi=args.mpi, n_mpi=args.n_mpi,
             mpiexec=args.mpiexec, mpiexec_args=mpiexec_args,
-            devel=args.devel
-            )
+            devel=args.devel)
+        if not args.no_prep:
+            _prepare_runs(tmpdir, sim_R, sim_T)
+        if not args.no_sim:
+            sim_R.run(bin_in_sim_dir=True)
+            sim_T.run(bin_in_sim_dir=True)
         if not args.no_analyze:
+            test = _analyze(sim_R, sim_T)
             with open('test.txt', 'a', encoding='UTF-8') as f:
                 f.write(f'{sim_name}: {test}\n')
             if not test:
                 test_all = False
+    os.removedirs(tmpdir)
     if not args.no_analyze:
         with open('test.txt', 'a', encoding='UTF-8') as f:
             f.write(f'\tTotal: {test_all}\n')
@@ -166,3 +169,7 @@ if __name__ == "__main__":
             with open('test.txt', 'r', encoding='UTF-8') as f:
                 print(f.read())
             sys.exit(1)
+
+
+if __name__ == '__main__':
+    _main()

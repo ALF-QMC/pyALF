@@ -72,7 +72,7 @@ def import_module(module_name, path):
     return module
 
 
-if __name__ == '__main__':
+def _main():
     parser = _get_arg_parser()
     args = parser.parse_args()
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             custom_obs_mod = import_module(
                 'custom_obs', os.path.expanduser(args.custom_obs))
         except FileNotFoundError as custom_obs_not_found:
-            raise Exception(f'"{args.custom_obs}" not found.') \
+            raise FileNotFoundError(f'"{args.custom_obs}" not found.') \
                 from custom_obs_not_found
         custom_obs = custom_obs_mod.custom_obs
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
             symmetry_mod = import_module(
                 'symmetry', os.path.expanduser(args.symmetry))
         except FileNotFoundError as symmetry_not_found:
-            raise Exception(f'"{args.symmetry}" not found.') \
+            raise FileNotFoundError(f'"{args.symmetry}" not found.') \
                 from symmetry_not_found
         symmetry = symmetry_mod.symmetry
 
@@ -118,3 +118,7 @@ if __name__ == '__main__':
     if args.gather:
         df = load_res(directories)
         df.to_pickle('gathered.pkl')
+
+
+if __name__ == '__main__':
+    _main()

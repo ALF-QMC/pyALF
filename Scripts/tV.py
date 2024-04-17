@@ -6,7 +6,6 @@ Created on Sat Aug 29 05:20:44 2020
 @author: fassaad
 """
 
-import numpy as np                         # Numerical library
 from py_alf import ALF_source, Simulation  # Interface with ALF
 
 sim_dict = {"Model": "tV", 
@@ -33,7 +32,7 @@ sim = Simulation(ALF_source(branch='master'), 'tV', sim_dict,
                  mpi    = False,
                  n_mpi  = 24)
 
-sims.compile()
+sim.compile()
 sim.run()
 sim.analysis()
 res = sim.get_obs()
