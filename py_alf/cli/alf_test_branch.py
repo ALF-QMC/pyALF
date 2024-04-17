@@ -157,7 +157,7 @@ def _main():
                 f.write(f'{sim_name}: {test}\n')
             if not test:
                 test_all = False
-    os.removedirs(tmpdir)
+    shutil.rmtree(tmpdir)
     if not args.no_analyze:
         with open('test.txt', 'a', encoding='UTF-8') as f:
             f.write(f'\tTotal: {test_all}\n')
