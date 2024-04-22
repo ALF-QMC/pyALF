@@ -10,15 +10,16 @@ __license__ = "GPL"
 
 import os
 import re
-import subprocess
 import shutil
+import subprocess
 import sys
 
 import numpy as np
 import pandas as pd
-from . analysis import analysis
-from . ana import load_res
-from . alf_source import ALF_source
+
+from .alf_source import ALF_source
+from .ana import load_res
+from .analysis import analysis
 
 
 class cd:
@@ -107,7 +108,7 @@ class Simulation:
         self.devel = kwargs.pop('devel', False)
         self.hdf5 = kwargs.pop('hdf5', True)
         if kwargs:
-            raise TypeError('Unused keyword arguments: {}'.format(kwargs))
+            raise TypeError(f'Unused keyword arguments: {kwargs}')
 
         self.tempering = isinstance(sim_dict, list)
         if self.tempering:
@@ -122,25 +123,24 @@ class Simulation:
                 for par_name in sim_dict0:
                     if par_name.upper() not in p_list:
                         raise TypeError(
-                            'Parameter {} not listed in default_variables'
-                            .format(par_name))
+                            f'Parameter {par_name} not listed in default_variables')
         else:
             for par_name in self.sim_dict:
                 if par_name.upper() not in p_list:
                     raise TypeError(
-                        'Parameter {} not listed in default_variables'
-                        .format(par_name))
+                        f'Parameter {par_name} not listed in default_variables')
 
         if self.mpi and self.n_mpi is None:
             raise TypeError('You have to specify n_mpi if you use MPI.')
 
         if self.parallel_params and (not self.tempering):
-            raise TypeError('sim_dict has to be a list to use Parallel parameters feature.')
+            raise TypeError('sim_dict has to be a list '
+                            'to use Parallel parameters feature.')
 
         if stab not in ['STAB1', 'STAB2', 'STAB3', 'LOG', '']:
-            raise TypeError('Illegal value stab={}'.format(stab))
+            raise TypeError(f'Illegal value stab={stab}')
 
-        self.config = '{} {}'.format(machine, stab).strip()
+        self.config = f'{machine} {stab}'.strip()
 
         if self.mpi:
             if self.parallel_params:
@@ -193,7 +193,7 @@ class Simulation:
                           self.ham_name, self.sim_dict[0])
             for i, sim_dict in enumerate(self.sim_dict):
                 _prep_sim_dir(self.alf_src,
-                              os.path.join(self.sim_dir, "Temp_{}".format(i)),
+                              os.path.join(self.sim_dir, f"Temp_{i}"),
                               self.ham_name, sim_dict)
         else:
             _prep_sim_dir(self.alf_src, self.sim_dir,
@@ -210,7 +210,7 @@ class Simulation:
         env = getenv(self.config, self.alf_src.alf_dir)
         env['OMP_NUM_THREADS'] = str(self.n_omp)
         with cd(self.sim_dir):
-            print('Run {}'.format(executable))
+            print(f'Run {executable}')
             try:
                 if self.mpi:
                     command = [self.mpiexec, '-n', str(self.n_mpi),
@@ -219,17 +219,17 @@ class Simulation:
                     command = executable
                 subprocess.run(command, check=True, env=env)
             except subprocess.CalledProcessError as ALF_crash:
-                print('Error while running {}.'.format(executable))
+                print(f'Error while running {executable}.')
                 print('parameters:')
                 # with open('parameters', 'r') as f:
                 #     print(f.read())
-                raise RuntimeError('Error while running {}.'.format(executable)) \
+                raise RuntimeError(f'Error while running {executable}.') \
                     from ALF_crash
 
     def get_directories(self):
         """Return list of directories connected to this simulation."""
         if self.tempering:
-            directories = [os.path.join(self.sim_dir, "Temp_{}".format(i))
+            directories = [os.path.join(self.sim_dir, f"Temp_{i}")
                            for i in range(len(self.sim_dict))]
         else:
             directories = [self.sim_dir]
@@ -240,11 +240,11 @@ class Simulation:
         for directory in self.get_directories():
             filename = os.path.join(directory, 'info')
             if os.path.exists(filename):
-                print('===== {} ====='.format(filename))
-                with open(filename, 'r', encoding='UTF-8') as f:
+                print(f'===== {filename} =====')
+                with open(filename, encoding='UTF-8') as f:
                     print(f.read())
             else:
-                print('{} does not exist.'.format(filename))
+                print(f'{filename} does not exist.')
                 return
 
     # pylint: disable-next=inconsistent-return-statements
@@ -264,11 +264,11 @@ class Simulation:
         """
         if gui == 'tk':
             # pylint: disable-next=import-outside-toplevel
-            from . check_warmup_tk import check_warmup_tk
+            from .check_warmup_tk import check_warmup_tk
             check_warmup_tk(self.get_directories(), names, **kwargs)
         elif gui == 'ipy':
             # pylint: disable-next=import-outside-toplevel
-            from . check_warmup_ipy import check_warmup_ipy
+            from .check_warmup_ipy import check_warmup_ipy
             return check_warmup_ipy(self.get_directories(), names, **kwargs)
         else:
             raise TypeError(f'Illegal value gui={gui}')
@@ -290,11 +290,11 @@ class Simulation:
         """
         if gui == 'tk':
             # pylint: disable-next=import-outside-toplevel
-            from . check_rebin_tk import check_rebin_tk
+            from .check_rebin_tk import check_rebin_tk
             check_rebin_tk(self.get_directories(), names, **kwargs)
         elif gui == 'ipy':
             # pylint: disable-next=import-outside-toplevel
-            from . check_rebin_ipy import check_rebin_ipy
+            from .check_rebin_ipy import check_rebin_ipy
             return check_rebin_ipy(self.get_directories(), names, **kwargs)
         else:
             raise TypeError(f'Illegal value gui={gui}')
@@ -338,7 +338,7 @@ class Simulation:
 
 
 def _prep_sim_dir(alf_src, sim_dir, ham_name, sim_dict):
-    print('Prepare directory "{}" for Monte Carlo run.'.format(sim_dir))
+    print(f'Prepare directory "{sim_dir}" for Monte Carlo run.')
     if not os.path.exists(sim_dir):
         print('Create new directory.')
         os.makedirs(sim_dir)
@@ -361,13 +361,13 @@ def _convert_par_to_str(parameter):
             return '.T.'
         return '.F.'
     if isinstance(parameter, float):
-        if 'e' in '{}'.format(parameter):
-            return '{}'.format(parameter).replace('e', 'd')
-        return '{}d0'.format(parameter)
+        if 'e' in f'{parameter}':
+            return f'{parameter}'.replace('e', 'd')
+        return f'{parameter}d0'
     if isinstance(parameter, int):
-        return '{}'.format(parameter)
+        return f'{parameter}'
     if isinstance(parameter, str):
-        return '"{}"'.format(parameter)
+        return f'"{parameter}"'
 
     raise TypeError('Error in "_convert_par_to_str": unrecognized type')
 
@@ -376,7 +376,7 @@ def write_parameters(params):
     """Write nameslists to file 'parameters'."""
     with open('parameters', 'w', encoding='UTF-8') as file:
         for namespace in params:
-            file.write("&{}\n".format(namespace))
+            file.write(f"&{namespace}\n")
             for var in params[namespace]:
                 file.write('{} = {}  ! {}\n'.format(
                     var,
@@ -393,22 +393,19 @@ def directory_name(alf_src, ham_name, sim_dict):
     p_list = alf_src.get_params_names(ham_name, include_generic=False)
     if isinstance(sim_dict, list):
         sim_dict = sim_dict[0]
-        dirname = 'temper_{}_'.format(ham_name)
+        dirname = f'temper_{ham_name}_'
     else:
-        dirname = '{}_'.format(ham_name)
+        dirname = f'{ham_name}_'
     for name, value in sim_dict.items():
         if name.upper() in p_list:
             if name.upper() == 'MODEL':
                 if value != ham_name:
-                    dirname = '{}{}_'.format(dirname, value)
+                    dirname = f'{dirname}{value}_'
             elif name.upper() == "LATTICE_TYPE":
-                dirname = '{}{}_'.format(dirname, value)
+                dirname = f'{dirname}{value}_'
             else:
-                if name.upper().startswith('HAM_'):
-                    name_temp = name[4:]
-                else:
-                    name_temp = name
-                dirname = '{}{}={}_'.format(dirname, name_temp, value)
+                name_temp = name[4:] if name.upper().startswith('HAM_') else name
+                dirname = f'{dirname}{name_temp}={value}_'
     return dirname[:-1]
 
 
@@ -419,7 +416,7 @@ def _update_var(params, var, value):
             if var2.lower() == var.lower():
                 params[name][var2]['value'] = value
                 return params
-    raise TypeError('"{}" does not correspond to a parameter'.format(var))
+    raise TypeError(f'"{var}" does not correspond to a parameter')
 
 
 def set_param(alf_src, ham_name, sim_dict):
@@ -446,13 +443,13 @@ def getenv(config, alf_dir='.'):
         try:
             subprocess.run(
                 ['bash', '-c',
-                '. ./configure.sh {} NO-FALLBACK > /dev/null || exit 1 &&'
-                'env > environment'.format(config)],
+                f'. ./configure.sh {config} NO-FALLBACK > /dev/null || exit 1 &&'
+                'env > environment'],
                 check=True)
         except subprocess.CalledProcessError:
             print(f'Error while running configure.sh with "{config}"\n'
                   'Is your machine set corretly?', file=sys.stderr)
-        with open('environment', 'r', encoding='UTF-8') as f:
+        with open('environment', encoding='UTF-8') as f:
             lines = f.readlines()
     env = {}
     for line in lines:
@@ -467,7 +464,7 @@ def getenv(config, alf_dir='.'):
     return env
 
 
-def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
+def compile_alf(alf_dir=None,
                 branch=None,
                 config='GNU noMPI',
                 url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git',
@@ -494,6 +491,8 @@ def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
         1: Echo make reciepes.
         else: Print make tracing information.
     """
+    if alf_dir is None:
+        alf_dir = os.getenv('ALF_DIR', './ALF')
     if verbosity == 0:
         makeflags = ['-s']
     elif verbosity == 1:
@@ -503,8 +502,7 @@ def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
 
     alf_dir = os.path.abspath(alf_dir)
     if not os.path.exists(alf_dir):
-        print("Repository {} does not exist, cloning from {}"
-              .format(alf_dir, url))
+        print(f"Repository {alf_dir} does not exist, cloning from {url}")
         try:
             subprocess.run(["git", "clone", url, alf_dir], check=True)
         except subprocess.CalledProcessError as git_clone_failed:
@@ -513,11 +511,11 @@ def compile_alf(alf_dir=os.getenv('ALF_DIR', './ALF'),
 
     with cd(alf_dir):
         if branch is not None:
-            print('Checking out branch {}'.format(branch))
+            print(f'Checking out branch {branch}')
             try:
                 subprocess.run(['git', 'checkout', branch], check=True)
             except subprocess.CalledProcessError as git_checkout_failed:
-                raise RuntimeError('Error while checking out {}'.format(branch)) \
+                raise RuntimeError(f'Error while checking out {branch}') \
                     from git_checkout_failed
         env = getenv(config)
         print('Compiling ALF... ')
@@ -535,7 +533,7 @@ def out_to_in(verbose=False):
         if name.startswith('confout_'):
             name2 = 'confin_' + name[8:]
             if verbose:
-                print('mv {} {}'.format(name, name2))
+                print(f'mv {name} {name2}')
             os.replace(name, name2)
 
 
@@ -556,19 +554,19 @@ def analysis_fortran(alf_dir, sim_dir='.', hdf5=False):
         else:
             for name in os.listdir():
                 if name.endswith('_scal'):
-                    print('Analysing {}'.format(name))
+                    print(f'Analysing {name}')
                     executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
                     subprocess.run([executable, name], check=True, env=env)
 
             for name in os.listdir():
                 if name.endswith('_eq'):
-                    print('Analysing {}'.format(name))
+                    print(f'Analysing {name}')
                     executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
                     subprocess.run([executable, name], check=True, env=env)
 
             for name in os.listdir():
                 if name.endswith('_tau'):
-                    print('Analysing {}'.format(name))
+                    print(f'Analysing {name}')
                     executable = os.path.join(alf_dir, 'Analysis', 'ana.out')
                     subprocess.run([executable, name], check=True, env=env)
 
@@ -590,7 +588,7 @@ def get_obs(sim_dir, names=None):
             obs[name0+'_sign_err'] = temp['sign'][1]
             for i, temp2 in enumerate(temp['obs']):
                 del temp2
-                name2 = '{}{}'.format(name0, i)
+                name2 = f'{name0}{i}'
                 obs[name2] = temp['obs'][i, 0]
                 obs[name2+'_err'] = temp['obs'][i, 1]
         if name.endswith('_eqJK'):

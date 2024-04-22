@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sat Aug 29 05:20:44 2020
 
@@ -7,7 +6,7 @@ Created on Sat Aug 29 05:20:44 2020
 """
 
 from py_alf import ALF_source, Simulation  # Interface with ALF
-from py_alf.ana import load_res      # Function for loading analysis results
+from py_alf.ana import load_res  # Function for loading analysis results
 
 sims = []                            # List of Simulation instances
 time_steps = [0.0, 0.01]
@@ -52,7 +51,7 @@ for time_step in time_steps:
 sims[0].compile()
 
 # Perform Monte Carlo simulations
-for i, sim in enumerate(sims):
+for sim in sims:
     print (sim.sim_dir)
     sim.run()
     sim.analysis()

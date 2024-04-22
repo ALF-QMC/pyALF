@@ -3,9 +3,9 @@
 
 import math
 
-from . check_common import _get_bins, _replot
-from . init_layout import init_layout
-from . ana import Parameters
+from .ana import Parameters
+from .check_common import _get_bins, _replot
+from .init_layout import init_layout
 
 
 def check_warmup_ipy(directories, names, custom_obs=None, ncols=3):

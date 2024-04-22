@@ -7,10 +7,19 @@ import pickle
 import h5py
 import numpy as np
 
-from . ana import (Parameters, ReadObs, error, ana_scal, ana_hist,
-                   ana_eq, write_res_eq, ana_tau, write_res_tau,
-                   custom_obs_get_dtype_len)
-from . exceptions import TooFewBinsError
+from .ana import (
+    Parameters,
+    ReadObs,
+    ana_eq,
+    ana_hist,
+    ana_scal,
+    ana_tau,
+    custom_obs_get_dtype_len,
+    error,
+    write_res_eq,
+    write_res_tau,
+)
+from .exceptions import TooFewBinsError
 
 
 def analysis(directory,
@@ -51,7 +60,7 @@ def analysis(directory,
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
-    print('### Analyzing {} ###'.format(directory))
+    print(f'### Analyzing {directory} ###')
     print(os.getcwd())
 
     par = Parameters(directory)
@@ -137,10 +146,7 @@ def analysis(directory,
 
                 N_bins = jacks[0].N_bins
                 dtype, length = custom_obs_get_dtype_len(obs_spec, jacks)
-                if length == 1:
-                    shape = (N_bins,)
-                else:
-                    shape = (N_bins, length)
+                shape = (N_bins,) if length == 1 else (N_bins, length)
                 J = np.empty(shape, dtype=dtype)
                 for i in range(N_bins):
                     J[i] = obs_spec['function'](

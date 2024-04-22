@@ -80,25 +80,25 @@ def show_obs(filename):
         for o in f:
             if o.endswith('_scal'):
                 N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
+                print(f"{o}; Bins: {N_bins}")
 
         print("Histogram observables:")
         for o in f:
             if o.endswith('_hist'):
                 N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
+                print(f"{o}; Bins: {N_bins}")
 
         print("Equal time observables:")
         for o in f:
             if o.endswith('_eq'):
                 N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
+                print(f"{o}; Bins: {N_bins}")
 
         print("Time displaced observables:")
         for o in f:
             if o.endswith('_tau'):
                 N_bins = f[o+"/obser"].shape[0]
-                print("{}; Bins: {}".format(o, N_bins))
+                print(f"{o}; Bins: {N_bins}")
 
 
 def bin_count(filename):

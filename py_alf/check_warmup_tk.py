@@ -2,15 +2,15 @@
 # pylint: disable=invalid-name
 
 import tkinter as tk
+
 import numpy as np
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-from . ana import Parameters
-from . check_common import _get_bins, _replot, _create_fig
+from .ana import Parameters
+from .check_common import _create_fig, _get_bins, _replot
 
 
-class check_warmup_tk():  # pylint: disable=too-few-public-methods
+class check_warmup_tk:  # pylint: disable=too-few-public-methods
     """
     Plot bins to determine n_skip. Opens a new window.
 
@@ -94,7 +94,7 @@ class check_warmup_tk():  # pylint: disable=too-few-public-methods
 
     def _set_nskip(self):
         N_skip = int(self.N_skip_str.get())
-        print("updating to N_skip={}".format(N_skip))
+        print(f"updating to N_skip={N_skip}")
         self.par.set_N_skip(N_skip)
         self.par.write_nml()
 
@@ -113,7 +113,7 @@ class check_warmup_tk():  # pylint: disable=too-few-public-methods
             return
         self.n_dir_var.set(n_dir)
         self.directory_var.set(self.directories[n_dir])
-        self.root.wm_title('{} warmup'.format(self.directory_var.get()))
+        self.root.wm_title(f'{self.directory_var.get()} warmup')
         self.par = Parameters(self.directory_var.get())
         self.res = _get_bins(
             self.directory_var.get(), self.names, self.custom_obs)

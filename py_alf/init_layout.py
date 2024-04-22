@@ -5,6 +5,7 @@ import math
 import ipywidgets as widgets
 import matplotlib.pyplot as plt
 
+
 def _create_fig(N, ncols=2):
     if N == 1:
         plt.ioff()

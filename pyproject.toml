@@ -57,3 +57,20 @@ alf_run = 'py_alf.cli.alf_run:_main'
 alf_show_obs = 'py_alf.cli.alf_show_obs:_main'
 alf_test_branch = 'py_alf.cli.alf_test_branch:_main'
 minimal_ALF_run = 'py_alf.cli.minimal_ALF_run:_main'
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # "W",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]

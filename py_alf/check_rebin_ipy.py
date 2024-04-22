@@ -1,9 +1,9 @@
 """Plot error vs n_rebin."""
 # pylint: disable=invalid-name
 
-from . check_common import _plot_errors, _get_errors
-from . init_layout import init_layout
-from . ana import Parameters
+from .ana import Parameters
+from .check_common import _get_errors, _plot_errors
+from .init_layout import init_layout
 
 
 def check_rebin_ipy(directories, names, custom_obs=None, Nmax0=100, ncols=3):

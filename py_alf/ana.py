@@ -5,16 +5,16 @@
 # pylint: disable=unbalanced-tuple-unpacking
 
 import os
-import shutil
 import pickle
+import shutil
 
+import f90nml
 import h5py
 import numpy as np
 import pandas as pd
-import f90nml
 
-from . lattice import Lattice
-from . exceptions import TooFewBinsError
+from .exceptions import TooFewBinsError
+from .lattice import Lattice
 
 
 def symmetrize(latt, syms, dat):
@@ -225,7 +225,7 @@ def read_scal(directory, obs_name, bare_bins=False):
     else:
         filename = os.path.join(directory, obs_name)
 
-        with open(filename, 'r', encoding='UTF-8') as f:
+        with open(filename, encoding='UTF-8') as f:
             lines = f.readlines()
 
         N_bins = len(lines)
@@ -309,7 +309,7 @@ def read_hist(directory, obs_name, bare_bins=False):
     else:
         filename = os.path.join(directory, obs_name)
 
-        with open(filename, 'r', encoding='UTF-8') as f:
+        with open(filename, encoding='UTF-8') as f:
             lines = f.readlines()
 
         N_bins = len(lines)
@@ -401,7 +401,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
             dtau = f[obs_name].attrs['dtau']
     else:
         filename = os.path.join(directory, obs_name)
-        with open(filename+'_info', 'r', encoding='UTF-8') as f:
+        with open(filename+'_info', encoding='UTF-8') as f:
             lines = f.readlines()
         # Channel = lines[1].split(':')[1].strip()
         N_tau = int(lines[2].split(':')[1])
@@ -415,7 +415,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         latt = Lattice(L1_p, L2_p, a1_p, a2_p)
         N_unit = latt.N
 
-        with open(filename, 'r', encoding='UTF-8') as f:
+        with open(filename, encoding='UTF-8') as f:
             lines = f.readlines()
 
         N_bins0 = len(lines) / (1 + N_orb + N_unit + N_unit*N_tau*N_orb**2)
@@ -767,7 +767,7 @@ def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
 
     for n in range(latt.N):
         directory2 = os.path.join(
-            directory, 'res', obs_name, '{0:.2f}_{1:.2f}'.format(*latt.k[n]))
+            directory, 'res', obs_name, '{:.2f}_{:.2f}'.format(*latt.k[n]))
         if not os.path.exists(directory2):
             os.makedirs(directory2)
 

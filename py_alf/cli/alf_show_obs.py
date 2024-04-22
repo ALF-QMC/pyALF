@@ -13,7 +13,7 @@ __license__ = "GPL"
 import os
 from argparse import ArgumentParser
 
-from py_alf.utils import show_obs, find_sim_dirs
+from py_alf.utils import find_sim_dirs, show_obs
 
 
 def _get_arg_parser():
@@ -39,7 +39,7 @@ def _main():
         filenames = [os.path.join(d, 'data.h5') for d in dirs]
 
     for filename in filenames:
-        print("===== {} =====".format(filename))
+        print(f"===== {filename} =====")
         show_obs(filename)
 
 
