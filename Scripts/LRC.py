@@ -7,17 +7,17 @@ Created on Sat Aug 29 05:20:44 2020
 
 from py_alf import ALF_source, Simulation  # Interface with ALF
 
-sim_dict = {"Model": "LRC", 
-            "Lattice_type": "Square", 
-            "L1": 4 , "L2": 4, 
-            "Beta": 5.0, 
+sim_dict = {"Model": "LRC",
+            "Lattice_type": "Square",
+            "L1": 4 , "L2": 4,
+            "Beta": 5.0,
             "Nsweep": 200,
             "NBin": 50,
             "Ltau": 0,
             "Global_tau_moves" : True,
-            "ham_U"            : 4.0 ,  
+            "ham_U"            : 4.0 ,
             "ham_alpha"        : 0.0 ,
-            "Percent_change"   : 0.1      
+            "Percent_change"   : 0.1
             }
 sim = Simulation(
     ALF_source(branch='master'),

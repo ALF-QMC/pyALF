@@ -17,7 +17,7 @@ def check_warmup(*args, gui='tk', **kwargs):
     Plot bins to determine n_skip.
 
     Calls either :func:`py_alf.check_warmup_tk` or
-    :func:`py_alf.check_warmup_ipy`. 
+    :func:`py_alf.check_warmup_ipy`.
 
     Parameters
     ----------
@@ -39,7 +39,7 @@ def check_rebin(*args, gui='tk', **kwargs):
     Plot error vs n_rebin in a Jupyter Widget.
 
     Calls either :func:`py_alf.check_rebin_tk` or
-    :func:`py_alf.check_rebin_ipy`. 
+    :func:`py_alf.check_rebin_ipy`.
 
     Parameters
     ----------

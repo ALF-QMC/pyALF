@@ -62,7 +62,7 @@ minimal_ALF_run = 'py_alf.cli.minimal_ALF_run:_main'
 select = [
     # pycodestyle
     "E",
-    # "W",
+    "W",
     # Pyflakes
     "F",
     # pyupgrade

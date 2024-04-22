@@ -46,7 +46,7 @@ def _prepare_runs(tmpdir, sim_R, sim_T):
         shutil.copy(f'{sim_R.alf_src.alf_dir}/Prog/ALF.out', executable_R)
     sim_R.run(copy_bin=True, only_prep=True)
 
-    executable_T = os.path.join(tmpdir, 
+    executable_T = os.path.join(tmpdir,
                                 f'ALF_{sim_T.config.replace(" ", "_")}_test.out')
     if os.path.isfile(executable_T):
         shutil.copy(executable_T, f'{sim_T.alf_src.alf_dir}/Prog/ALF.out')

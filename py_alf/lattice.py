@@ -30,7 +30,7 @@ class Lattice:
         a1, a2: 2d primitive vectors.
 
     force_python_init : bool, default=False
-        Force the usage of Python version of the initialization. 
+        Force the usage of Python version of the initialization.
         Default behaviour is to first try compiled Fortran and fall back to
         Python if that fails.
     """

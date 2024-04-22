@@ -31,11 +31,11 @@ for Ham_Uf in [
                      n_mpi  = 12
                      )
     sims.append(sim)
-sims[0].compile()        
+sims[0].compile()
 
 for sim in sims:
     sim.run()
-    sim.analysis() 
+    sim.analysis()
 
 # Load all analysis results in a single Pandas dataframe
 directories = [sim.sim_dir for sim in sims]

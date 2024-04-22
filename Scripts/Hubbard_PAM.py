@@ -40,7 +40,7 @@ for Ham_V in [0.5, 0.6, 0.7, 0.8, 0.9,
                      )
     sims.append(sim)
 
-sims[0].compile()   
+sims[0].compile()
 for sim in sims:
     sim.run()
     sim.analysis()
