@@ -1,5 +1,4 @@
-"""
-Provides interfaces for compiling, running and postprocessing ALF in Python.
+"""Provides interfaces for compiling, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
@@ -37,8 +36,7 @@ class cd:
 
 
 class Simulation:
-    """
-    Object corresponding to an ALF simulation.
+    """Object corresponding to an ALF simulation.
 
     Parameters
     ----------
@@ -81,7 +79,9 @@ class Simulation:
     hdf5 : bool, default=True
         Whether to compile ALF with HDF5.
         Full postprocessing support only exists with HDF5.
+
     """
+
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
 
@@ -161,8 +161,7 @@ class Simulation:
         self.config += ' NO-INTERACTIVE'
 
     def compile(self, verbosity=0):
-        """
-        Compile ALF.
+        """Compile ALF.
 
         Parameters
         ----------
@@ -170,13 +169,13 @@ class Simulation:
             0: Don't echo make reciepes.
             1: Echo make reciepes.
             else: Print make tracing information.
+
         """
         compile_alf(self.alf_src.alf_dir, config=self.config,
                     verbosity=verbosity, branch=self.alf_src.branch)
 
     def run(self, copy_bin=False, only_prep=False, bin_in_sim_dir=False):
-        """
-        Prepare simulation directory and run ALF.
+        """Prepare simulation directory and run ALF.
 
         Parameters
         ----------
@@ -187,6 +186,7 @@ class Simulation:
         bin_in_sim_dir : bool, default=False
             Assume that the ALF binary is already present in simultation
             directory and use this.
+
         """
         if self.tempering:
             _prep_sim_dir(self.alf_src, self.sim_dir,
@@ -249,8 +249,7 @@ class Simulation:
 
     # pylint: disable-next=inconsistent-return-statements
     def check_warmup(self, names, gui='tk', **kwargs):
-        """
-        Plot bins to determine n_skip.
+        """Plot bins to determine n_skip.
 
         Parameters
         ----------
@@ -261,6 +260,7 @@ class Simulation:
         **kwargs : dict, optional
             Extra arguments for :func:`py_alf.check_warmup_tk` or
             :func:`py_alf.check_warmup_ipy`.
+
         """
         if gui == 'tk':
             # pylint: disable-next=import-outside-toplevel
@@ -275,8 +275,7 @@ class Simulation:
 
     # pylint: disable-next=inconsistent-return-statements
     def check_rebin(self, names, gui='tk', **kwargs):
-        """
-        Plot error vs n_rebin to control autocorrelation.
+        """Plot error vs n_rebin to control autocorrelation.
 
         Parameters
         ----------
@@ -287,6 +286,7 @@ class Simulation:
         **kwargs : dict, optional
             Extra arguments for :func:`py_alf.check_rebin_tk` or
             :func:`py_alf.check_rebin_ipy`.
+
         """
         if gui == 'tk':
             # pylint: disable-next=import-outside-toplevel
@@ -300,8 +300,7 @@ class Simulation:
             raise TypeError(f'Illegal value gui={gui}')
 
     def analysis(self, python_version=True, **kwargs):
-        """
-        Perform default analysis on Monte Carlo data.
+        """Perform default analysis on Monte Carlo data.
 
         Calls :func:`py_alf.analysis`, if run with `python_version=True`.
 
@@ -314,6 +313,7 @@ class Simulation:
         **kwargs : dict, optional
             Extra arguments for :func:`py_alf.analysis`, if run with
             `python_version=True`.
+
         """
         for directory in self.get_directories():
             if python_version:
@@ -470,8 +470,7 @@ def compile_alf(alf_dir=None,
                 url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git',
                 verbosity=0
                 ):
-    """
-    Compile ALF. Clone a new repository if alf_dir does not exist.
+    """Compile ALF. Clone a new repository if alf_dir does not exist.
 
     Parameters
     ----------
@@ -490,6 +489,7 @@ def compile_alf(alf_dir=None,
         0: Don't echo make reciepes.
         1: Echo make reciepes.
         else: Print make tracing information.
+
     """
     if alf_dir is None:
         alf_dir = os.getenv('ALF_DIR', './ALF')

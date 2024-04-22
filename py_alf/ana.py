@@ -18,8 +18,7 @@ from .lattice import Lattice
 
 
 def symmetrize(latt, syms, dat):
-    """
-    Symmetrize a dataset.
+    """Symmetrize a dataset.
 
     Parameters
     ----------
@@ -36,6 +35,7 @@ def symmetrize(latt, syms, dat):
     -------
     dat_sym : numpy array
         Symmetrized data.
+
     """
     N = dat.shape[-1]
     N_sym = len(syms)
@@ -49,8 +49,7 @@ def symmetrize(latt, syms, dat):
 
 
 class Parameters:
-    """
-    Object representing the "parameters" file.
+    """Object representing the "parameters" file.
 
     Parameters
     ----------
@@ -61,6 +60,7 @@ class Parameters:
         not from the namelist 'var_errors', but from a namelist called
         `obs_name`, while 'var_errors' is the fallback options. Parameters
         will be written to namelist `obs_name`.
+
     """
 
     def __init__(self, directory, obs_name=None):
@@ -131,8 +131,7 @@ def rebin(X, N_rebin):
 
 
 def jack(X, par, N_skip=None, N_rebin=None):
-    """
-    Create jackknife bins out of input bins after skipping and rebinning.
+    """Create jackknife bins out of input bins after skipping and rebinning.
 
     Parameters
     ----------
@@ -149,6 +148,7 @@ def jack(X, par, N_skip=None, N_rebin=None):
     -------
     numpy array
         Jackknife bins after skipping and rebinning.
+
     """
     if N_rebin is None:
         N_rebin = par.N_rebin()
@@ -163,8 +163,7 @@ def jack(X, par, N_skip=None, N_rebin=None):
 
 
 def error(jacks, imag=False):
-    """
-    Calculate expectation values and errors of given jackknife bins.
+    """Calculate expectation values and errors of given jackknife bins.
 
     Parameters
     ----------
@@ -177,6 +176,7 @@ def error(jacks, imag=False):
     -------
     tuple of numpy arrays
         (expectation values, errors).
+
     """
     N = len(jacks)
     m_r = np.mean(jacks.real, axis=0)
@@ -189,8 +189,7 @@ def error(jacks, imag=False):
 
 
 def read_scal(directory, obs_name, bare_bins=False):
-    """
-    Read, skip, rebin and jackknife scalar-type bins.
+    """Read, skip, rebin and jackknife scalar-type bins.
 
     Bins get skipped and rebinned according to N_skip an N_rebin retrieved
     through :class:`Parameters`, then jackknife resampling is applied.
@@ -212,6 +211,7 @@ def read_scal(directory, obs_name, bare_bins=False):
         Sign. shape: `(N_bins,)`.
     N_obs : int
         Number of observables.
+
     """
     if 'data.h5' in os.listdir(directory):
         filename = os.path.join(directory, 'data.h5')
@@ -251,8 +251,7 @@ def read_scal(directory, obs_name, bare_bins=False):
 
 
 def read_hist(directory, obs_name, bare_bins=False):
-    """
-    Read, skip, rebin and jackknife histogram-type bins.
+    """Read, skip, rebin and jackknife histogram-type bins.
 
     Bins get skipped and rebinned according to N_skip an N_rebin retrieved
     through :class:`Parameters`, then jackknife resampling is applied.
@@ -282,6 +281,7 @@ def read_hist(directory, obs_name, bare_bins=False):
         Upper bound.
     lower : float
         Lower bound.
+
     """
     # pylint: disable=too-many-locals
     par = Parameters(directory, obs_name)
@@ -342,8 +342,7 @@ def read_hist(directory, obs_name, bare_bins=False):
 
 
 def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
-    """
-    Read, skip, rebin and jackknife lattice-type bins (_eq and _tau).
+    """Read, skip, rebin and jackknife lattice-type bins (_eq and _tau).
 
     Bins get skipped and rebinned according to N_skip an N_rebin retrieved
     through :class:`Parameters`, then jackknife resampling is applied.
@@ -375,6 +374,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         Imaginary time step length.
     latt : Lattice
         See :class:`py_alf.Lattice`.
+
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -477,8 +477,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
 
 
 class ReadObs:
-    """
-    Read, skip, rebin and jackknife scalar-type bins.
+    """Read, skip, rebin and jackknife scalar-type bins.
 
     Bins get skipped and rebinned according to N_skip an N_rebin retrieved
     through :class:`Parameters`, then jackknife resampling is applied.
@@ -496,7 +495,9 @@ class ReadObs:
         Do not perform skipping, rebinning, or jackknife resampling.
     substract_back : bool, default=True
         Substract background. Applies to correlation functions.
+
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, directory, obs_name,
@@ -544,13 +545,13 @@ class ReadObs:
         raise TypeError('Error in ReadObs.slice: Unknow observable type.')
 
     def jack(self, N_rebin):
-        """
-        Return jackknife bins. Object has to be created with `bare_bins=True`.
+        """Return jackknife bins. Object has to be created with `bare_bins=True`.
 
         Parameters
         ----------
         N_rebin : int
             Overwrite N_rebin from parameters.
+
         """
         if not self.bare_bins:
             raise TypeError('Object has to be created with `bare_bins=True`.')
@@ -585,6 +586,7 @@ def ana_scal(directory, obs_name):
         Directory containing the observable.
     obs_name : str
         Name of the observable.
+
     """
     J_obs, J_sign, N_obs = ReadObs(directory, obs_name).all()
     if len(J_obs) < 2:
@@ -784,8 +786,7 @@ def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
 
 
 def load_res(directories):
-    """
-    Read analysis results from multiple simulations.
+    """Read analysis results from multiple simulations.
 
     Read from pickled dictionaries 'res.pkl' and return everything
     in a single pandas DataFrame with one row per simulation.
@@ -800,6 +801,7 @@ def load_res(directories):
     df : pandas.DataFrame
         Contains analysis results and Hamiltonian parameters.
         One row per simulation.
+
     """
     if not isinstance(directories, list):
         directories = [directories]

@@ -43,7 +43,6 @@ default:
 
 .ruff_template: &ruff_definition
   stage: test
-  allow_failure: true
   rules:
     - if: '$BRANCH_T'
       when: never
@@ -54,6 +53,21 @@ default:
     - export PATH="$HOME/.local/bin:$PATH"
     - pip install ruff
     - ruff check
+
+
+check_docstrings:
+  stage: test
+  allow_failure: true
+  image: python:alpine
+  rules:
+    - if: '$BRANCH_T'
+      when: never
+    - changes:
+      - py_alf
+      - .gitlab-ci.yml
+  script:
+    - pip install ruff
+    - ruff check --select D
 
 
 build:

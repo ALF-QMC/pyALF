@@ -1,5 +1,4 @@
-"""
-Provides interfaces for compiling, running and postprocessing ALF in Python.
+"""Provides interfaces for compiling, running and postprocessing ALF in Python.
 """
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
@@ -31,8 +30,7 @@ class cd:
 
 
 class ALF_source:
-    """
-    Objet representing ALF source code.
+    """Objet representing ALF source code.
 
     Parameters
     ----------
@@ -45,6 +43,7 @@ class ALF_source:
         If specified, this will be checked out by git.
     url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
         Address from where to clone ALF if alf_dir does not exist.
+
     """
 
     def __init__(self, alf_dir=None, branch=None,
@@ -135,7 +134,8 @@ class ALF_source:
 
 def get_default_parameters(parse_ham_mod, alf_dir):
     """Return dictionary of all default parameters of Hamiltonians.
-    By parsing Hamiltonians."""
+    By parsing Hamiltonians.
+    """
     try:
         ham_names, ham_files = parse_ham_mod.get_ham_names_ham_files(
             os.path.join(alf_dir, 'Prog', 'Hamiltonians.list')

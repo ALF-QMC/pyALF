@@ -10,8 +10,7 @@ from .check_common import _create_fig, _get_errors, _plot_errors
 
 
 class check_rebin_tk:
-    """
-    Plot error vs n_rebin. Opens a new window.
+    """Plot error vs n_rebin. Opens a new window.
 
     Parameters
     ----------
@@ -24,7 +23,9 @@ class check_rebin_tk:
     custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
+
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-few-public-methods
 

@@ -14,8 +14,7 @@ _use_fortran_init = True
 
 
 class Lattice:
-    """
-    Finite size Bravais lattice object.
+    """Finite size Bravais lattice object.
 
     Parameters
     ----------
@@ -33,7 +32,9 @@ class Lattice:
         Force the usage of Python version of the initialization.
         Default behaviour is to first try compiled Fortran and fall back to
         Python if that fails.
+
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, *args, force_python_init=False):
@@ -126,8 +127,7 @@ class Lattice:
         return n
 
     def fourier_K_to_R(self, X):
-        """
-        Fourier transform from k to r space.
+        """Fourier transform from k to r space.
 
         Last index of input has to run over all lattice points in k space.
 
@@ -143,8 +143,7 @@ class Lattice:
         return Y
 
     def fourier_R_to_K(self, X):
-        """
-        Fourier transform from r to k space.
+        """Fourier transform from r to k space.
 
         Last index of input has to run over all lattice points in r space.
 
@@ -160,8 +159,7 @@ class Lattice:
         return Y
 
     def rotate(self, n, theta):
-        """
-        Rotate vector in k space.
+        """Rotate vector in k space.
 
         Parameters
         ----------
@@ -174,19 +172,20 @@ class Lattice:
         -------
         int
             Index corresponding to output vector.
+
         """
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
         return self.k_to_n(np.matmul(R, self.k[n]))
 
     def plot_r(self, data):
-        """
-        Plot data in r space.
+        """Plot data in r space.
 
         Parameters
         ----------
         data : iterable
             Index corresponds to coordinates.
+
         """
         # pylint: disable=import-outside-toplevel
         import matplotlib as mpl
@@ -204,13 +203,13 @@ class Lattice:
         ax.set_ylabel(r'$r_y$')
 
     def plot_k(self, data):
-        """
-        Plot data in k space.
+        """Plot data in k space.
 
         Parameters
         ----------
         data : iterable
             Index corresponds to coordinates.
+
         """
         # pylint: disable=import-outside-toplevel
         import matplotlib as mpl

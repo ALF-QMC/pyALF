@@ -11,8 +11,7 @@ from .check_common import _create_fig, _get_bins, _replot
 
 
 class check_warmup_tk:  # pylint: disable=too-few-public-methods
-    """
-    Plot bins to determine n_skip. Opens a new window.
+    """Plot bins to determine n_skip. Opens a new window.
 
     Parameters
     ----------
@@ -23,7 +22,9 @@ class check_warmup_tk:  # pylint: disable=too-few-public-methods
     custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
+
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-locals
 

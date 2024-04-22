@@ -24,8 +24,7 @@ from .exceptions import TooFewBinsError
 
 def analysis(directory,
              symmetry=None, custom_obs=None, do_tau=True, always=False):
-    """
-    Perform analysis in the given directory.
+    """Perform analysis in the given directory.
 
     Results are written to the pickled dictionary `res.pkl` and in plain text
     in the folder `res/`.
@@ -56,6 +55,7 @@ def analysis(directory,
         speeds up analysis and makes result files much smaller.
     always : bool, default=False
         Do not skip if parameters and bins are older than results.
+
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches

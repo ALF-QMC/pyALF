@@ -13,8 +13,7 @@ import numpy as np
 
 
 def find_sim_dirs(root_in='.'):
-    """
-    Find directories containing a file named 'data.h5'.
+    """Find directories containing a file named 'data.h5'.
 
     Parameters
     ----------
@@ -24,6 +23,7 @@ def find_sim_dirs(root_in='.'):
     Returns
     -------
     list of directory names.
+
     """
     dirs = []
     for root, folders, files in os.walk(root_in):
@@ -45,6 +45,7 @@ def del_bins(filename, N0, N):
         Number of first N0 bins to keep.
     N: int
         Number of bins to remove after first N0 bins.
+
     """
     def reshape(fileobj, dset_name, N0, N):
         dset = fileobj[dset_name]
@@ -74,6 +75,7 @@ def show_obs(filename):
     ----------
     filename: str
         Name of HDF5 file.
+
     """
     with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         print("Scalar observables:")
@@ -110,6 +112,7 @@ def bin_count(filename):
     ----------
     filename: str
         Name of HDF5 file.
+
     """
     with h5py.File(filename, 'r') as f:           # pylint: disable=no-member
         N_bins = 0
