@@ -18,14 +18,12 @@ default:
       - tests
       - .gitlab-ci.yml
   script:
-    - export PATH="$HOME/.local/bin:$PATH"
     - pip install pylint ruff
     - pylint -E py_alf/
     - ruff check
-    - export PYTHONPATH="$PWD:$PYTHONPATH"
-    - export PATH="$PWD/py_alf/cli:$PATH"
+    - pip install .
     - cd tests && ./test_lattice_init.py && cd ..
-    - alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
+    - alf_run --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
 .pylint_template: &pylint_definition
   stage: test
@@ -37,7 +35,6 @@ default:
       - py_alf
       - .gitlab-ci.yml
   script:
-    - export PATH="$HOME/.local/bin:$PATH"
     - pip install pylint
     - pylint py_alf/
 
@@ -50,7 +47,6 @@ default:
       - py_alf
       - .gitlab-ci.yml
   script:
-    - export PATH="$HOME/.local/bin:$PATH"
     - pip install ruff
     - ruff check
 
