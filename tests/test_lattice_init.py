@@ -20,7 +20,18 @@ lattice_types = {
         },
 }
 
-def test_lattice_init(lattice_type, L1_1, L1_2, L2_1, L2_2):
+lattice_list = [
+    ("Square", 4, 0, 0, 4),
+    ("Square", 4, 1, 0, 4),
+    ("Square", 4, 0, 1, 4),
+    ("Square", 4, 0, 0, 1),
+    ("Honeycomb", 3, 0, 0, 3),
+    ("Honeycomb", 3, 1, 0, 3),
+    ("Pi_Flux", 4, 0, 0, 4),
+    ("Pi_Flux", 4, 1, 0, 4),
+]
+
+def compare_lattice_init(lattice_type, L1_1, L1_2, L2_1, L2_2):
     print('Testing', lattice_type, L1_1, L1_2, L2_1, L2_2)
     a1 = lattice_types[lattice_type]['a1']
     a2 = lattice_types[lattice_type]['a2']
@@ -33,14 +44,6 @@ def test_lattice_init(lattice_type, L1_1, L1_2, L2_1, L2_2):
         if not np.allclose(a, b):
             raise Exception('not matching', a, b)
 
-for lattice_type, L1_1, L1_2, L2_1, L2_2 in [
-    ("Square", 4, 0, 0, 4),
-    ("Square", 4, 1, 0, 4),
-    ("Square", 4, 0, 1, 4),
-    ("Square", 4, 0, 0, 1),
-    ("Honeycomb", 3, 0, 0, 3),
-    ("Honeycomb", 3, 1, 0, 3),
-    ("Pi_Flux", 4, 0, 0, 4),
-    ("Pi_Flux", 4, 1, 0, 4),
-]:
-    test_lattice_init(lattice_type, L1_1, L1_2, L2_1, L2_2)
+def test_lattice_init():
+    for lattice_type, L1_1, L1_2, L2_1, L2_2 in lattice_list:
+        compare_lattice_init(lattice_type, L1_1, L1_2, L2_1, L2_2)
