@@ -11,7 +11,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 
 import numpy as np
 import pandas as pd
@@ -446,9 +445,10 @@ def getenv(config, alf_dir='.'):
                 f'. ./configure.sh {config} NO-FALLBACK > /dev/null || exit 1 &&'
                 'env > environment'],
                 check=True)
-        except subprocess.CalledProcessError:
-            print(f'Error while running configure.sh with "{config}"\n'
-                  'Is your machine set corretly?', file=sys.stderr)
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                f'Error while running configure.sh with "{config}"! '
+                'Is your machine set corretly?') from exc
         with open('environment', encoding='UTF-8') as f:
             lines = f.readlines()
     env = {}
