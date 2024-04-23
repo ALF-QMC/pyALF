@@ -3,14 +3,13 @@
 
 import math
 
-from . check_common import _get_bins, _replot
-from . init_layout import init_layout
-from . ana import Parameters
+from .ana import Parameters
+from .check_common import _get_bins, _replot
+from .init_layout import init_layout
 
 
 def check_warmup_ipy(directories, names, custom_obs=None, ncols=3):
-    """
-    Plot bins to determine n_skip in a Jupyter Widget.
+    """Plot bins to determine n_skip in a Jupyter Widget.
 
     Parameters
     ----------
@@ -26,14 +25,14 @@ def check_warmup_ipy(directories, names, custom_obs=None, ncols=3):
     -------
     Jupyter Widget
         A graphical user interface based on ipywidgets
+
     """
     return CheckWarmupIpy(
         directories, names, custom_obs=custom_obs, ncols=ncols).gui
 
 
 class CheckWarmupIpy:  # pylint: disable=too-few-public-methods
-    """
-    Plot bins to determine n_skip in a Jupyter Widget.
+    """Plot bins to determine n_skip in a Jupyter Widget.
 
     Parameters
     ----------
@@ -49,7 +48,9 @@ class CheckWarmupIpy:  # pylint: disable=too-few-public-methods
     -------
     Jupyter Widget
         A graphical user interface based on ipywidgets
+
     """
+
     # pylint: disable=too-many-instance-attributes
     def __init__(self, directories, names, custom_obs=None, ncols=3):
         self.gui, self.log, self.axs, self.nmax, self.nskip, self.select = \

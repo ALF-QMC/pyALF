@@ -2,21 +2,19 @@
 # pylint: disable=invalid-name
 
 import os
-import sys
-from ctypes import CDLL, POINTER, c_int, c_double, byref
 import platform
+import sys
+from ctypes import CDLL, POINTER, byref, c_double, c_int
 
 import numpy as np
 from numba import jit
-
 
 _cache = {}
 _use_fortran_init = True
 
 
 class Lattice:
-    """
-    Finite size Bravais lattice object.
+    """Finite size Bravais lattice object.
 
     Parameters
     ----------
@@ -31,10 +29,12 @@ class Lattice:
         a1, a2: 2d primitive vectors.
 
     force_python_init : bool, default=False
-        Force the usage of Python version of the initialization. 
+        Force the usage of Python version of the initialization.
         Default behaviour is to first try compiled Fortran and fall back to
         Python if that fails.
+
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, *args, force_python_init=False):
@@ -49,7 +49,7 @@ class Lattice:
             self.a1 = np.array(args[2], dtype=float)
             self.a2 = np.array(args[3], dtype=float)
 
-        s = 'L1={}L2={}a1={}a2={}'.format(self.L1, self.L2, self.a1, self.a2)
+        s = f'L1={self.L1}L2={self.L2}a1={self.a1}a2={self.a2}'
         if s in _cache:
             (self.BZ1, self.BZ2, self.b1, self.b2,
              self.b1_perp, self.b2_perp, self.L, self.N,
@@ -127,8 +127,7 @@ class Lattice:
         return n
 
     def fourier_K_to_R(self, X):
-        """
-        Fourier transform from k to r space.
+        """Fourier transform from k to r space.
 
         Last index of input has to run over all lattice points in k space.
 
@@ -144,8 +143,7 @@ class Lattice:
         return Y
 
     def fourier_R_to_K(self, X):
-        """
-        Fourier transform from r to k space.
+        """Fourier transform from r to k space.
 
         Last index of input has to run over all lattice points in r space.
 
@@ -161,8 +159,7 @@ class Lattice:
         return Y
 
     def rotate(self, n, theta):
-        """
-        Rotate vector in k space.
+        """Rotate vector in k space.
 
         Parameters
         ----------
@@ -175,23 +172,24 @@ class Lattice:
         -------
         int
             Index corresponding to output vector.
+
         """
         c, s = np.cos(theta), np.sin(theta)
         R = np.array(((c, -s), (s, c)))
         return self.k_to_n(np.matmul(R, self.k[n]))
 
     def plot_r(self, data):
-        """
-        Plot data in r space.
+        """Plot data in r space.
 
         Parameters
         ----------
         data : iterable
             Index corresponds to coordinates.
+
         """
         # pylint: disable=import-outside-toplevel
-        import matplotlib.pyplot as plt
         import matplotlib as mpl
+        import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(1, 1, constrained_layout=True)
         cmap = mpl.cm.ScalarMappable(
@@ -205,17 +203,17 @@ class Lattice:
         ax.set_ylabel(r'$r_y$')
 
     def plot_k(self, data):
-        """
-        Plot data in k space.
+        """Plot data in k space.
 
         Parameters
         ----------
         data : iterable
             Index corresponds to coordinates.
+
         """
         # pylint: disable=import-outside-toplevel
-        import matplotlib.pyplot as plt
         import matplotlib as mpl
+        import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(1, 1, constrained_layout=True)
         cmap = mpl.cm.ScalarMappable(
@@ -292,11 +290,11 @@ def _calc_patch(a1, a2):
         r_min = np.inf
         for i, a in enumerate(NNs):
             r, g = _find_cross(x, d, a)
-            if 1e-8 < r < r_min and 1e-8 < abs(g):
+            if 1e-8 < r < r_min and abs(g) > 1e-8:
                 i_min = i
                 r_min = r
         r, g = _find_cross(x, d, a0)
-        if 1e-8 < r < r_min and 1e-8 < abs(g):
+        if 1e-8 < r < r_min and abs(g) > 1e-8:
             verts.append(x+r*d)
             verts.append(np.array([0, 0]))
             return np.array(verts)
@@ -444,7 +442,7 @@ def _init1(L1, L2, a1, a2):
             if in_latt:
                 listr[nc] = [i1, i2]
                 nc += 1
-    if not nc == N:
+    if nc != N:
         print(L, nc, N)
         raise RuntimeError('Error in initialsation of Lattice')
 
@@ -463,7 +461,7 @@ def _init1(L1, L2, a1, a2):
                 listk[nc] = [i1, i2]
                 invlistk[i1, i2] = nc
                 nc += 1
-    if not nc == N:
+    if nc != N:
         print(L, nc, N)
         raise RuntimeError('Error in initialsation of Lattice')
 

@@ -18,15 +18,14 @@ default:
       - tests
       - .gitlab-ci.yml
   script:
-    - export PATH="$HOME/.local/bin:$PATH"
-    - pip install pylint
+    - pip install pylint ruff
     - pylint -E py_alf/
-    - export PYTHONPATH="$PWD:$PYTHONPATH"
-    - export PATH="$PWD/py_alf/cli:$PATH"
+    - ruff check
+    - pip install .
     - cd tests && ./test_lattice_init.py && cd ..
-    - alf_run.py --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
+    - alf_run --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
-.warn_template: &warn_definition
+.pylint_template: &pylint_definition
   stage: test
   allow_failure: true
   rules:
@@ -36,9 +35,35 @@ default:
       - py_alf
       - .gitlab-ci.yml
   script:
-    - export PATH="$HOME/.local/bin:$PATH"
     - pip install pylint
     - pylint py_alf/
+
+.ruff_template: &ruff_definition
+  stage: test
+  rules:
+    - if: '$BRANCH_T'
+      when: never
+    - changes:
+      - py_alf
+      - .gitlab-ci.yml
+  script:
+    - pip install ruff
+    - ruff check
+
+
+check_docstrings:
+  stage: test
+  allow_failure: true
+  image: python:alpine
+  rules:
+    - if: '$BRANCH_T'
+      when: never
+    - changes:
+      - py_alf
+      - .gitlab-ci.yml
+  script:
+    - pip install ruff
+    - ruff check --select D
 
 
 build:
@@ -91,6 +116,10 @@ Test_IntelLLVM:
   <<: *test_definition
 
 
-Warn_Bullseye:
+Warn_pylint_Bullseye:
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
-  <<: *warn_definition
+  <<: *pylint_definition
+
+Warn_ruff_Bullseye:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
+  <<: *ruff_definition

@@ -1,14 +1,13 @@
 """Plot error vs n_rebin."""
 # pylint: disable=invalid-name
 
-from . check_common import _plot_errors, _get_errors
-from . init_layout import init_layout
-from . ana import Parameters
+from .ana import Parameters
+from .check_common import _get_errors, _plot_errors
+from .init_layout import init_layout
 
 
 def check_rebin_ipy(directories, names, custom_obs=None, Nmax0=100, ncols=3):
-    """
-    Plot error vs n_rebin in a Jupyter Widget.
+    """Plot error vs n_rebin in a Jupyter Widget.
 
     Parameters
     ----------
@@ -26,14 +25,14 @@ def check_rebin_ipy(directories, names, custom_obs=None, Nmax0=100, ncols=3):
     -------
     Jupyter Widget
         A graphical user interface based on ipywidgets
+
     """
     return CheckRebinIpy(
         directories, names, custom_obs=custom_obs, Nmax0=Nmax0, ncols=ncols).gui
 
 
 class CheckRebinIpy:
-    """
-    Plot error vs n_rebin in a Jupyter Widget.
+    """Plot error vs n_rebin in a Jupyter Widget.
 
     Parameters
     ----------
@@ -51,7 +50,9 @@ class CheckRebinIpy:
     -------
     Jupyter Widget
         A graphical user interface based on ipywidgets
+
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
     # pylint: disable=too-few-public-methods

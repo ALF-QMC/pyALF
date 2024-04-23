@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Delete N bins in all observables of the specified HDF5-file.
+"""Delete N bins in all observables of the specified HDF5-file.
 
 Command line arguments:
    First argument: Name of HDF5 file

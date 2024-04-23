@@ -3,16 +3,14 @@
 
 import tkinter as tk
 
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
-from . ana import Parameters
-from . check_common import _create_fig, _plot_errors, _get_errors
+from .ana import Parameters
+from .check_common import _create_fig, _get_errors, _plot_errors
 
 
-class check_rebin_tk():
-    """
-    Plot error vs n_rebin. Opens a new window.
+class check_rebin_tk:
+    """Plot error vs n_rebin. Opens a new window.
 
     Parameters
     ----------
@@ -25,7 +23,9 @@ class check_rebin_tk():
     custom_obs : dict, default=None
         Defines additional observables derived from existing observables.
         See :func:`py_alf.analysis`.
+
     """
+
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-few-public-methods
 
@@ -82,7 +82,7 @@ class check_rebin_tk():
 
     def _set_nrebin(self):
         N_rebin = int(self.N_rebin_str.get())
-        print("updating to N_rebin={}".format(N_rebin))
+        print(f"updating to N_rebin={N_rebin}")
         self.par.set_N_rebin(N_rebin)
         self.par.write_nml()
         for vert in self.verts:
@@ -101,7 +101,7 @@ class check_rebin_tk():
         self.n_dir_var.set(n_dir)
         self.directory_var.set(self.directories[n_dir])
         self.root.wm_title(
-            '{} N_rebin vs error'.format(self.directory_var.get()))
+            f'{self.directory_var.get()} N_rebin vs error')
         self.par = Parameters(self.directory_var.get())
 
         _plot_errors(

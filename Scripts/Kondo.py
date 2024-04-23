@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Aug 29 05:20:44 2020
+"""Created on Sat Aug 29 05:20:44 2020
 
 @author: fassaad
 """
 
-import numpy as np                                  # Numerical library
-from py_alf import ALF_source, Simulation, Lattice  # Interface with ALF
-from py_alf.ana import load_res            # Function for loading analysis results
+import numpy as np  # Numerical library
+
+from py_alf import ALF_source, Lattice, Simulation  # Interface with ALF
+from py_alf.ana import load_res  # Function for loading analysis results
 
 alf_src = ALF_source(branch='master')
 sims = []                                  # List of Simulation instances
-for Ham_Uf in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4,
-        1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0]:  # Values of Uf
+for Ham_Uf in [
+      0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+      1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+      2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0]:  # Values of Uf
     print(Ham_Uf)
     sim_dict = {"Model": "Kondo",
                 "Lattice_type": "Bilayer_square",
@@ -29,11 +30,11 @@ for Ham_Uf in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 
                      n_mpi  = 12
                      )
     sims.append(sim)
-sims[0].compile()        
+sims[0].compile()
 
-for i, sim in enumerate(sims):
+for sim in sims:
     sim.run()
-    sim.analysis() 
+    sim.analysis()
 
 # Load all analysis results in a single Pandas dataframe
 directories = [sim.sim_dir for sim in sims]

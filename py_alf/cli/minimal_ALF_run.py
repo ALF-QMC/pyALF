@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Example script showing the minimal steps for creating and running an ALF
+"""Example script showing the minimal steps for creating and running an ALF
 simulation in pyALF.
 """
 

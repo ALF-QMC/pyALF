@@ -6,15 +6,15 @@ __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2021-2022, The ALF Project"
 __license__ = "GPL"
 
+import importlib.util
 import os
 from argparse import ArgumentParser
-import importlib.util
 
-from py_alf.utils import find_sim_dirs
-from py_alf.check_warmup_tk import check_warmup_tk
-from py_alf.check_rebin_tk import check_rebin_tk
-from py_alf.analysis import analysis
 from py_alf.ana import load_res
+from py_alf.analysis import analysis
+from py_alf.check_rebin_tk import check_rebin_tk
+from py_alf.check_warmup_tk import check_warmup_tk
+from py_alf.utils import find_sim_dirs
 
 
 def _get_arg_parser():
@@ -98,10 +98,7 @@ def _main():
                 from symmetry_not_found
         symmetry = symmetry_mod.symmetry
 
-    if args.directories:
-        directories = args.directories
-    else:
-        directories = find_sim_dirs('.')
+    directories = args.directories if args.directories else find_sim_dirs('.')
 
     if args.check_warmup and (args.check_list is not None):
         check_warmup_tk(directories, args.check_list, custom_obs=custom_obs)

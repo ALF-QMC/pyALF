@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Helper script for testing between ALF branches."""
 # pylint: disable=invalid-name
 
@@ -7,16 +6,17 @@ __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2020-2022, The ALF Project"
 __license__ = "GPL"
 
-import os
-import sys
 import argparse
+import contextlib
 import json
+import os
 import shutil
+import sys
 import tempfile
 
 import numpy as np
-from py_alf import ALF_source, Simulation
 
+from py_alf import ALF_source, Simulation
 
 # def _test_branch(sim_name, alf_dir, pars, branch_R, branch_T, tmpdir,
 #                 prepare_run=True, run=True, **kwargs):
@@ -36,7 +36,9 @@ def _create_sims(sim_name, alf_dir, pars, branch_R, branch_T, **kwargs):
     return sim_R, sim_T
 
 def _prepare_runs(tmpdir, sim_R, sim_T):
-    executable_R = os.path.join(tmpdir, f'ALF_{sim_R.config.replace(" ", "_")}_reference.out')
+    executable_R = os.path.join(
+        tmpdir,
+        f'ALF_{sim_R.config.replace(" ", "_")}_reference.out')
     if os.path.isfile(executable_R):
         shutil.copy(executable_R, f'{sim_R.alf_src.alf_dir}/Prog/ALF.out')
     else:
@@ -44,7 +46,8 @@ def _prepare_runs(tmpdir, sim_R, sim_T):
         shutil.copy(f'{sim_R.alf_src.alf_dir}/Prog/ALF.out', executable_R)
     sim_R.run(copy_bin=True, only_prep=True)
 
-    executable_T = os.path.join(tmpdir, f'ALF_{sim_T.config.replace(" ", "_")}_test.out')
+    executable_T = os.path.join(tmpdir,
+                                f'ALF_{sim_T.config.replace(" ", "_")}_test.out')
     if os.path.isfile(executable_T):
         shutil.copy(executable_T, f'{sim_T.alf_src.alf_dir}/Prog/ALF.out')
     else:
@@ -64,10 +67,8 @@ def _analyze(sim_R, sim_T):
         for name in obs_R:
             test = True
             for dat_R, dat_T in zip(obs_R[name], obs_T[name]):
-                try:
+                with contextlib.suppress(TypeError):
                     test_temp = np.allclose(dat_R, dat_T)
-                except TypeError:
-                    pass
                 test = test and test_temp
             f.write('{name}: {test}\n')
             test_all = test_all and test
@@ -131,7 +132,7 @@ def _main():
     alf_dir = os.path.abspath(args.alfdir)
     mpiexec_args = args.mpiexec_args.split()
 
-    with open(args.sim_pars, 'r', encoding='UTF-8') as f:
+    with open(args.sim_pars, encoding='UTF-8') as f:
         sim_pars = json.load(f)
 
     if os.path.exists("test.txt"):
@@ -166,7 +167,7 @@ def _main():
             sys.exit(0)
         else:
             print("Test failed")
-            with open('test.txt', 'r', encoding='UTF-8') as f:
+            with open('test.txt', encoding='UTF-8') as f:
                 print(f.read())
             sys.exit(1)
 

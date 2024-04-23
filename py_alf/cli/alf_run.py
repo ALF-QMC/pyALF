@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Helper script for compiling and running ALF."""
 # pylint: disable=invalid-name
 
@@ -7,8 +6,8 @@ __author__ = "Fakher F. Assaad, and Jonas Schwab"
 __copyright__ = "Copyright 2020-2022, The ALF Project"
 __license__ = "GPL"
 
-import os
 import json
+import os
 from argparse import ArgumentParser
 from collections import OrderedDict
 
@@ -62,7 +61,7 @@ def _main():
 
     alf_src = ALF_source(alf_dir=alf_dir, branch=args.branch)
 
-    with open(args.sims_file, 'r', encoding="UTF-8") as f:
+    with open(args.sims_file, encoding="UTF-8") as f:
         simulations = f.read().splitlines()
     num_sims = 0
     ham_names = []
@@ -77,7 +76,7 @@ def _main():
         ham_names.append(ham_name)
         sim_dicts.append(sim_dict)
 
-    print("Number of simulations: {}".format(num_sims))
+    print(f"Number of simulations: {num_sims}")
     for ham_name, sim_dict in zip(ham_names, sim_dicts):
         sim = Simulation(
             alf_src, ham_name, sim_dict,

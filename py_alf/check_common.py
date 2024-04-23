@@ -4,12 +4,11 @@
 
 import math
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.optimize import curve_fit
 
-from . ana import (Parameters, ReadObs, read_scal,
-                   jack, error, custom_obs_get_dtype_len)
+from .ana import Parameters, ReadObs, custom_obs_get_dtype_len, error, jack, read_scal
 
 
 def _create_fig(N):
@@ -17,10 +16,7 @@ def _create_fig(N):
         fig, axes0 = plt.subplots(1, 1, constrained_layout=True)
         return fig, [axes0]
     ncols = math.ceil(math.sqrt(N))
-    if ncols**2 - ncols >= N:
-        nrows = ncols-1
-    else:
-        nrows = ncols
+    nrows = ncols-1 if ncols**2 - ncols >= N else ncols
 
     fig, axes0 = plt.subplots(
         nrows, ncols,
@@ -79,16 +75,10 @@ def _replot(ax, obs_name, bins, N_skip, nmax=None):
     except IndexError:
         N_obs = 1
     for i in range(N_obs):
-        if N_obs == 1:
-            bins2 = bins1.reshape((len(x1),))
-        else:
-            bins2 = bins1[:, i]
+        bins2 = bins1.reshape((len(x1),)) if N_obs == 1 else bins1[:, i]
 
         p = ax.plot(range(1, N_bins+1), bins)
-        if N_obs == 1:
-            color = None
-        else:
-            color = p[0].get_color()
+        color = None if N_obs == 1 else p[0].get_color()
         ax.plot(x1, bins2, '.', c=color)
 
         m = np.mean(bins2)
