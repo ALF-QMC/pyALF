@@ -188,25 +188,17 @@ def analysis(directory,
     for obs_name in list_hist:
         print(obs_name)
         try:
-            sign, above, below, dat, upper, lower = ana_hist(directory, obs_name)
+            hist = ana_hist(directory, obs_name)
         except TooFewBinsError:
             print("Too few bins, skipping.")
             continue
-
-        hist = {}
-        hist['dat'] = dat
-        hist['sign'] = sign
-        hist['above'] = above
-        hist['below'] = below
-        hist['upper'] = upper
-        hist['lower'] = lower
         dic[obs_name] = hist
 
         np.savetxt(
             os.path.join(directory, 'res', obs_name),
-            dat,
+            hist['dat'],
             header='Sign: {} {}, above {} {}, below {} {}'.format(
-                *sign, *above, *below)
+                *hist['sign'], *hist['above'], *hist['below'])
         )
 
     print("Equal time observables:")

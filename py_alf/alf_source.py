@@ -48,11 +48,10 @@ class ALF_source:
 
     def __init__(self, alf_dir=None, branch=None,
                  url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
-        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
-        self.branch = branch
-
         if alf_dir is None:
             alf_dir = os.getenv('ALF_DIR', './ALF')
+        self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))
+        self.branch = branch
 
         if not os.path.exists(self.alf_dir):
             print(f"Repository {alf_dir} does not exist, cloning from {url}")

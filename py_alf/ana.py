@@ -17,6 +17,33 @@ from .exceptions import TooFewBinsError
 from .lattice import Lattice
 
 
+<<<<<<< Updated upstream
+=======
+class AnalysisResults:
+    """
+    Storage for analysis restults of an observable.
+
+    Parameters
+    ----------
+    obs_name : str
+        Observable name
+    results_dict : dict
+        Dictionary containing the data
+    """
+    def __init__(self, obs_name, sign, sign_err, results_dict):
+        self.name = obs_name
+        self.sign = sign
+        self.sign_err = sign_err
+        self.results_dict = results_dict
+
+    def write_to_hdf5(self, filename):
+        with h5py.File(filename, "a") as f:
+            grp = f.create_group(self.name)
+            for name, val in self.results_dict.items():
+                grp.create_dataset(name, data=val)
+
+
+>>>>>>> Stashed changes
 def symmetrize(latt, syms, dat):
     """Symmetrize a dataset.
 
@@ -599,7 +626,20 @@ def ana_scal(directory, obs_name):
         J = J_obs[:, n] / J_sign
         dat[n, :] = error(J)
 
+<<<<<<< Updated upstream
     return sign, dat
+=======
+    results = AnalysisResults(
+        obs_name,
+        sign[0],
+        sign[1],
+        {
+            'val': dat[:, 0],
+            'err': dat[:, 1],
+        }
+    )
+    return results
+>>>>>>> Stashed changes
 
 
 def ana_hist(directory, obs_name):
@@ -620,7 +660,15 @@ def ana_hist(directory, obs_name):
         J = J_obs[:, n] / J_sign
         dat[n, :] = [lower+d_class*(0.5+n), *error(J)]
 
-    return sign, above, below, dat, upper, lower
+    hist = {}
+    hist['dat'] = dat
+    hist['sign'] = sign
+    hist['above'] = above
+    hist['below'] = below
+    hist['upper'] = upper
+    hist['lower'] = lower
+
+    return hist
 
 
 def ana_eq(directory, obs_name, sym=None):
