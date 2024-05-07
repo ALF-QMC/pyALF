@@ -64,13 +64,19 @@ class Parameters:
     """
 
     def __init__(self, directory, obs_name=None):
-        self.directory = directory
+        self.directory = os.path.abspath(directory)
         self.filename = os.path.join(directory, 'parameters')
         self._nml = f90nml.read(self.filename)
         if obs_name is None:
             self.obs_name = 'var_errors'
         else:
             self.obs_name = obs_name.lower()
+
+    def __repr__(self):
+        class_name = type(self).__name__
+        return f"{class_name}( \
+                 directory={self.directory!r}, \
+                 obs_name={self.obs_name!r})"
 
     def write_nml(self):
         """Write namelist to file. Preseves comments."""

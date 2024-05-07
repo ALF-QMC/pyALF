@@ -43,11 +43,13 @@ class Lattice:
             self.L2 = np.array(args[0]["L2"], dtype=float)
             self.a1 = np.array(args[0]["a1"], dtype=float)
             self.a2 = np.array(args[0]["a2"], dtype=float)
-        else:
+        elif len(args) == 4:
             self.L1 = np.array(args[0], dtype=float)
             self.L2 = np.array(args[1], dtype=float)
             self.a1 = np.array(args[2], dtype=float)
             self.a2 = np.array(args[3], dtype=float)
+        else:
+            raise TypeError(f'Wrong number of arguments {len(args)}')
 
         s = f'L1={self.L1}L2={self.L2}a1={self.a1}a2={self.a2}'
         if s in _cache:
@@ -93,6 +95,11 @@ class Lattice:
                 self.listr, self.invlistr, self.nnlistr,
                 self.listk, self.invlistk, self.nnlistk,
                 self.imj, self.r, self.k)
+
+    def __repr__(self):
+        class_name = type(self).__name__
+        params = {'L1': self.L1, 'L2': self.L2, 'a1': self.a1, 'a2': self.a2}
+        return f"{class_name}({params!r})"
 
     def periodic_boundary_k(self, k):
         """Apply periodic boundary conditions on vector in k space."""
