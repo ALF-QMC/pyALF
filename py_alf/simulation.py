@@ -635,6 +635,8 @@ def _read_eqJ(name):
         x_name = 'k'
     elif name.endswith('R'):
         x_name = 'r'
+    else:
+        raise RuntimeError("name has to end in 'K' or 'R'")
 
     N_lines = len(lines)
     N_orb = None
