@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from .exceptions import TooFewBinsError
-from .lattice import Lattice
+from .lattice import Lattice, UnitCell
 
 
 def symmetrize(latt, syms, dat):
@@ -392,6 +392,7 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
         filename = os.path.join(directory, 'data.h5')
         with h5py.File(filename, "r") as f:       # pylint: disable=no-member
             latt = Lattice(f[obs_name]["lattice"].attrs)
+            latt.unit_cell = UnitCell(f[obs_name]["lattice"])
 
             obs = f[obs_name + "/obser"]
             # Indices: bins, no1, no, nt, n, re/im
@@ -430,8 +431,6 @@ def read_latt(directory, obs_name, bare_bins=False, substract_back=True):
             raise RuntimeError(
                 f'Error in read_latt_plaintxt: File "{filename}" '
                 'lines number does not fit.')
-
-        latt = Lattice(L1_p, L2_p, a1_p, a2_p)
 
         obs_c = np.empty((N_bins, N_orb, N_orb, N_tau, N_unit), dtype=complex)
         back_c = np.empty((N_bins, N_orb), dtype=complex)

@@ -2,6 +2,7 @@
 """Example script showing the minimal steps for creating and running an ALF
 simulation in pyALF.
 """
+# pylint: disable=invalid-name
 
 __author__ = "Jonas Schwab"
 __copyright__ = "Copyright 2022, The ALF Project"

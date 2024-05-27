@@ -13,6 +13,42 @@ _cache = {}
 _use_fortran_init = True
 
 
+class UnitCell:
+    """Lattice unit cell.
+
+    Parameters
+    ----------
+    latt_grp : h5py.Group
+        HDF5 group containing the lattice information.
+    """
+    # pylint: disable=too-few-public-methods
+    def __init__(self, latt_grp):
+        self.N_coord = latt_grp.attrs["N_coord"]
+        self.Ndim = len(latt_grp.attrs["Orbital1"])
+        orbital_positions = []
+        i = 0
+        while True:
+            i += 1
+            try:
+                orbital_positions.append(latt_grp.attrs[f"Orbital{i}"])
+            except KeyError:
+                break
+        self.orbital_positions = np.array(orbital_positions)
+        self.Norb = len(self.orbital_positions)
+
+        if self.Norb != latt_grp.attrs["Norb"]:
+            if self.Norb != latt_grp.attrs['N_coord']:
+                raise RuntimeError("Non-recoverable mixup with Norb/N_coord")
+            print("Fixing mixup between Norb and N_coord")
+            print(f"Wrong values Norb={latt_grp.attrs['Norb']}, "
+                  f"N_coord={latt_grp.attrs['N_coord']}")
+            print(f"Correct values Norb={latt_grp.attrs['N_coord']}, "
+                  f"N_coord={latt_grp.attrs['Norb']}")
+            self.N_coord = latt_grp.attrs["Norb"]
+            # latt_grp.attrs["N_coord"] = latt_grp.attrs["Norb"]
+            # latt_grp.attrs["Norb"] = self.Norb
+
+
 class Lattice:
     """Finite size Bravais lattice object.
 

@@ -55,7 +55,6 @@ def _get_arg_parser():
 def _main():
     parser = _get_arg_parser()
     args = parser.parse_args()
-    mpiexec_args = args.mpiexec_args.split()
 
     alf_dir = os.path.abspath(args.alfdir)
 
@@ -81,7 +80,7 @@ def _main():
         sim = Simulation(
             alf_src, ham_name, sim_dict,
             machine=args.machine, mpi=args.mpi, n_mpi=args.n_mpi,
-            mpiexec=args.mpiexec, mpiexec_args=mpiexec_args
+            mpiexec=args.mpiexec, mpiexec_args=args.mpiexec_args.split()
             )
         sim.compile()
         sim.run()
