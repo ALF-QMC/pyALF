@@ -21,6 +21,7 @@ class UnitCell:
     latt_grp : h5py.Group
         HDF5 group containing the lattice information.
     """
+    # pylint: disable=too-few-public-methods
     def __init__(self, latt_grp):
         self.N_coord = latt_grp.attrs["N_coord"]
         self.Ndim = len(latt_grp.attrs["Orbital1"])

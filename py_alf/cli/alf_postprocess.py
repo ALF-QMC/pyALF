@@ -107,7 +107,6 @@ def _main():
         check_rebin_tk(directories, args.check_list, custom_obs=custom_obs)
 
     if args.do_analysis:
-        # TODO: Add MPI support
         for directory in directories:
             analysis(directory, custom_obs=custom_obs, symmetry=symmetry,
                      do_tau=not args.no_tau, always=args.always)
