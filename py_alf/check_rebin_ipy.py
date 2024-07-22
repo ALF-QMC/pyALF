@@ -63,7 +63,7 @@ class CheckRebinIpy:
         self.nrebin.min = 1
         self.names = names
         if custom_obs is None:
-            custom_obs = {}
+            self.custom_obs = {}
         else:
             self.custom_obs = custom_obs
         self.Nmax0 = Nmax0
@@ -103,4 +103,4 @@ class CheckRebinIpy:
             self.par.set_N_rebin(self.nrebin.value)
             self.par.write_nml()
             for vert in self.verts:
-                vert.set_xdata(self.nrebin.value)
+                vert.set_xdata([self.nrebin.value])

@@ -58,7 +58,7 @@ class CheckWarmupIpy:  # pylint: disable=too-few-public-methods
                         int_names=('N_max:', 'N_skip:'))
         self.names = names
         if custom_obs is None:
-            custom_obs = {}
+            self.custom_obs = {}
         else:
             self.custom_obs = custom_obs
         self.ncols = ncols

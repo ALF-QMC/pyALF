@@ -32,7 +32,7 @@ class check_warmup_tk:  # pylint: disable=too-few-public-methods
         self.directories = directories
         self.names = names
         if custom_obs is None:
-            custom_obs = {}
+            self.custom_obs = {}
         else:
             self.custom_obs = custom_obs
         self.root = tk.Tk()
