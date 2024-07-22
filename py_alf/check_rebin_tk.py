@@ -34,7 +34,7 @@ class check_rebin_tk:
         self.names = names
         self.Nmax0 = Nmax0
         if custom_obs is None:
-            custom_obs = {}
+            self.custom_obs = {}
         else:
             self.custom_obs = custom_obs
         self.root = tk.Tk()
@@ -86,7 +86,7 @@ class check_rebin_tk:
         self.par.set_N_rebin(N_rebin)
         self.par.write_nml()
         for vert in self.verts:
-            vert.set_xdata(self.par.N_rebin())
+            vert.set_xdata([self.par.N_rebin()])
         self.canvas.draw()
 
     def _quit(self):
