@@ -168,15 +168,15 @@ def jack(X, par, N_skip=None, N_rebin=None):
     return Y
 
 
-def error(jacks, imag=False):
+def error(jacks, only_real=False):
     """Calculate expectation values and errors of given jackknife bins.
 
     Parameters
     ----------
     jacks : array-like object
         Jackknife bins.
-    imag : bool, default=False
-        Output with imaginary part.
+    only_real : bool, default=False
+        Omit imaginary part.
 
     Returns
     -------
@@ -187,11 +187,11 @@ def error(jacks, imag=False):
     N = len(jacks)
     m_r = np.mean(jacks.real, axis=0)
     e_r = np.sqrt(np.var(jacks.real, axis=0) * N)
-    if imag:
-        m_i = np.mean(jacks.imag, axis=0)
-        e_i = np.sqrt(np.var(jacks.imag, axis=0) * N)
-        return m_r, e_r, m_i, e_i
-    return m_r, e_r
+    if only_real:
+        return m_r, e_r
+    m_i = np.mean(jacks.imag, axis=0)
+    e_i = np.sqrt(np.var(jacks.imag, axis=0) * N)
+    return m_r + 1j*m_i, e_r + 1j*e_i
 
 
 def read_scal(directory, obs_name, bare_bins=False):
@@ -711,8 +711,8 @@ def write_res_eq(directory, obs_name,
     for no in range(N_orb):
         for no1 in range(N_orb):
             header = header + [str((no, no1))]
-            out = np.column_stack([out, m_k[no1, no], e_k[no1, no]])
-    out = np.column_stack([out, m_k_sum, e_k_sum])
+            out = np.column_stack([out, m_k[no1, no].real, e_k[no1, no].real])
+    out = np.column_stack([out, m_k_sum.real, e_k_sum.real])
     header = header + ['trace over n_orb']
 
     np.savetxt(
@@ -726,7 +726,7 @@ def write_res_eq(directory, obs_name,
     out = latt.k
     fmt = '\t'.join(['%8.5f %8.5f'] + ['% 13.10e % 13.10e']*(1))
     fmth = '\t'.join(['{:^8s} {:^8s}'] + [' {:^33s}']*(1))
-    out = np.column_stack([out, m_k_sum, e_k_sum])
+    out = np.column_stack([out, m_k_sum.real, e_k_sum.real])
     header = header + ['trace over n_orb']
     np.savetxt(
         os.path.join(directory, 'res', obs_name + '_K_sum'),
@@ -742,8 +742,8 @@ def write_res_eq(directory, obs_name,
     for no in range(N_orb):
         for no1 in range(N_orb):
             header = header + [str((no, no1))]
-            out = np.column_stack([out, m_r[no1, no], e_r[no1, no]])
-    out = np.column_stack([out, m_r_sum, e_r_sum])
+            out = np.column_stack([out, m_r[no1, no].real, e_r[no1, no].real])
+    out = np.column_stack([out, m_r_sum.real, e_r_sum.real])
     header = header + ['trace over n_orb']
 
     np.savetxt(
@@ -757,7 +757,7 @@ def write_res_eq(directory, obs_name,
     out = latt.r
     fmt = '\t'.join(['%9.5f %9.5f'] + ['% 13.10e % 13.10e']*(1))
     fmth = '\t'.join(['{:^8s} {:^8s}'] + [' {:^33s}']*(1))
-    out = np.column_stack([out, m_r_sum, e_r_sum])
+    out = np.column_stack([out, m_r_sum.real, e_r_sum.real])
     header = header + ['trace over n_orb']
     np.savetxt(
         os.path.join(directory, 'res', obs_name + '_R_sum'),
@@ -779,13 +779,13 @@ def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
             os.makedirs(directory2)
 
         np.savetxt(os.path.join(directory2, 'dat'),
-                   np.column_stack([taus, m_k[:, n], e_k[:, n]]),
+                   np.column_stack([taus, m_k[:, n].real, e_k[:, n].real]),
                    fmt=['%14.7f', '%16.8f', '%16.8f']
                    )
 
     n = latt.invlistr[0, 0]
     np.savetxt(os.path.join(directory, 'res', obs_name, 'R0'),
-               np.column_stack([taus, m_r[:, n], e_r[:, n]]),
+               np.column_stack([taus, m_r[:, n].real, e_r[:, n].real]),
                fmt=['%14.7f', '%16.8f', '%16.8f']
                )
 
