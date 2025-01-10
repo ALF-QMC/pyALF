@@ -74,3 +74,6 @@ select = [
     # isort
     "I",
 ]
+ignore = [
+  "E501"  # Line too long
+]
