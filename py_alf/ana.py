@@ -21,7 +21,7 @@ from .lattice import Lattice, UnitCell
 
 class AnalysisResults:
     """
-    Storage for analysis restults of an observable.
+    Storage for analysis results of an observable.
 
     Parameters
     ----------
