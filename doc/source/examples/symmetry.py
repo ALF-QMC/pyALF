@@ -1,5 +1,8 @@
 """File that defines lattice symmetry for analysis."""
 
+import numpy as np
+
+
 # Define list of transformations (Lattice, i) -> new_i
 # Default analysis will average over all listed elements
 def sym_c4_0(latt, i): return i

@@ -10,10 +10,11 @@ outfile = sys.argv[2]
 def replace_lines(orig_lines, search_str, insert_lines, N_lines_before=0, N_lines_after=0):
     for i, line in enumerate(orig_lines):
         if search_str in line:
+            i_line = i
             break
-    return orig_lines[:i-N_lines_before] + [insert_lines] + orig_lines[i+1+N_lines_after:]
+    return orig_lines[:i_line-N_lines_before] + [insert_lines] + orig_lines[i_line+1+N_lines_after:]
 
-with open(infile, 'r', encoding="UTF-8") as f:
+with open(infile, encoding="UTF-8") as f:
     lines = f.readlines()
 
 # Protect hyperliks, such that they work (within captions?)

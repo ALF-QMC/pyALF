@@ -90,10 +90,10 @@ custom_obs['R_AFM']= {
 def obs_k(obs, back, sign, N_orb, N_tau, dtau, latt,
           ks=[(0., 0.)], mat=None):
     """Mean of correlation function at one, or multiple k-points.
-    
+
     Calculates integral over tau (=susceptibility) if time-displaced
     correlation is supplied.
-    
+
     Parameters
     ----------
     obs : array of shape (N_orb, N_orb, N_tau, latt.N)
@@ -119,7 +119,7 @@ def obs_k(obs, back, sign, N_orb, N_tau, dtau, latt,
     out = 0
     for k in ks:
         n = latt.k_to_n(k)
-        
+
         if N_tau == 1:
             out += (obs[:, :, 0, n] * mat).sum()
         else:
