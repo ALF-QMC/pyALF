@@ -1,0 +1,125 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: pyALF Documentation
+author: Jonas Schwab
+copyright: "2022-2023"
+logo: "images/pyalf_logo2.png"
+# Patterns to skip when building the book. Can be glob-style (e.g. "*skip.ipynb")
+exclude_patterns            : [_build, Thumbs.db, .DS_Store, "**.ipynb_checkpoints"]
+# Auto-exclude files not in the toc
+only_build_toc_files        : true
+
+#######################################################################################
+# Execution settings
+execute:
+  execute_notebooks         : 'off'  # Whether to execute notebooks at build time. Must be one of ("auto", "force", "cache", "off")
+  cache                     : ""    # A path to the jupyter cache that will be used to store execution artifacts. Defaults to `_build/.jupyter_cache/`
+  exclude_patterns          :       # A list of patterns to *skip* in execution (e.g. a notebook that takes a really long time)
+    - 'Nematic_Dirac'
+  timeout                   : 600   # The maximum time (in seconds) each notebook cell is allowed to run.
+  run_in_temp               : false # If `True`, then a temporary directory will be created and used as the command working directory (cwd),
+                                    # otherwise the notebook's parent directory will be the cwd.
+  allow_errors              : false # If `False`, when a code cell raises an error the execution is stopped, otherwise all cells are always run.
+  stderr_output             : remove  # One of 'show', 'remove', 'remove-warn', 'warn', 'error', 'severe'
+
+
+# Define the name of the latex output file for PDF builds
+latex:
+  # latex_engine: xelatex  # one of 'pdflatex', 'xelatex' (recommended for unicode), 'luatex', 'platex', 'uplatex'
+  latex_documents:
+    targetname: doc.tex
+
+# Add a bibtex file so that we can create citations
+bibtex_bibfiles:
+  - bibfile.bib
+
+# Information about where the book exists on the web
+# repository:
+  # url: https://github.com/executablebooks/jupyter-book  # Online location of your book
+  # path_to_book: docs  # Optional path to your book, relative to the repository root
+  # branch: master  # Which branch of the repository should be used when creating links (optional)
+
+# Add GitHub buttons to your book
+# See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+html:
+  favicon: "images/pyalf_favicon.png"
+  use_edit_page_button      : false  # Whether to add an "edit this page" button to pages. If `true`, repository information in repository: must be filled in
+  use_repository_button     : false  # Whether to add a link to your repository button
+  use_issues_button         : false  # Whether to add an "open an issue" button
+  use_multitoc_numbering    : true   # Continuous numbering across parts/chapters
+  # extra_footer              : ""  # Will be displayed underneath the footer.
+  # google_analytics_id       : ""  # A GA id that can be used to track book views.
+  home_page_in_navbar       : true  # Whether to include your home page in the left Navigation Bar
+  # baseurl                   : ""  # The base URL where your book will be hosted. Used for creating image previews and social links. e.g.: https://mypage.com/mybook/
+  # comments:
+  #   hypothesis              : false
+  #   utterances              : false
+
+parse:
+  myst_enable_extensions:
+    # default extensions:
+    - colon_fence
+    - dollarmath
+    - linkify
+    - substitution
+    - tasklist
+    # enable \begin{align} etc.
+    - amsmath
+
+sphinx:
+  extra_extensions:
+   - sphinx.ext.autodoc
+   - sphinx.ext.intersphinx
+   - numpydoc
+   # https://sphinx-argparse.readthedocs.io
+   - sphinxarg.ext
+   # https://github.com/missinglinkelectronics/sphinxcontrib-svg2pdfconverter
+   - sphinxcontrib.inkscapeconverter
+  config:
+    templates_path:
+      - "_templates"
+    html_sidebars:
+      "**": 
+        - "navbar-logo.html"
+        - "sidebar_pdf_commit.html"
+        - "search-field.html"
+        - "sbt-sidebar-nav.html"
+    html_static_path:
+      - "images/Download-PDF.svg"
+    html_theme_options:
+      home_page_in_toc: true
+    intersphinx_mapping:
+      python:
+        - https://docs.python.org/3
+        - null
+      pandas:
+        - https://pandas.pydata.org/pandas-docs/stable/
+        - null
+    mathjax3_config:
+      tex:
+        macros:
+          "ve"   : ["\\boldsymbol{#1}",1]
+          "mc"   : ["\\mathcal{#1}",1]
+          "dag"  : ["\\dagger"]
+          "du"   : ["\\mathrm{d}"]
+          "nicefrac" : ["\\raise.5ex\\hbox{#1}\\kern-.1em/\\kern-.15em\\lower.25ex\\hbox{#2}", 2]
+    numpydoc_show_class_members: false
+    latex_domain_indices: false
+    # latex_show_urls: "footnote"
+    latex_additional_files:
+      - source/usage/warmup_widget.png
+      - source/usage/rebin_widget.png
+      - source/front.tex
+    latex_elements:
+      papersize: 'a4paper'
+      babel: "\\usepackage[english]{babel}"
+      preamble: |
+        \usepackage{braket}
+        \usepackage{nicefrac}
+        \usepackage{unicode-math}
+        \newcommand{\mc}[1]{\mathcal{#1}}
+        \newcommand{\ve}[1]{\mathbfit{#1}}
+        \newcommand{\du}{\mathrm{d}}
+        %\renewcommand\thesection{\arabic{section}}
+      maketitle: "\\input{front.tex}"

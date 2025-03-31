@@ -5,3 +5,9 @@ ALF_data
 docs/_build
 dist/
 pyALF.egg-info/
+_build
+KondoBilayerSquareL16
+doc/git_commit.tex
+doc/_templates/sidebar_pdf_commit.html
+public
+

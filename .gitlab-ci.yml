@@ -50,6 +50,18 @@ default:
     - pip install ruff
     - ruff check
 
+build_doc:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-doc/jupyter
+  tags:
+    - k8s
+  script:
+    - pip install .
+    - (cd doc && make)
+    - mkdir public
+    - mv doc/_build/html/* public
+  artifacts:
+    paths:
+      - public
 
 check_docstrings:
   stage: test

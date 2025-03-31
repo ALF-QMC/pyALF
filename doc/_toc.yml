@@ -1,0 +1,34 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: source/front.md
+defaults:
+  maxdepth: 6
+options:
+  numbered: true
+
+chapters:
+- file: source/installation
+- file: source/usage/usage
+  sections:
+  - file: source/usage/minimal_example
+  - file: source/usage/compiling_running
+  - file: source/usage/postprocessing
+    sections:
+    - file: source/usage/postprocessing_basic_analysis
+    - file: source/usage/postprocessing_custom_obs
+    - file: source/usage/postprocessing_check_warmup
+    - file: source/usage/postprocessing_symmetrization
+  - file: source/usage/cli
+- file: source/reference/reference
+  sections:
+  - file: source/reference/alf_source
+  - file: source/reference/simulation
+  - file: source/reference/ana_high
+  - file: source/reference/lattice
+  - file: source/reference/ana
+  - file: source/reference/utils
+  - file: source/reference/cli
+- file: source/acknowledgments
+- file: source/bibliography
