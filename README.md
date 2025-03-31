@@ -15,7 +15,7 @@ It introduces:
 * Jupyter notebooks in the folder `Notebooks`, serving as an easy introduction to QMC and ALF
 * Python Scripts in the folder `Scripts` that can be run to reproduce benchmark results for established models
 
-The **documentation** can be found [here](http://gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu).
+The **documentation** can be found [here](https://gitpages.physik.uni-wuerzburg.de/ALF/pyALF).
 
 ## Installation
 
@@ -76,7 +76,7 @@ which opens the "notebook dashboard" in your default browser, from where one can
 
 ### Command line interface
 
-pyALF also delivers a set of command line scripts, to be use from a UNIX shell. For a full list of command line scripts see [here](gitpages.physik.uni-wuerzburg.de/Jonas_schwab/pyalf-docu/source/reference/cli.html).
+pyALF also delivers a set of command line scripts, to be use from a UNIX shell. For a full list of command line scripts see [here](https://gitpages.physik.uni-wuerzburg.de/ALF/pyALF/source/reference/cli.html).
 
 Try, e.g.
 
