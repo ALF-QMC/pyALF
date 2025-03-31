@@ -59,6 +59,8 @@ pages:
   tags:
     - k8s
   script:
+    - git config --global --add safe.directory $PWD
+    - git checkout $CI_COMMIT_BRANCH
     - pip install .
     - (cd doc && make)
     - mkdir public
