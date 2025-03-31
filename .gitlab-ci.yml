@@ -61,7 +61,7 @@ pages:
   script:
     - git config --global --add safe.directory $PWD
     - git checkout $CI_COMMIT_BRANCH
-    - pip install .
+    - pip install --editable .
     - (cd doc && make)
     - mkdir public
     - mv doc/_build/html/* public
