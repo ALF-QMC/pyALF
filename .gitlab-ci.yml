@@ -65,6 +65,7 @@ testci:
     - (cd doc && make)
     - mkdir public
     - mv doc/_build/html/* public
+    - git status
   artifacts:
     paths:
       - public
