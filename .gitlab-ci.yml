@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - build_doc
 
 variables:
   BRANCH_R: "master"
@@ -20,7 +21,7 @@ default:
   script:
     - pip install pylint ruff pytest
     - pylint -E py_alf/
-    - ruff check
+    - ruff check --exclude doc
     - pip install .
     - pytest
     - alf_run --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
@@ -48,8 +49,23 @@ default:
       - .gitlab-ci.yml
   script:
     - pip install ruff
-    - ruff check
+    - ruff check --exclude doc
 
+pages:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-doc/jupyter
+  stage: build_doc
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+  tags:
+    - k8s
+  script:
+    - pip install .
+    - (cd doc && make)
+    - mkdir public
+    - mv doc/_build/html/* public
+  artifacts:
+    paths:
+      - public
 
 check_docstrings:
   stage: test
@@ -99,12 +115,6 @@ Test_PGI:
 
 Test_Intel21:
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye-intel
-  variables:
-    MACHINE: "INTEL"
-  <<: *test_definition
-
-Test_IntelLatest:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bookworm-intel
   variables:
     MACHINE: "INTEL"
   <<: *test_definition
