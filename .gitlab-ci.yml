@@ -1,4 +1,5 @@
 stages:
+  - testci
   - test
   - build
   - build_doc
@@ -50,6 +51,25 @@ default:
   script:
     - pip install ruff
     - ruff check --exclude doc
+
+testci:
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-doc/jupyter
+  stage: testci
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+  tags:
+    - k8s
+  script:
+    - git config --global --add safe.directory $PWD
+    - git checkout $CI_COMMIT_BRANCH
+    - pip install --editable .
+    - git status
+    - (cd doc && make)
+    - mkdir public
+    - mv doc/_build/html/* public
+  artifacts:
+    paths:
+      - public
 
 pages:
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-doc/jupyter
