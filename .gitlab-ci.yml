@@ -55,8 +55,6 @@ default:
 testci:
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-doc/jupyter
   stage: testci
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
   tags:
     - k8s
   script:
