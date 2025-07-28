@@ -50,7 +50,7 @@ class UnitCell:
 
 
 class Lattice:
-    """Finite size Bravais lattice object.
+    """Finite size Bravais lattice object, mirroring ALF's Lattice type.
 
     Parameters
     ----------
@@ -60,15 +60,43 @@ class Lattice:
 
         if tuple or list: [L1, L2, a1, a2].
 
-        L1, L2: 2d vector defining periodic boundary conditions.
+        L1, L2: 2d vectors defining periodic boundary conditions.
 
         a1, a2: 2d primitive vectors.
 
     force_python_init : bool, default=False
         Force the usage of Python version of the initialization.
-        Default behaviour is to first try compiled Fortran and fall back to
+        Default behavior is to first try compiled Fortran and fall back to
         Python if that fails.
 
+    Attributes
+    ----------
+    L1, L2 : arrays of floats
+        2d vectors defining periodic boundary conditions in real space.
+    a1, a2 : arrays of floats
+        2d primitive vectors in real space.
+    BZ1, BZ2 : arrays of floats
+        2d vectors defining periodic boundary conditions in k space.
+    b1, b2 : arrays of floats
+        2d primitive vectors in k space.
+    N : int
+        Number of unit cells
+    r : array of floats, shape=(N, 2)
+        Real-space coordinates.
+    k : array of floats, shape=(N, 2)
+        K-space coordinates.
+    b1_perp : array, shape=(2,)
+    b2_perp : array, shape=(2,)
+    L : int
+    listr : array of ints, shape=(N, 2)
+        `r[i] = listr[i, 0]*a1 + listr[i, 1]*a2`
+    listk : array of ints, shape=(N, 2)
+        `k[i] = listk[i, 0]*a1 + listk[i, 1]*b2`
+    invlistr : array of ints, shape=(2*L+1, 2*L+1)
+    invlistk : array of ints, shape=(2*L+1, 2*L+1)
+    nnlistr : array of ints, shape=(N, 3, 3)
+    nnlistk : array of ints, shape=(N, 3, 3)
+    imj : array of ints, shape=(N, N)
     """
 
     # pylint: disable=too-many-instance-attributes
