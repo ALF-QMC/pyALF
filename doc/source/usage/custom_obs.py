@@ -57,6 +57,7 @@ def R_k(obs, back, sign, N_orb, N_tau, dtau, latt,
         Orbital structure of the order parameter. Default: Trace over orbitals.
     NNs : list of tuples, default=[(1, 0), (0, 1), (-1, 0), (0, -1)]
         Deltas in terms of primitive k-vectors of the Bravais lattice.
+
     """
     if mat is None:
         mat = np.identity(N_orb)
@@ -113,6 +114,7 @@ def obs_k(obs, back, sign, N_orb, N_tau, dtau, latt,
     ks : list of k-points, default=[(0., 0.)]
     mat : array of shape (N_orb, N_orb), default=None
         Orbital structure. Default: Trace over orbitals.
+
     """
     if mat is None:
         mat = np.identity(N_orb)

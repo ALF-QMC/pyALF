@@ -1,5 +1,4 @@
-"""Provides interfaces for compiling, running and postprocessing ALF in Python.
-"""
+"""Provides interfaces for compiling, running and postprocessing ALF in Python."""
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
 
@@ -608,7 +607,7 @@ def get_obs(sim_dir, names=None):
 
 def _read_scalJ(name):
     """Return dictionary with Fortran analysis
-    results from scalar observable. (legacy)
+    results from scalar observable (legacy).
     """
     with open(name, encoding='UTF-8') as f:
         lines = f.readlines()
@@ -626,7 +625,7 @@ def _read_scalJ(name):
 
 def _read_eqJ(name):
     """Return dictionary with Fortran analysis results from equal time
-    correlation function. (legacy)
+    correlation function (legacy).
     """
     with open(name, encoding='UTF-8') as f:
         lines = f.readlines()

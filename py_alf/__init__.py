@@ -1,5 +1,4 @@
-"""pyALF, a Python package for the Algorithms for Lattice Fermions (ALF).
-"""
+"""pyALF, a Python package for the Algorithms for Lattice Fermions (ALF)."""
 # pylint: disable=inconsistent-return-statements
 # pylint: disable=import-outside-toplevel
 

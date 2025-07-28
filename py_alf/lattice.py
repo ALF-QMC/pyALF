@@ -20,7 +20,9 @@ class UnitCell:
     ----------
     latt_grp : h5py.Group
         HDF5 group containing the lattice information.
+
     """
+
     # pylint: disable=too-few-public-methods
     def __init__(self, latt_grp):
         self.N_coord = latt_grp.attrs["N_coord"]
@@ -97,6 +99,7 @@ class Lattice:
     nnlistr : array of ints, shape=(N, 3, 3)
     nnlistk : array of ints, shape=(N, 3, 3)
     imj : array of ints, shape=(N, N)
+
     """
 
     # pylint: disable=too-many-instance-attributes
