@@ -1,4 +1,5 @@
-[![Unitary Fund](https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=for-the-badge)](http://unitary.fund)
+[![Documentation](https://img.shields.io/badge/-Documentation-blue)](https://gitpages.physik.uni-wuerzburg.de/ALF/pyALF)
+[<img src="https://img.shields.io/badge/Supported%20By-UNITARY%20FUND-brightgreen.svg?style=for-the-badge" alt="drawing" width="170"/>](https://unitary.fund)
 
 ## pyALF
 
@@ -11,9 +12,12 @@ A Python package building on top of [ALF](https://git.physik.uni-wuerzburg.de/AL
 It introduces:
 
 * The Python module `py_alf`, exposing all the package's utility to Python.
-* A set of command line tools in the folder `py_alf/cli`, that make it easy to leverage pyALF from a Unix shell.
-* Jupyter notebooks in the folder `Notebooks`, serving as an easy introduction to QMC and ALF
-* Python Scripts in the folder `Scripts` that can be run to reproduce benchmark results for established models
+* A set of command line tools in the folder, that make it easy to leverage pyALF from a Unix shell.
+  They are automatically exposed to the shell when pyALF is installed via pip.
+  Their source code can be found in [py_alf/cli](py_alf/cli) and documentation
+  [here](https://gitpages.physik.uni-wuerzburg.de/ALF/pyALF/source/reference/cli.html).
+* Jupyter notebooks in the folder [Notebooks](Notebooks), serving as an easy introduction to QMC and ALF.
+* Python Scripts in the folder [Scripts](Scripts) that can be run to reproduce benchmark results for established models.
 
 The **documentation** can be found [here](https://gitpages.physik.uni-wuerzburg.de/ALF/pyALF).
 
@@ -30,6 +34,10 @@ pyALF can be installed via the Python package installer [pip](https://pip.pypa.i
 ```bash
 pip install pyALF
 ```
+
+For running ALF, you will additionaly need the [ALF prerequsites](https://git.physik.uni-wuerzburg.de/ALF/ALF#prerequisites).
+
+Alternatively, one could use [this Docker image](https://hub.docker.com/r/alfcollaboration/jupyter-pyalf-full), which has ALF, pyALF and a Jupyter server pre-installed.
 
 ### Development installation
 
@@ -63,16 +71,16 @@ There are multiple ways to use pyALF, which roughly breaks down into three appro
 A convenient way to use pyALF is through Jupyter notebooks. They [are run](https://jupyter.readthedocs.io/en/latest/running.html) through a Jupyter server started, e.g., from the command line:
 
 ```bash
-jupyter-notebook
+jupyter-lab
 ```
 
 or
 
 ```bash
-jupyter-lab
+jupyter-notebook
 ```
 
-which opens the "notebook dashboard" in your default browser, from where one can open the sample notebooks in `Notebooks/` and create new notebooks.
+which opens the "notebook dashboard" in your default browser, from where one can open the sample notebooks in [Notebooks/](Notebooks) and create new notebooks.
 
 ### Command line interface
 
@@ -84,7 +92,7 @@ Try, e.g.
 alf_run -h
 ```
 
-The source code for the scripts can be found in the folder `/py_alf/cli/`.
+The source code for the scripts can be found in the folder [py_alf/cli/](py_alf/cli).
 
 
 ### Use module `py_alf` in custom scripts
