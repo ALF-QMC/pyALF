@@ -9,7 +9,7 @@ variables:
 default:
   tags: [k8s]
   
-.test_template: &test_definition
+.test_template:
   stage: test
   rules:
     - if: '$BRANCH_T'
@@ -26,7 +26,18 @@ default:
     - pytest
     - alf_run --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
-.pylint_template: &pylint_definition
+
+.exec_notebook_template:
+  stage: test
+  rules:
+    - if: '$BRANCH_T'
+      when: never
+  script:
+    - pip install .
+    - cd Notebooks/
+    - jupyter-nbconvert --execute --inplace $NOTEBOOK
+
+.pylint_template:
   stage: test
   allow_failure: true
   rules:
@@ -39,7 +50,7 @@ default:
     - pip install pylint
     - pylint py_alf/
 
-.ruff_template: &ruff_definition
+.ruff_template:
   stage: test
   rules:
     - if: '$BRANCH_T'
@@ -96,42 +107,40 @@ build:
     - python -m build
     - python -m twine upload dist/*
 
+test:
+  extends: .test_template
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  parallel:
+    matrix:
+      - MACHINE: GNU
+        IMAGE_MINOR: [bullseye, bookworm]
+      - MACHINE: PGI
+        IMAGE_MINOR: bullseye-pgi-21-03
+      - MACHINE: INTEL
+        IMAGE_MINOR: [bullseye-intel, bookworm-intel-2024.2]
+      - MACHINE: INTELLLVM
+        IMAGE_MINOR: bookworm-intel
 
-Test_Bullseye:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
-  variables:
-    MACHINE: "GNU"
-  <<: *test_definition
-
-Test_Bookworm:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bookworm
-  variables:
-    MACHINE: "GNU"
-  <<: *test_definition
-  
-Test_PGI:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye-pgi-21-03
-  variables:
-    MACHINE: "PGI"
-  <<: *test_definition
-
-Test_Intel21:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye-intel
-  variables:
-    MACHINE: "INTEL"
-  <<: *test_definition
-
-Test_IntelLLVM:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bookworm-intel
-  variables:
-    MACHINE: "INTELLLVM"
-  <<: *test_definition
+exec_notebook:
+  extends: .exec_notebook_template
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  parallel:
+    matrix:
+      - MACHINE: GNU
+        IMAGE_MINOR: [bullseye, bookworm]
+        NOTEBOOK: [parallel_tempering.ipynb, projective_algorithm.ipynb, pyALF_new_features.ipynb, testing_against_ED.ipynb, trotter_error.ipynb, tV_model.ipynb]
 
 
-Warn_pylint_Bullseye:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
-  <<: *pylint_definition
+warn_pylint:
+  extends: .pylint_template
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  parallel:
+    matrix:
+      - IMAGE_MINOR: [bullseye, bookworm]
 
-Warn_ruff_Bullseye:
-  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/bullseye
-  <<: *ruff_definition
+warn_ruff:
+  extends: .ruff_template
+  image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  parallel:
+    matrix:
+      - IMAGE_MINOR: [bullseye, bookworm]
