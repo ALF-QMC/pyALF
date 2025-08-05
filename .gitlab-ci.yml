@@ -32,8 +32,10 @@ default:
   rules:
     - if: '$BRANCH_T'
       when: never
+    - changes:
+      - Notebooks/*
   script:
-    - pip install .
+    - pip install jupyter nbconvert .
     - cd Notebooks/
     - jupyter-nbconvert --execute --inplace $NOTEBOOK
 
@@ -113,13 +115,7 @@ test:
   parallel:
     matrix:
       - MACHINE: GNU
-        IMAGE_MINOR: [bullseye, bookworm]
-      - MACHINE: PGI
-        IMAGE_MINOR: bullseye-pgi-21-03
-      - MACHINE: INTEL
-        IMAGE_MINOR: [bullseye-intel, bookworm-intel-2024.2]
-      - MACHINE: INTELLLVM
-        IMAGE_MINOR: bookworm-intel
+        IMAGE_MINOR: [bullseye, bookworm, tumbleweed]
 
 exec_notebook:
   extends: .exec_notebook_template
@@ -127,7 +123,7 @@ exec_notebook:
   parallel:
     matrix:
       - MACHINE: GNU
-        IMAGE_MINOR: [bullseye, bookworm]
+        IMAGE_MINOR: [bullseye, bookworm, tumbleweed]
         NOTEBOOK: [parallel_tempering.ipynb, projective_algorithm.ipynb, pyALF_new_features.ipynb, testing_against_ED.ipynb, trotter_error.ipynb, tV_model.ipynb]
 
 
@@ -136,11 +132,11 @@ warn_pylint:
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
   parallel:
     matrix:
-      - IMAGE_MINOR: [bullseye, bookworm]
+      - IMAGE_MINOR: [bullseye, bookworm, tumbleweed]
 
 warn_ruff:
   extends: .ruff_template
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
   parallel:
     matrix:
-      - IMAGE_MINOR: [bullseye, bookworm]
+      - IMAGE_MINOR: [bullseye, bookworm, tumbleweed]
