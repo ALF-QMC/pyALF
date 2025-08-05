@@ -55,6 +55,7 @@ class CheckRebinIpy:
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     # pylint: disable=too-few-public-methods
     def __init__(self, directories, names, custom_obs=None, Nmax0=100, ncols=3):
         self.gui, self.log, self.axs, self.nrebin, self.select = \

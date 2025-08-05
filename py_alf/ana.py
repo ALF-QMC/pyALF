@@ -703,6 +703,7 @@ def write_res_eq(directory, obs_name,
                  m_r, e_r, m_r_sum, e_r_sum, latt):
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     N_orb = m_k.shape[0]
     header = ['kx', 'ky']
     out = latt.k
@@ -769,6 +770,7 @@ def write_res_eq(directory, obs_name,
 
 def write_res_tau(directory, obs_name, m_k, e_k, m_r, e_r, dtau, latt):
     # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     N_tau = m_k.shape[0]
     taus = np.linspace(0., (N_tau-1)*dtau, num=N_tau)
 

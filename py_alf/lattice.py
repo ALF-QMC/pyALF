@@ -301,7 +301,9 @@ class Lattice:
         ax.set_ylabel(r'$k_y$')
 
 
-def _plot_2d(coords, vec1, vec2, ax, data, cmap):  # pylint: disable=too-many-arguments
+def _plot_2d(coords, vec1, vec2, ax, data, cmap):
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-many-arguments
     # pylint: disable=import-outside-toplevel
     # pylint: disable=too-many-locals
     import matplotlib as mpl
