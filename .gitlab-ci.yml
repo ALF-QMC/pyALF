@@ -124,7 +124,13 @@ exec_notebook:
     matrix:
       - MACHINE: GNU
         IMAGE_MINOR: [bullseye, bookworm, trixie, tumbleweed]
-        NOTEBOOK: [parallel_tempering.ipynb, projective_algorithm.ipynb, pyALF_new_features.ipynb, testing_against_ED.ipynb, trotter_error.ipynb, tV_model.ipynb]
+        NOTEBOOK: 
+          - parallel_tempering.ipynb
+          - projective_algorithm.ipynb
+          - pyALF_new_features.ipynb
+          - testing_against_ED.ipynb
+          - trotter_error.ipynb
+          - tV_model.ipynb
 
 
 warn_pylint:
