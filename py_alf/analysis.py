@@ -14,7 +14,7 @@ from .ana import (
     ana_hist,
     ana_scal,
     ana_tau,
-    custom_obs_get_dtype_len,
+    custom_obs_get_dtype_shape,
     error,
     write_res_eq,
     write_res_tau,
@@ -145,8 +145,8 @@ def analysis(directory,
                          for obs_name in obs_spec['needs']]
 
                 N_bins = jacks[0].N_bins
-                dtype, length = custom_obs_get_dtype_len(obs_spec, jacks)
-                shape = (N_bins,) if length == 1 else (N_bins, length)
+                dtype, shape = custom_obs_get_dtype_shape(obs_spec, jacks)
+                shape = (N_bins,) + shape
                 J = np.empty(shape, dtype=dtype)
                 for i in range(N_bins):
                     J[i] = obs_spec['function'](

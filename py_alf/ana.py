@@ -838,16 +838,9 @@ def load_res(directories):
     return df
 
 
-def custom_obs_get_dtype_len(obs_spec, bins):
+def custom_obs_get_dtype_shape(obs_spec, bins):
     sample = obs_spec['function'](
                     *[x for b in bins for x in b.slice(0)],
                     **obs_spec['kwargs'])
-    dypte = sample.dtype
-    if np.ndim(sample) == 0:
-        length = 1
-    elif np.ndim(sample) == 1:
-        length = len(sample)
-    else:
-        raise TypeError(
-            "Only scalar or one-dimensional custom_obs allowed")
-    return dypte, length
+    sample = np.array(sample)
+    return sample.dtype, sample.shape

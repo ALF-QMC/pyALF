@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
 
-from .ana import Parameters, ReadObs, custom_obs_get_dtype_len, error, jack, read_scal
+from .ana import Parameters, ReadObs, custom_obs_get_dtype_shape, error, jack, read_scal
 
 
 def _create_fig(N):
@@ -33,18 +33,19 @@ def _get_bins(directory, names, custom_obs):
             print('custom', obs_name)
             obs_spec = custom_obs[obs_name]
 
-            Bins = [ReadObs(directory, o, bare_bins=True)
+            bins_raw = [ReadObs(directory, o, bare_bins=True)
                     for o in obs_spec['needs']]
-            N_bins = Bins[0].N_bins
+            N_bins = bins_raw[0].N_bins
 
-            dtype, length = custom_obs_get_dtype_len(obs_spec, Bins)
+            dtype, shape = custom_obs_get_dtype_shape(obs_spec, bins_raw)
             del dtype
-            bins = np.empty((N_bins, length))
+            size = np.prod(shape)
+            bins = np.empty((N_bins, size))
 
             for i in range(N_bins):
                 bins[i] = obs_spec['function'](
-                    *[x for b in Bins for x in b.slice(i)],
-                    **obs_spec['kwargs']).real
+                    *[x for b in bins_raw for x in b.slice(i)],
+                    **obs_spec['kwargs']).real.flatten()
         else:
             print(obs_name)
             bins_c, sign, N_obs = read_scal(directory, obs_name,
@@ -131,14 +132,16 @@ def _get_errors(directory, names, custom_obs, Nmax0):
 
             N_bins1 = bins[0].N_bins - N_skip
             Nmax = min(N_bins1 // 3, Nmax0)
-            dtype, length = custom_obs_get_dtype_len(obs_spec, bins)
-            err = np.empty((Nmax, length))
+
+            dtype, shape = custom_obs_get_dtype_shape(obs_spec, bins)
+            size = np.prod(shape)
+            err = np.empty((Nmax, size))
 
             for N_rebin in range(1, Nmax+1):
                 jacks = [x for b in bins for x in b.jack(N_rebin)]
 
                 N_bins = len(jacks[0])
-                J = np.empty((N_bins, length), dtype=dtype)
+                J = np.empty((N_bins, size), dtype=dtype)
                 print(f'{N_rebin}*{N_bins}={N_rebin*N_bins}')
                 for i in range(N_bins):
                     J[i] = obs_spec['function'](*[x[i] for x in jacks],
