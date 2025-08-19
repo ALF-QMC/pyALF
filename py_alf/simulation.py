@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -437,19 +438,18 @@ def set_param(alf_src, ham_name, sim_dict):
 
 def getenv(config, alf_dir='.'):
     """Get environment variables for compiling ALF."""
-    with cd(alf_dir):
+    with cd(alf_dir), tempfile.NamedTemporaryFile(mode='r') as f:
         try:
             subprocess.run(
                 ['bash', '-c',
                 f'. ./configure.sh {config} NO-FALLBACK > /dev/null || exit 1 &&'
-                'env > environment'],
+                f'env >> {f.name}'],
                 check=True)
         except subprocess.CalledProcessError as exc:
             raise RuntimeError(
                 f'Error while running configure.sh with "{config}"! '
-                'Is your machine set corretly?') from exc
-        with open('environment', encoding='UTF-8') as f:
-            lines = f.readlines()
+                'Is your machine set correctly?') from exc
+        lines = f.readlines()
     env = {}
     for line in lines:
         if ((not re.search(r"^BASH_FUNC.*%%=()", line))
