@@ -263,7 +263,7 @@ Now, to access this web server on the remote machine, one can forward this port 
 ssh -L <local_port_number>:localhost:<remote_port_number> <username>@<servername>
 ```
 
-With the command from above, a remote JupyterLab will be accessible trough the address `http://localhost:<local_port_number>:/lab?token=<token>`.
+With the command from above, a remote JupyterLab will be accessible through the address `http://localhost:<local_port_number>:/lab?token=<token>`.
 
 
 ### Using SSH in Visual Studio Code
