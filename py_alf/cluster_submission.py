@@ -250,10 +250,7 @@ def get_status(sim: Simulation, colored: bool = True) -> str:
     jobid_file = Path(sim.sim_dir) / "jobid.txt"
     running_file = Path(sim.sim_dir) / "RUNNING"
     if not jobid_file.exists():
-        if running_file.exists():
-            status = "CRASHED"
-        else:
-            status = "NO_JOBID"
+        status = "CRASHED" if running_file.exists() else "NO_JOBID"
     else:
         jobid = jobid_file.read_text().strip()
         status, runtime = _get_slurm_status_sacct(jobid)
@@ -443,10 +440,7 @@ def get_status_all(
         jobid = jobid_map.get(sim.sim_dir)
         if jobid is None:
             running_file = Path(sim.sim_dir) / "RUNNING"
-            if running_file.exists():
-                status = "CRASHED"
-            else:
-                status = "INACTIVE"
+            status = "CRASHED" if running_file.exists() else "INACTIVE"
         else:
             status_tuple = statuses.get(jobid, ("UNKNOWN", None))
             if isinstance(status_tuple, tuple):
@@ -524,10 +518,7 @@ def find_sims_by_status(
         jobid = jobid_map.get(sim.sim_dir)
         if jobid is None:
             running_file = Path(sim.sim_dir) / "RUNNING"
-            if running_file.exists():
-                status = "CRASHED"
-            else:
-                status = "INACTIVE"
+            status = "CRASHED" if running_file.exists() else "INACTIVE"
         else:
             status_tuple = statuses.get(jobid, ("UNKNOWN", None))
             if isinstance(status_tuple, tuple):
@@ -690,7 +681,9 @@ def print_logfile(
         logger.error(f"Error reading {log_file}: {e}")
     return None
 
-def _find_job_log(jobid: str, root_dir: List[str] = ['.']) -> Path | None:
+def _find_job_log(jobid: str, root_dir: List[str] = None) -> Path | None:
+    if root_dir is None:
+        root_dir = ['.']
     if jobid is None:
         logger.info("No job ID provided for logfile search.")
         return None
