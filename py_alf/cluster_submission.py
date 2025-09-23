@@ -5,17 +5,19 @@ __author__ = "Johannes Hofmann"
 __copyright__ = "Copyright 2020-2025, The ALF Project"
 __license__ = "GPL"
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pathlib import Path
-from .simulation import cd, Simulation
+import logging
+import os
 import subprocess
 from collections.abc import Iterable
-import os
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
 from colorama import Fore
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from tabulate import tabulate
-from typing import Union, List, Optional, Dict, Any, Sequence
-import logging
 from tqdm import tqdm
+
+from .simulation import Simulation, cd
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +212,7 @@ class ClusterSubmitter:
             confirm: If True, asks for confirmation before resubmission.
             subdir: Subdirectory for resubmission job scripts.
         """
-        
+
         if not sims_to_resubmit:
             logger.info("No simulations to resubmit.")
             return
@@ -571,7 +573,7 @@ def _bin_count(sim: Simulation, counting_obs: str = 'Ener_scal', refresh: bool =
     Returns:
         Number of bins.
     """
-    import h5py, os
+    import h5py
     filename = os.path.join(sim.sim_dir, "data.h5")
     key = (filename, counting_obs)
 
@@ -583,7 +585,7 @@ def _bin_count(sim: Simulation, counting_obs: str = 'Ener_scal', refresh: bool =
         with h5py.File(filename, "r") as f:
             if counting_obs in f:
                 N_bins = f[counting_obs + '/obser'].shape[0]
-    except (FileNotFoundError) as e:
+    except (FileNotFoundError):
         N_bins = 0
     except (OSError, KeyError) as e:
         logger.error(f"Error reading {filename}: {e}")
@@ -650,7 +652,7 @@ def print_logfile(
     else:
         log_file = Path(sim.sim_dir) / "latest_cluster_run.log"
         if not log_file.exists():
-            logger.info(f"Searching by job ID...")
+            logger.info("Searching by job ID...")
             jobid=get_job_id(sim)
             if jobid:
                 status=get_status(sim, colored=False)
@@ -659,11 +661,11 @@ def print_logfile(
                     logger.info(f"Job {jobid} is pending. Logfile cannot be located by job ID.")
                     return None
             else:
-                logger.info(f"No job ID found. Logfile cannot be located by job ID.")
+                logger.info("No job ID found. Logfile cannot be located by job ID.")
                 return None
             logfile_path = _find_job_log(jobid, root_dir=[sim.sim_dir, '.'])
             if logfile_path is None:
-                logger.error(f"Cannot locate logfile.")
+                logger.error("Cannot locate logfile.")
                 return None
             log_file = logfile_path
 
