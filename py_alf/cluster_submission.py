@@ -690,7 +690,7 @@ def _find_job_log(jobid: str, root_dir: List[str] = None) -> Path | None:
     all_matches = []
     for dir in root_dir:
         root = Path(dir)
-        pattern = f"job-{jobid.replace("_", "-")}.log"
+        pattern = f"job-{jobid.replace('_', '-')}.log"
         matches = list(root.rglob(pattern))
         all_matches.extend(matches)
     matches = all_matches
