@@ -19,10 +19,9 @@ default:
       - tests
       - .gitlab-ci.yml
   script:
-    - pip install pylint ruff pytest
+    - pip install pylint ruff pytest .
     - pylint -E py_alf/
     - ruff check --exclude doc
-    - pip install .
     - pytest
     - alf_run --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
