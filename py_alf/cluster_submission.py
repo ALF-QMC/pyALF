@@ -90,21 +90,21 @@ class ClusterSubmitter:
             if jobid_file.exists():
                 with jobid_file.open("r") as f:
                     jobid = f.read().strip()
-                status = _get_slurm_status_sacct(jobid)
-                if status in ("PENDING", "RUNNING"):
-                    logger.info(f"Skipping {s.sim_dir}: job {jobid} is {status}")
+                status_entry = _get_slurm_status_sacct(jobid)
+                if status_entry.get("status") in ("PENDING", "RUNNING"):
+                    logger.info(f"Skipping {s.sim_dir}: job {jobid} is {status_entry.get('status')}")
                     continue
             running_file = Path(s.sim_dir) / "RUNNING"
             if running_file.exists():
                 jobid = jobid_file.read_text().strip()
-                status = _get_slurm_status_sacct(jobid)
-                if status in ("RUNNING"):
-                    logger.info(f"Skipping {s.sim_dir}: job {jobid} is {status}")
+                status_entry = _get_slurm_status_sacct(jobid)
+                if status_entry.get("status") == "RUNNING":
+                    logger.info(f"Skipping {s.sim_dir}: job {jobid} is {status_entry.get('status')}")
                     continue
                 else:
                     logger.warning(f"Leftover RUNNING file detected in {s.sim_dir}.")
                     logger.warning("This indicates an error in the previous run.")
-                    choice = input(f"Do you want to remove this file to enable resubmission (status={status}) [y/N]?").strip().lower()
+                    choice = input(f"Do you want to remove this file to enable resubmission (status={status_entry.get('status')}) [y/N]?").strip().lower()
                     if choice in ("yes", "y"):
                         running_file.unlink()
                         logger.info("File removed.")
@@ -251,9 +251,12 @@ def get_status(sim: Simulation, colored: bool = True) -> str:
     running_file = Path(sim.sim_dir) / "RUNNING"
     if not jobid_file.exists():
         status = "CRASHED" if running_file.exists() else "NO_JOBID"
+        runtime = None
     else:
         jobid = jobid_file.read_text().strip()
-        status, runtime = _get_slurm_status_sacct(jobid)
+        entry = _get_slurm_status_sacct(jobid)
+        status = entry.get("status", "UNKNOWN")
+        runtime = entry.get("runtime")
     if colored:
         status = _colorize_status(status)
     return status
@@ -273,10 +276,10 @@ def get_job_id(sim: Simulation) -> str | None:
     else:
         return jobid_file.read_text().strip()
 
-def _get_slurm_status_sacct(jobid: str) -> tuple[str, Optional[str]]:
+def _get_slurm_status_sacct(jobid: str) -> Dict[str, Optional[str]]:
     """
     Query SLURM sacct for job status and elapsed time.
-    Returns (status, runtime) tuple.
+    Returns dict: {'status': <status_str>, 'runtime': <elapsed_or_None>}
     """
     try:
         result = subprocess.run(
@@ -290,18 +293,18 @@ def _get_slurm_status_sacct(jobid: str) -> tuple[str, Optional[str]]:
             if len(parts) >= 1:
                 state = parts[0]
                 runtime = parts[1] if len(parts) > 1 else None
-                return (state, runtime)
-        return ("UNKNOWN", None)
+                return {"status": state, "runtime": runtime}
+        return {"status": "UNKNOWN", "runtime": None}
     except Exception as e:
         logger.error(f"sacct error for job {jobid}: {e}")
-        return ("ERROR", None)
+        return {"status": "ERROR", "runtime": None}
 
-def _get_slurm_status_bulk_sacct(jobids: List[str]) -> Dict[str, Union[str, tuple]]:
+def _get_slurm_status_bulk_sacct(jobids: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
     """
     Query SLURM sacct for multiple job IDs (including array tasks) in one call.
-    Returns dict: jobid[_index] -> (status, runtime)
+    Returns dict: jobid[_index] -> {'status': <str>, 'runtime': <str|None>}
     """
-    status_map: Dict[str, Union[str, tuple]] = {jid: "UNKNOWN" for jid in jobids}
+    status_map: Dict[str, Dict[str, Optional[str]]] = {jid: {"status": "UNKNOWN", "runtime": None} for jid in jobids}
     if not jobids:
         return status_map
 
@@ -316,25 +319,25 @@ def _get_slurm_status_bulk_sacct(jobids: List[str]) -> Dict[str, Union[str, tupl
                 jobid = parts[0]
                 state = parts[1]
                 runtime = parts[2] if len(parts) > 2 else None
-                status_map[jobid] = (state, runtime)
+                status_map[jobid] = {"status": state, "runtime": runtime}
     except Exception as e:
         logger.error(f"sacct bulk error: {e}")
         for jid in jobids:
-            status_map[jid] = ("ERROR", None)
+            status_map[jid] = {"status": "ERROR", "runtime": None}
     return status_map
 
-def _get_slurm_status_bulk(jobids: List[str]) -> Dict[str, Union[str, tuple]]:
+def _get_slurm_status_bulk(jobids: List[str]) -> Dict[str, Dict[str, Optional[str]]]:
     """
     Query SLURM for multiple job IDs (including array tasks) in one call.
     Args:
         jobids: List of job IDs.
     Returns:
-        Dict mapping jobid[_index] to (status, runtime) or status string.
+        Dict mapping jobid[_index] to {'status':..., 'runtime':...}.
     """
     if not jobids:
         return {}
 
-    status_map: Dict[str, Union[str, tuple]] = {jid: "FINISHED_OR_NOT_FOUND" for jid in jobids}
+    status_map: Dict[str, Dict[str, Optional[str]]] = {jid: {"status": "FINISHED_OR_NOT_FOUND", "runtime": None} for jid in jobids}
     found_in_squeue = set()
 
     try:
@@ -359,7 +362,7 @@ def _get_slurm_status_bulk(jobids: List[str]) -> Dict[str, Union[str, tuple]]:
                     continue
                 jid, idx, state, runtime = parts
                 full_id = jid if idx == "N/A" else idx
-                status_map[full_id] = (state, runtime)
+                status_map[full_id] = {"status": state, "runtime": runtime}
                 found_in_squeue.add(full_id)
             except Exception as e:
                 logger.error(f"Error parsing squeue output line '{line}': {e}")
@@ -369,10 +372,12 @@ def _get_slurm_status_bulk(jobids: List[str]) -> Dict[str, Union[str, tuple]]:
         if missing_jobids:
             sacct_statuses = _get_slurm_status_bulk_sacct(missing_jobids)
             for jid in missing_jobids:
-                status_map[jid] = sacct_statuses.get(jid, ("UNKNOWN", None))
+                status_map[jid] = sacct_statuses.get(jid, {"status": "UNKNOWN", "runtime": None})
     else:
         # squeue failed, use sacct bulk for all jobids
-        status_map = _get_slurm_status_bulk_sacct(jobids)
+        sacct_statuses = _get_slurm_status_bulk_sacct(jobids)
+        for jid in jobids:
+            status_map[jid] = sacct_statuses.get(jid, {"status": "UNKNOWN", "runtime": None})
 
     return status_map
 
@@ -442,12 +447,9 @@ def get_status_all(
             running_file = Path(sim.sim_dir) / "RUNNING"
             status = "CRASHED" if running_file.exists() else "INACTIVE"
         else:
-            status_tuple = statuses.get(jobid, ("UNKNOWN", None))
-            if isinstance(status_tuple, tuple):
-                status, runtime = status_tuple
-            else:
-                status = status_tuple
-                runtime = None
+            status_entry = statuses.get(jobid, {"status": "UNKNOWN", "runtime": None})
+            status = status_entry.get("status", "UNKNOWN")
+            runtime = status_entry.get("runtime", None)
 
         num_bins = _bin_count(sim, counting_obs, refresh=(status == 'RUNNING') or refresh_cache)
         row = [sim.sim_dict.get(key, None) for key in keys]
@@ -520,11 +522,8 @@ def find_sims_by_status(
             running_file = Path(sim.sim_dir) / "RUNNING"
             status = "CRASHED" if running_file.exists() else "INACTIVE"
         else:
-            status_tuple = statuses.get(jobid, ("UNKNOWN", None))
-            if isinstance(status_tuple, tuple):
-                status, runtime = status_tuple
-            else:
-                status = status_tuple
+            status_entry = statuses.get(jobid, {"status":"UNKNOWN","runtime":None})
+            status = status_entry.get("status","UNKNOWN")
         if status in filter:
             sims_with_status.append(sim)
     if not sims_with_status:
