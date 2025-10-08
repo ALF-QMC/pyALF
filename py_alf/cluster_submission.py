@@ -251,17 +251,15 @@ def get_status(sim: Simulation, colored: bool = True) -> str:
     running_file = Path(sim.sim_dir) / "RUNNING"
     if not jobid_file.exists():
         status = "CRASHED" if running_file.exists() else "NO_JOBID"
-        runtime = None
     else:
         jobid = jobid_file.read_text().strip()
         entry = _get_slurm_status_sacct(jobid)
         status = entry.get("status", "UNKNOWN")
-        runtime = entry.get("runtime")
     if colored:
         status = _colorize_status(status)
     return status
 
-def get_job_id(sim: Simulation) -> str | None:
+def get_job_id(sim: Simulation) -> Optional[str]:
     """
     Returns colorized SLURM job status for a simulation.
     Args:
@@ -498,7 +496,7 @@ def get_status_all(
 def find_sims_by_status(
     sims: Iterable[Simulation],
     filter: List[str]
-) -> List[Simulation] | None:
+) -> Optional[List[Simulation]]:
     """
     Prints a table of statuses for all simulations (bulk SLURM query).
     Args:
@@ -680,7 +678,7 @@ def print_logfile(
         logger.error(f"Error reading {log_file}: {e}")
     return None
 
-def _find_job_log(jobid: str, root_dir: List[str] = None) -> Path | None:
+def _find_job_log(jobid: str, root_dir: List[str] = None) -> Optional[Path]:
     if root_dir is None:
         root_dir = ['.']
     if jobid is None:
