@@ -70,7 +70,7 @@ def _analyze(sim_R, sim_T):
                 with contextlib.suppress(TypeError):
                     test_temp = np.allclose(dat_R, dat_T)
                 test = test and test_temp
-            f.write('{name}: {test}\n')
+            f.write(f'{name}: {test}\n')
             test_all = test_all and test
 
     return test_all
