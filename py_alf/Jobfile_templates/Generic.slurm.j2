@@ -1,0 +1,57 @@
+#!/bin/bash -l
+#SBATCH --nodes={{ nodes }}
+#SBATCH --ntasks={{ tasks }}
+#SBATCH --threads-per-core=1
+#SBATCH --cpus-per-task={{ threads }}
+##SBATCH --hint=nomultithread
+#SBATCH --mail-type FAIL
+#SBATCH --job-name={{ name }}
+## Create a directory called logfiles in the submission directory to store log files
+## The logfiles are named job-<jobid>.log or job-<arrayjobid>-<arraytaskid>.log
+## DO NOT CHANGE so pyALF can find the logfiles!
+#SBATCH --output=logfiles/job-{% if array %}%A-%a{% else %}%j{% endif %}.log
+#SBATCH --mem={{ mem }}
+#SBATCH --partition={{ queue }}
+#SBATCH --time={{ time }}:00:00
+#SBATCH --no-requeue
+{% if array %}#SBATCH --array=0-{{ array_max }}{% endif %}
+
+echo "Job is assigned to $SLURM_JOB_NODELIST"
+
+#
+# Prepare your environment
+#
+
+# causes jobs to fail if one command fails - makes failed jobs easier to find with tools like sacct
+set -e
+
+# load modules using the machine provided to the configure.sh script
+cd {{ alf_src }}
+source configure.sh {{ config }}
+cd -
+
+## DO NOT CHANGE so array jobs can find the directories.txt file, created by cluster_sumbitter
+#switch to apropriate simulation directory
+{% if array %}
+simdir="$(sed -n "$((SLURM_ARRAY_TASK_ID+1))p" directories.txt)"
+{% else %}
+simdir="{{ sim_dir }}"
+{% endif %}
+cd $simdir
+
+## DO NOT CHANGE so pyALF can find the logfiles!
+slurm_logfile="${SLURM_SUBMIT_DIR}/logfiles/job-{% if array %}${SLURM_ARRAY_JOB_ID}-${SLURM_ARRAY_TASK_ID}{% else %}${SLURM_JOB_ID}{% endif %}.log"
+ln -sf "${slurm_logfile}" latest_cluster_run.log
+
+#run QMC
+echo "Starting QMC run"
+ulimit -c 0 #disable the generation of core.*** dump files if code crashed
+srun ./ALF.out
+echo "Done with QMC run"
+echo 
+
+#cleanup slurm id file to indicate job is done.
+rm -f {{ slurm_id_file }}
+
+# exit gracefully
+exit 0
