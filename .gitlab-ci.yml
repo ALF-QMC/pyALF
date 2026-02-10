@@ -97,17 +97,26 @@ check_docstrings:
     - ruff check --select D
 
 
+build_test:
+  stage: build
+  image: ghcr.io/astral-sh/uv:alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "master"'
+  script:
+    - apk add git
+    - uv build
+
+
 build:
   stage: build
-  image: python:alpine
+  image: ghcr.io/astral-sh/uv:alpine
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
   script:
     - apk add git
-    - pip install build setuptools setuptools-git-versioning twine
-    - python -m setuptools_git_versioning 
-    - python -m build
-    - python -m twine upload dist/*
+    - uv build
+    - uv publish --username $TWINE_USERNAME --password $TWINE_PASSWORD
+
 
 test:
   extends: .test_template
