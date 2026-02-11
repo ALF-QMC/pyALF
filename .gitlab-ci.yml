@@ -1,68 +1,11 @@
 stages:
   - test
-  - build
   - build_doc
-
-variables:
-  BRANCH_R: "master"
+  - publish
 
 default:
   tags: [k8s]
-  
-.test_template:
-  stage: test
-  rules:
-    - if: '$BRANCH_T'
-      when: never
-    - changes:
-      - py_alf
-      - tests
-      - .gitlab-ci.yml
-  script:
-    - pip install pylint ruff pytest
-    - pylint -E py_alf/
-    - ruff check --exclude doc
-    - pip install .
-    - pytest
-    - alf_run --machine $MACHINE --branch $BRANCH_R --sims_file py_alf/cli/Sims
 
-
-.exec_notebook_template:
-  stage: test
-  rules:
-    - if: '$BRANCH_T'
-      when: never
-    - changes:
-      - Notebooks/*
-  script:
-    - pip install jupyter nbconvert .
-    - cd Notebooks/
-    - jupyter-nbconvert --execute --inplace $NOTEBOOK
-
-.pylint_template:
-  stage: test
-  allow_failure: true
-  rules:
-    - if: '$BRANCH_T'
-      when: never
-    - changes:
-      - py_alf
-      - .gitlab-ci.yml
-  script:
-    - pip install pylint
-    - pylint py_alf/
-
-.ruff_template:
-  stage: test
-  rules:
-    - if: '$BRANCH_T'
-      when: never
-    - changes:
-      - py_alf
-      - .gitlab-ci.yml
-  script:
-    - pip install ruff
-    - ruff check --exclude doc
 
 pages:
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-doc/jupyter
@@ -82,13 +25,12 @@ pages:
     paths:
       - public
 
+
 check_docstrings:
   stage: test
   allow_failure: true
   image: python:alpine
   rules:
-    - if: '$BRANCH_T'
-      when: never
     - changes:
       - py_alf
       - .gitlab-ci.yml
@@ -98,7 +40,7 @@ check_docstrings:
 
 
 build_test:
-  stage: build
+  stage: publish
   image: ghcr.io/astral-sh/uv:alpine
   rules:
     - if: '$CI_COMMIT_BRANCH != "master"'
@@ -108,7 +50,7 @@ build_test:
 
 
 build:
-  stage: build
+  stage: publish
   image: ghcr.io/astral-sh/uv:alpine
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
@@ -119,16 +61,32 @@ build:
 
 
 test:
-  extends: .test_template
+  stage: test
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  rules:
+    - changes:
+      - py_alf
+      - tests
+      - .gitlab-ci.yml
   parallel:
     matrix:
       - MACHINE: GNU
         IMAGE_MINOR: [bullseye, bookworm, trixie, tumbleweed]
+  script:
+    - pip install pylint ruff pytest
+    - pylint -E py_alf/
+    - ruff check --exclude doc
+    - pip install .
+    - pytest
+    - alf_run --machine $MACHINE --sims_file py_alf/cli/Sims
+
 
 exec_notebook:
-  extends: .exec_notebook_template
+  stage: test
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  rules:
+    - changes:
+      - Notebooks/*
   parallel:
     matrix:
       - MACHINE: GNU
@@ -140,18 +98,37 @@ exec_notebook:
           - testing_against_ED.ipynb
           - trotter_error.ipynb
           - tV_model.ipynb
+  script:
+    - pip install jupyter nbconvert .
+    - cd Notebooks/
+    - jupyter-nbconvert --execute --inplace $NOTEBOOK
 
 
 warn_pylint:
-  extends: .pylint_template
+  stage: test
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  rules:
+    - changes:
+      - py_alf
+      - .gitlab-ci.yml
   parallel:
     matrix:
       - IMAGE_MINOR: [bullseye, bookworm, trixie, tumbleweed]
+  allow_failure: true
+  script:
+    - pip install pylint
+    - pylint py_alf/
 
 warn_ruff:
-  extends: .ruff_template
+  stage: test
   image: git.physik.uni-wuerzburg.de:25812/alf/alf_docker/pyalf-requirements/$IMAGE_MINOR
+  rules:
+    - changes:
+      - py_alf
+      - .gitlab-ci.yml
   parallel:
     matrix:
       - IMAGE_MINOR: [bullseye, bookworm, trixie, tumbleweed]
+  script:
+    - pip install ruff
+    - ruff check --exclude doc
