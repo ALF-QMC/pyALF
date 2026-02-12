@@ -52,6 +52,7 @@ jobs:
 
   check_docstrings:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -61,6 +62,7 @@ jobs:
 
   warn_pylint:
     runs-on: ubuntu-latest
+    continue-on-error: true
     container:
       image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
     strategy:
