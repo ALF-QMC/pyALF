@@ -97,10 +97,25 @@ jobs:
 
   build_docs:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-doc/jupyter
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - run: pip install .
+      - run: pip install .[doc]
+      - run: sudo apt-get install --yes --no-install-recommends
+          texlive-latex-recommended
+          texlive-latex-extra
+          texlive-fonts-recommended
+          texlive-fonts-extra
+          texlive-xetex
+          texlive-lang-german
+          latexmk
+          xindy
+          fonts-freefont-otf
+          inkscape
       - run: cd doc && make
+      - name: Upload Jupyter Book HTML artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: jupyter-book-html
+          path: doc/_build/html
+          if-no-files-found: error
