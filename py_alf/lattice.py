@@ -50,6 +50,24 @@ class UnitCell:
             # latt_grp.attrs["N_coord"] = latt_grp.attrs["Norb"]
             # latt_grp.attrs["Norb"] = self.Norb
 
+    def write_to_hdf5(self, latt_grp):
+        """Write unit cell info to HDF5-group."""
+        dset = latt_grp.create_dataset(
+            'orbital_positions', data=self.orbital_positions)
+        dset.attrs['description'] = 'Orbital positions within a unit cell'
+
+        dset = latt_grp.create_dataset(
+            'Norb', data=self.Norb)
+        dset.attrs['description'] = 'Number of orbitals per unit cell'
+
+        dset = latt_grp.create_dataset(
+            'Ndim', data=self.Ndim)
+        dset.attrs['description'] = 'Dimensionality of lattice'
+
+        dset = latt_grp.create_dataset(
+            'N_coord', data=self.N_coord)
+        dset.attrs['description'] = 'Coordination number'
+
 
 class Lattice:
     """Finite size Bravais lattice object, mirroring ALF's Lattice type.
@@ -299,6 +317,26 @@ class Lattice:
         fig.colorbar(cmap, ax=ax, shrink=0.6)
         ax.set_xlabel(r'$k_x$')
         ax.set_ylabel(r'$k_y$')
+
+    def write_to_hdf5(self, hdf5_loc):
+        """Create the HDF5-group 'lattice' and write lattice info."""
+        grp = hdf5_loc.create_group('lattice')
+
+        dset = grp.create_dataset('L1', data=self.L1)
+        dset.attrs['description'] = 'Periodic boundary condition 1'
+        dset = grp.create_dataset('L2', data=self.L2)
+        dset.attrs['description'] = 'Periodic boundary condition 2'
+        dset = grp.create_dataset('a1', data=self.a1)
+        dset.attrs['description'] = 'Primitive lattice vector 1'
+        dset = grp.create_dataset('a2', data=self.a2)
+        dset.attrs['description'] = 'Primitive lattice vector 2'
+
+        dset = grp.create_dataset('k', data=self.k)
+        dset.attrs['description'] = 'k-space coordinates'
+        dset = grp.create_dataset('r', data=self.r)
+        dset.attrs['description'] = 'Real space coordinates'
+
+        self.unit_cell.write_to_hdf5(grp)
 
 
 def _plot_2d(coords, vec1, vec2, ax, data, cmap):
