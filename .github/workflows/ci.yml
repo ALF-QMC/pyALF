@@ -31,6 +31,11 @@ jobs:
 
   exec_notebooks:
     runs-on: ubuntu-latest
+    env:
+      PRTE_MCA_rmaps_default_mapping_policy: ":oversubscribe"
+      PRTE_MCA_rmaps_base_oversubscribe: '1'
+      OMPI_MCA_rmaps_base_oversubscribe: "true"
+
     container:
       image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
     strategy:
