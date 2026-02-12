@@ -56,7 +56,7 @@ jobs:
       - run: cd Notebooks/ && jupyter-nbconvert --execute --inplace ${{ matrix.notebook }}
 
   check_docstrings:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     continue-on-error: true
     steps:
       - name: Checkout
@@ -66,29 +66,16 @@ jobs:
         continue-on-error: true
 
   warn_pylint:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [bullseye, bookworm, trixie, tumbleweed]
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - run: pip install pylint
+      - run: sudo apt update && sudo apt install -y python3-tk
+      - run: pip install . pylint
       - run: pylint py_alf/
-        continue-on-error: true
 
   warn_ruff:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [bullseye, bookworm, trixie, tumbleweed]
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v6

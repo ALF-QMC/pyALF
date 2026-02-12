@@ -7,9 +7,13 @@ on:
     branches:
       - 'master'
 
+concurrency:
+  group: publish
+  cancel-in-progress: true
+
 jobs:
   publish_pypi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: pypi
