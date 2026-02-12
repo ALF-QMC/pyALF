@@ -50,9 +50,9 @@ doc = [
 include = ["py_alf", "py_alf.cli"]
 
 [project.urls]
-Documentation = "https://gitpages.physik.uni-wuerzburg.de/ALF/pyALF"
-Repository = "https://git.physik.uni-wuerzburg.de/ALF/pyALF"
-Issues = "https://git.physik.uni-wuerzburg.de/ALF/pyALF/-/issues"
+Documentation = "https://alf.physik.uni-wuerzburg.de/pyalf-doc/"
+Repository = "https://github.com/ALF-QMC/pyALF"
+Issues = "https://github.com/ALF-QMC/pyALF/issues"
 "ALF Homepage" = "https://alf.physik.uni-wuerzburg.de/"
 
 [project.scripts]

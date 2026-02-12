@@ -15,7 +15,7 @@ from py_alf import ALF_source, Simulation
 
 def _main():
     # Create an instance of ALF_source, downloading the ALF source code from
-    # https://git.physik.uni-wuerzburg.de/ALF/ALF, if ALF diretory does not exist.
+    # https://github.com/ALF-QMC/ALF, if ALF diretory does not exist.
     # Gets ALF diretory from environment variable $ALF_DIR, or defaults to "./ALF",
     # if not present.
     alf_src = ALF_source()

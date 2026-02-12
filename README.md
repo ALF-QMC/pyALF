@@ -3,7 +3,7 @@
 
 ## pyALF
 
-A Python package building on top of [ALF](https://git.physik.uni-wuerzburg.de/ALF/ALF), meant to simplify the different steps of working with ALF, including:
+A Python package building on top of [ALF](https://github.com/ALF-QMC/ALF), meant to simplify the different steps of working with ALF, including:
 
 * Obtaining and compiling the ALF source code
 * Preparing and running simulations
@@ -35,7 +35,7 @@ pyALF can be installed via the Python package installer [pip](https://pip.pypa.i
 pip install pyALF
 ```
 
-For running ALF, you will additionaly need the [ALF prerequsites](https://git.physik.uni-wuerzburg.de/ALF/ALF#prerequisites).
+For running ALF, you will additionaly need the [ALF prerequsites](https://github.com/ALF-QMC/ALF#prerequisites).
 
 Alternatively, one could use [this Docker image](https://hub.docker.com/r/alfcollaboration/jupyter-pyalf-full), which has ALF, pyALF and a Jupyter server pre-installed.
 
@@ -51,7 +51,7 @@ or a
 The following example shows how to install pyALF in development mode using venv.
 
 ```bash
-git clone https://git.physik.uni-wuerzburg.de/ALF/pyALF.git
+git clone https://github.com/ALF-QMC/pyALF.git
 cd pyALF
 python -m venv .venv
 source .venv/bin/activate
