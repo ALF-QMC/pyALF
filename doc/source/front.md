@@ -8,7 +8,7 @@ Aiming to address this challenge, pyALF is a set of Python scripts built on top 
 - Preparing and running simulations
 - Postprocessing and displaying the data obtained during the simulation 
 
-The source codes for both ALF and pyALF are publicly available at [https://git.physik.uni-wuerzburg.de/ALF](https://git.physik.uni-wuerzburg.de/ALF).
+The source codes for both ALF and pyALF are publicly available at [https://github.com/ALF-QMC](https://github.com/ALF-QMC).
 
 This documentation is structured in the following way:
 

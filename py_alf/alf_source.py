@@ -40,13 +40,13 @@ class ALF_source:
         to './ALF'.
     branch : str, optional
         If specified, this will be checked out by git.
-    url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
+    url : str, default='https://github.com/ALF-QMC/ALF.git'
         Address from where to clone ALF if alf_dir does not exist.
 
     """
 
     def __init__(self, alf_dir=None, branch=None,
-                 url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'):
+                 url='https://github.com/ALF-QMC/ALF.git'):
         if alf_dir is None:
             alf_dir = os.getenv('ALF_DIR', './ALF')
         self.alf_dir = os.path.abspath(os.path.expanduser(alf_dir))

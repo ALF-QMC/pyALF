@@ -466,7 +466,7 @@ def getenv(config, alf_dir='.'):
 def compile_alf(alf_dir=None,
                 branch=None,
                 config='GNU noMPI',
-                url='https://git.physik.uni-wuerzburg.de/ALF/ALF.git',
+                url='https://github.com/ALF-QMC/ALF.git',
                 verbosity=0
                 ):
     """Compile ALF. Clone a new repository if alf_dir does not exist.
@@ -482,7 +482,7 @@ def compile_alf(alf_dir=None,
         If specified, this will be checked out by git.
     config : str, default='GNU noMPI'
         Arguments for `configure.sh`.
-    url : str, default='https://git.physik.uni-wuerzburg.de/ALF/ALF.git'
+    url : str, default='https://github.com/ALF-QMC/ALF.git'
         Address from where to clone ALF if alf_dir not exists.
     verbosity : int, default=0
         0: Don't echo make reciepes.

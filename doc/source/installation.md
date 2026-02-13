@@ -82,7 +82,7 @@ or a
 The following example shows how to install pyALF in development mode using venv.
 
 ```bash
-git clone https://git.physik.uni-wuerzburg.de/ALF/pyALF.git
+git clone https://https://github.com/ALF-QMC/pyALF.git
 cd pyALF
 python -m venv .venv
 source .venv/bin/activate
@@ -92,12 +92,12 @@ pip install --editable .
 
 ## Setting ALF directory through environment variable
 
-Since pyALF is set up to automatically clone ALF with git, it is not strictly necessary to download ALF manually, but pyALF will download ALF every time it does not find it. Therefore it is recommended to clone ALF once manually from [here](https://git.physik.uni-wuerzburg.de/ALF/ALF) and setting its location in the environment variable `ALF_DIR`. This way, pyALF will use the same ALF source code directory every time.
+Since pyALF is set up to automatically clone ALF with git, it is not strictly necessary to download ALF manually, but pyALF will download ALF every time it does not find it. Therefore it is recommended to clone ALF once manually from [here](https://github.com/ALF-QMC/ALF) and setting its location in the environment variable `ALF_DIR`. This way, pyALF will use the same ALF source code directory every time.
 
 ALF can be cloned with the Unix shell command
 
 ```bash
-git clone https://git.physik.uni-wuerzburg.de/ALF/ALF.git
+git clone https://github.com/ALF-QMC/ALF.git
 ```
 
 This will create a folder called `ALF` in the current working directory of the terminal and download the repository there[^clone_fyi].
@@ -127,7 +127,7 @@ in the Unix shell. If it does clone the ALF repository, `ALF_DIR` has not been s
 ## Using Jupyter Notebooks
 
 A convenient way to work with pyALF (and Python in general) is through Jupyter Notebooks. These are interactively usable documents that combine source code,
-results and narration (through [Markdown](https://www.markdownguide.org/)) in one file. pyALF includes example notebooks, online available from [here](https://git.physik.uni-wuerzburg.de/ALF/pyALF/-/tree/master/Notebooks), or by cloning the [pyALF repository](https://git.physik.uni-wuerzburg.de/ALF/pyALF).
+results and narration (through [Markdown](https://www.markdownguide.org/)) in one file. pyALF includes example notebooks, online available from [here](https://github.com/ALF-QMC/pyALF/tree/master/Notebooks), or by cloning the [pyALF repository](https://github.com/ALF-QMC/pyALF).
 
 The canonical way to use the Jupyter Notebooks, is through a JupyterLab, which can for example be installed via pip (for more details see [here](https://jupyter.org/install)):
 
@@ -185,21 +185,21 @@ If one wanted to git clone the ALF source code, this could usually be
 done with one of the following commands, using HTTPS or SSH, respectively.
 
 ```bash
-git clone https://git.physik.uni-wuerzburg.de:443/ALF/ALF.git
-git clone git@git.physik.uni-wuerzburg.de:ALF/ALF.git
+git clone https://github.com/ALF-QMC/ALF.git
+git clone git@github.com:ALF-QMC/ALF.git
 ```
 
 But on some systems with very restrictive firewalls, this approach might
 not work. This is where the ssh option [-R](https://man.openbsd.org/ssh#R)
 might come in handy. It maps a port on the remote machine to a an address
 connected to from the local machine on which the SSH command was executed.
-To facilitate a connection to `git.physik.uni-wuerzburg.de`, the following
+To facilitate a connection to `github.com`, the following
 commands can be used, connecting to port 443 or 22, for the HTTPS or SSH
 protocol, respectively.
 
 ```bash
-ssh -R <PortNum>:git.physik.uni-wuerzburg.de:443 <username>@<servername>
-ssh -R <PortNum>:git.physik.uni-wuerzburg.de:22 <username>@<servername>
+ssh -R <PortNum>:github.com:443 <username>@<servername>
+ssh -R <PortNum>:github.com:22 <username>@<servername>
 ```
 
 Here `<PortNum>` refers to a port on the remote machine, a value in the range
@@ -212,14 +212,14 @@ With these port forwarding options, the ALF source code can then be cloned on th
 machine with:
 
 ```bash
-git clone -c http.sslVerify=false https://localhost:<PortNum>/ALF/ALF.git
-git clone ssh://git@localhost:<PortNum>/ALF/ALF.git
+git clone -c http.sslVerify=false https://localhost:<PortNum>/ALF-QMC/ALF.git
+git clone ssh://git@localhost:<PortNum>/ALF-QMC/ALF.git
 ```
 
 The HTTPS version needs the option `-c http.sslVerify=false` because the SSL certificate
-for `git.physik.uni-wuerzburg.de` does not apply to `localhost`.
+for `github.com` does not apply to `localhost`.
 
-One can omit the host value in the `-R` option (in the example above `git.physik.uni-wuerzburg.de:443`)
+One can omit the host value in the `-R` option (in the example above `github.com:443`)
 which will set up a dynamic SOCKS proxy, able to connect to arbitrary addresses.
 This can be used, for example, to download and install packages with `pip`.
 
