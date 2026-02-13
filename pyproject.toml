@@ -39,6 +39,12 @@ dependencies = [
 
 [project.optional-dependencies]
 GUI = ["tkinter"]
+doc = [
+  "sphinxcontrib-svg2pdfconverter",
+  "jupyter-book<2.0",
+  "numpydoc",
+  "sphinx-argparse",
+]
 
 [tool.setuptools.packages.find]
 include = ["py_alf", "py_alf.cli"]

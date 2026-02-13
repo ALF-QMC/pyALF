@@ -7,9 +7,13 @@ on:
     branches:
       - 'master'
 
+concurrency:
+  group: publish
+  cancel-in-progress: true
+
 jobs:
   publish_pypi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: pypi
@@ -27,9 +31,7 @@ jobs:
         run: uv publish
 
   publish_pages:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-doc/jupyter
+    runs-on: ubuntu-slim
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
@@ -38,15 +40,16 @@ jobs:
       contents: read
       pages: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - run: pip install .
-      - run: cd doc && make
+      - name: Download Jupyter Book HTML
+        uses: actions/download-artifact@v7
+        with:
+          name: jupyter-book-html
+          path: public
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./doc/_build/html
+          path: public
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4

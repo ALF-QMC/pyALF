@@ -31,6 +31,11 @@ jobs:
 
   exec_notebooks:
     runs-on: ubuntu-latest
+    env:
+      PRTE_MCA_rmaps_default_mapping_policy: ":oversubscribe"
+      PRTE_MCA_rmaps_base_oversubscribe: '1'
+      OMPI_MCA_rmaps_base_oversubscribe: "true"
+
     container:
       image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
     strategy:
@@ -51,7 +56,8 @@ jobs:
       - run: cd Notebooks/ && jupyter-nbconvert --execute --inplace ${{ matrix.notebook }}
 
   check_docstrings:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -60,28 +66,16 @@ jobs:
         continue-on-error: true
 
   warn_pylint:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [bullseye, bookworm, trixie, tumbleweed]
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - run: pip install pylint
+      - run: sudo apt update && sudo apt install -y python3-tk
+      - run: pip install . pylint
       - run: pylint py_alf/
-        continue-on-error: true
 
   warn_ruff:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-requirements/${{ matrix.image }}
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [bullseye, bookworm, trixie, tumbleweed]
+    runs-on: ubuntu-slim
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -90,10 +84,25 @@ jobs:
 
   build_docs:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/alf-qmc/alf-container/pyalf-doc/jupyter
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - run: pip install .
+      - run: pip install .[doc]
+      - run: sudo apt-get install --yes --no-install-recommends
+          texlive-latex-recommended
+          texlive-latex-extra
+          texlive-fonts-recommended
+          texlive-fonts-extra
+          texlive-xetex
+          texlive-lang-german
+          latexmk
+          xindy
+          fonts-freefont-otf
+          inkscape
       - run: cd doc && make
+      - name: Upload Jupyter Book HTML artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: jupyter-book-html
+          path: doc/_build/html
+          if-no-files-found: error
