@@ -1,6 +1,5 @@
 pages:
   image: git.physik.uni-wuerzburg.de:25812/z03/pdi/debian:bookworm-buildd
-  stage: build_doc
   script:
     - mkdir public
     - echo '<meta http-equiv="refresh" content="0; URL=https://alf.physik.uni-wuerzburg.de/pyalf-doc" />' > public/index.html
