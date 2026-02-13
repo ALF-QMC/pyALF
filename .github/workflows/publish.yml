@@ -45,6 +45,8 @@ jobs:
         with:
           name: jupyter-book-html
           path: public
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
