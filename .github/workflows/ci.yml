@@ -99,7 +99,9 @@ jobs:
           xindy
           fonts-freefont-otf
           inkscape
+          python3-tk
       - run: cd doc && make
+      - run: git status
       - name: Upload Jupyter Book HTML artifact
         uses: actions/upload-artifact@v6
         with:

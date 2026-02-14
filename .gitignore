@@ -10,4 +10,5 @@ KondoBilayerSquareL16
 doc/git_commit.tex
 doc/_templates/sidebar_pdf_commit.html
 public
+build/
 
