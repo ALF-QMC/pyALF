@@ -27,7 +27,9 @@ jobs:
         run: apk add --no-cache git
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Configure git safe directory
+        with:
+          fetch-depth: 0
+      - name: Mark workspace as a safe Git directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Build
         run: uv build
