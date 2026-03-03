@@ -39,7 +39,7 @@ def _get_bins(directory, names, custom_obs):
 
             dtype, shape = custom_obs_get_dtype_shape(obs_spec, bins_raw)
             del dtype
-            size = np.prod(shape)
+            size = 1 if not shape else np.prod(shape)
             bins = np.empty((N_bins, size))
 
             for i in range(N_bins):
