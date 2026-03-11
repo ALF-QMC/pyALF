@@ -3,6 +3,8 @@
 # pylint: disable=too-many-branches
 # pylint: disable=missing-function-docstring
 # pylint: disable=unbalanced-tuple-unpacking
+# pylint: disable=protected-access
+# pylint: disable=too-many-lines
 
 import os
 import pickle
@@ -15,6 +17,145 @@ import pandas as pd
 
 from .exceptions import TooFewBinsError
 from .lattice import Lattice, UnitCell
+
+
+class AnalysisResults:
+    """
+    Storage for analysis results of an observable.
+
+    Parameters
+    ----------
+    name : str
+        Observable name
+    sign : float
+        Average QMC sign
+    sign_err : float
+        Error of average QMC sign
+    description : str, optional
+        Observable description
+    """
+    _values = {}
+
+    def __init__(self, name, sign, sign_err, description=None):
+        self.name = name
+        self.description = description
+
+        self._add_value('sign', sign, sign_err, 'Average QMC sign')
+        # setattr(self, 'results_dict', results_dict)
+
+
+    class _Value:
+        # pylint: disable=too-few-public-methods
+        def __init__(self, name, value, err=None, description=None):
+            self.name = name
+            self.value = value
+            self.error = err
+            self.description = description
+
+        def write_to_hdf5(self, hdf5_loc):
+            grp = hdf5_loc.create_group(self.name)
+            grp.create_dataset('value', data=self.value)
+            if self.error is not None:
+                grp.create_dataset('error', data=self.error)
+            if self.description:
+                grp.attrs['description'] = self.description
+
+    def _add_value(self, name, value, err=None, description=None):
+        self._values[name] = self._Value(
+            name, value, err, description)
+
+    def write_to_hdf5(self, filename):
+        with h5py.File(filename, "a") as f:
+            grp = f.create_group(self.name)
+            if self.description:
+                grp.attrs['description'] = self.description
+            for val in self._values.values():
+                val.write_to_hdf5(grp)
+
+    def append_to_flat_dict(self, dic):
+        dic[self.name+'_sign'] = self._values['sign'].value
+        dic[self.name+'_sign_err'] = self._values['sign'].error
+
+
+
+class AnalysisResultsScal(AnalysisResults):
+    """
+    Storage for analysis restults of a scalar type observable.
+
+    Parameters
+    ----------
+    name : str
+        Observable name
+    name : description
+        Observable description
+    sign : float
+        Average QMC sign
+    sign_err : float
+        Error of average QMC sign
+    val : array
+        Observable value(s)
+    err : array
+        Observable error(s)
+    """
+
+    def __init__(self, name, sign, sign_err, val, err, description=None):
+        # pylint: disable=too-many-arguments
+        super().__init__(name, sign, sign_err, description)
+
+        self._add_value('val', val, err, 'Observable value(s)')
+
+    def append_to_flat_dict(self, dic):
+        super().append_to_flat_dict(dic)
+        dat = self._values['val'].value
+        err = self._values['val'].error
+        # for i in range(len(dat)):
+        for i, (d, e) in enumerate(zip(dat, err)):
+            dic[self.name+str(i)] = d
+            dic[self.name+str(i)+'_err'] = e
+
+    def savetxt(self, fname):
+        np.savetxt(
+            fname,
+            np.column_stack([self._values['val'].value,
+                             self._values['val'].error]),
+            header='Sign: {} {}'.format(
+                self._values['sign'].value,
+                self._values['sign'].error
+                )
+        )
+
+
+class AnalysisResultsLatt(AnalysisResults):
+    """
+    Storage for analysis restults of a Lattice type observable.
+
+    Parameters
+    ----------
+    name : str
+        Observable name
+    name : description
+        Observable description
+    sign : float
+        Average QMC sign
+    sign_err : float
+        Error of average QMC sign
+    val : array
+        Observable value(s)
+    err : array
+        Observable error(s)
+    """
+
+    def __init__(self, name, sign, sign_err, latt, description=None):
+        # pylint: disable=too-many-arguments
+        super().__init__(name, sign, sign_err, description)
+
+        self.latt = latt
+
+    def write_to_hdf5(self, filename):
+        super().write_to_hdf5(filename)
+        with h5py.File(filename, "a") as f:
+            grp = f[self.name]
+            self.latt.write_to_hdf5(grp)
 
 
 def symmetrize(latt, syms, dat):
@@ -604,7 +745,7 @@ def ana_scal(directory, obs_name):
         J = J_obs[:, n] / J_sign
         dat[n, :] = error(J)
 
-    return sign, dat
+    return AnalysisResultsScal(obs_name, sign[0], sign[1], dat[:, 0], dat[:, 1])
 
 
 def ana_hist(directory, obs_name):
@@ -620,12 +761,25 @@ def ana_hist(directory, obs_name):
     below = error(J_below)
 
     d_class = (upper-lower)/N_classes
-    dat = np.empty((N_classes, 3))
+    dat = np.empty((N_classes, 2))
+    err = np.empty((N_classes,))
     for n in range(N_classes):
         J = J_obs[:, n] / J_sign
-        dat[n, :] = [lower+d_class*(0.5+n), *error(J)]
+        m, e = error(J)
+        dat[n, 0] = lower+d_class*(0.5+n)
+        dat[n, 1] = m
+        err[n] = e
 
-    return sign, above, below, dat, upper, lower
+    results = AnalysisResults(obs_name, sign[0], sign[1])
+    results._add_value('dat', dat, err, 'Histogram data')
+    results._add_value('above', above[0], above[1],
+                       'Fraction of counts above histogram range')
+    results._add_value('below', below[0], below[1],
+                       'Fraction of counts below histogram range')
+    results._add_value('upper', upper, description='Upper histogram bound')
+    results._add_value('lower', lower, description='Lower histogram bound')
+
+    return results
 
 
 def ana_eq(directory, obs_name, sym=None):
@@ -645,7 +799,8 @@ def ana_eq(directory, obs_name, sym=None):
     J_obs = J_obs.reshape((N_bins, N_orb, N_orb, latt.N))
 
     m, e = error(J_sign)
-    sign = (m, e)
+
+    results = AnalysisResultsLatt(obs_name, m, e, latt)
 
     J = np.array([J_obs[n] / J_sign[n] for n in range(N_bins)])
 
@@ -653,17 +808,23 @@ def ana_eq(directory, obs_name, sym=None):
         J = symmetrize(latt, sym, J)
 
     m_K, e_K = error(J)
+    results._add_value('k', m_K, e_K, 'Momentum-resolved results')
 
     J_sum = J.trace(axis1=1, axis2=2)
     m_sum, e_sum = error(J_sum)
+    results._add_value('k_traced', m_sum, e_sum,
+                       'Momentum-resolved results. '
+                       'Traced over orbital degrees of freedom')
 
-    J_R = latt.fourier_K_to_R(J)
-    m_R, e_R = error(J_R)
+    m_R, e_R = error(latt.fourier_K_to_R(J))
+    results._add_value('r', m_R, e_R, 'Real-space results')
 
-    J_R_sum = latt.fourier_K_to_R(J_sum)
-    m_R_sum, e_R_sum = error(J_R_sum)
+    m_R_sum, e_R_sum = error(latt.fourier_K_to_R(J_sum))
+    results._add_value('r_traced', m_R_sum, e_R_sum,
+                       'Momentum-resolved results. '
+                       'Traced over orbital degrees of freedom')
 
-    return sign, m_K, e_K, m_sum, e_sum, m_R, e_R, m_R_sum, e_R_sum, latt
+    return results
 
 
 def ana_tau(directory, obs_name, sym=None):
@@ -681,7 +842,9 @@ def ana_tau(directory, obs_name, sym=None):
     N_bins = len(J_sign)
 
     m, e = error(J_sign)
-    sign = (m, e)
+
+    results = AnalysisResultsLatt(obs_name, m, e, latt)
+    results._add_value('dtau', dtau, description='Imaginary time step')
 
     J = np.array(
         [J_obs[n].trace(axis1=0, axis2=1) / J_sign[n] for n in range(N_bins)])
@@ -690,12 +853,14 @@ def ana_tau(directory, obs_name, sym=None):
         J = symmetrize(latt, sym, J)
 
     m_K, e_K = error(J)
+    results._add_value('k', m_K, e_K, 'Momentum-resolved results')
 
     # Fourier transform
     J_R = latt.fourier_K_to_R(J)
     m_R, e_R = error(J_R)
+    results._add_value('r', m_R, e_R, 'Real-space results')
 
-    return sign, m_K, e_K, m_R, e_R, dtau, latt
+    return results
 
 
 def write_res_eq(directory, obs_name,
