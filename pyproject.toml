@@ -38,7 +38,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-GUI = ["tkinter"]
 doc = [
   "sphinxcontrib-svg2pdfconverter",
   "jupyter-book<2.0",
