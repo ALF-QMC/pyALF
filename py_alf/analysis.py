@@ -1,5 +1,7 @@
 """Supplies the default analysis routine."""
 # pylint: disable=invalid-name
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
 
 import os
 import pickle
@@ -23,11 +25,11 @@ from .exceptions import TooFewBinsError
 
 
 def analysis(directory,
-             symmetry=None, custom_obs=None, do_tau=True, always=False):
+             symmetry=None, custom_obs=None, do_tau=True, always=False, write_plain_text=True):
     """Perform analysis in the given directory.
 
     Results are written to the pickled dictionary `res.pkl` and in plain text
-    in the folder `res/`.
+    in the folder `res/` if `write_plain_text` is True.
 
     Parameters
     ----------
@@ -55,7 +57,10 @@ def analysis(directory,
         speeds up analysis and makes result files much smaller.
     always : bool, default=False
         Do not skip if parameters and bins are older than results.
-
+    write_plain_text : bool, default=True
+        Write results in plain text files in the `res/` folder.
+        Setting this to False saves disk space (in particular in terms of number of files),
+        but makes it harder to read results without loading the pickled dictionary `res.pkl`.
     """
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
@@ -131,7 +136,7 @@ def analysis(directory,
                 list_obs.append(o)
                 list_tau.append(o)
 
-    if 'res' not in os.listdir(directory):
+    if write_plain_text and 'res' not in os.listdir(directory):
         os.mkdir(os.path.join(directory, 'res'))
 
     dic = params
@@ -158,10 +163,11 @@ def analysis(directory,
                 dic[obs_name] = dat[0]
                 dic[obs_name+'_err'] = dat[1]
 
-                np.savetxt(
-                    os.path.join(directory, 'res', obs_name),
-                    dat
-                )
+                if write_plain_text:
+                    np.savetxt(
+                        os.path.join(directory, 'res', obs_name),
+                        dat
+                    )
 
     print("Scalar observables:")
     for obs_name in list_scal:
@@ -178,11 +184,12 @@ def analysis(directory,
             dic[obs_name+str(i)] = dat[i, 0]
             dic[obs_name+str(i)+'_err'] = dat[i, 1]
 
-        np.savetxt(
-            os.path.join(directory, 'res', obs_name),
-            dat,
-            header='Sign: {} {}'.format(*sign)
-        )
+        if write_plain_text:
+            np.savetxt(
+                os.path.join(directory, 'res', obs_name),
+                dat,
+                header='Sign: {} {}'.format(*sign)
+            )
 
     print("Histogram observables:")
     for obs_name in list_hist:
@@ -202,12 +209,13 @@ def analysis(directory,
         hist['lower'] = lower
         dic[obs_name] = hist
 
-        np.savetxt(
-            os.path.join(directory, 'res', obs_name),
-            dat,
-            header='Sign: {} {}, above {} {}, below {} {}'.format(
-                *sign, *above, *below)
-        )
+        if write_plain_text:
+            np.savetxt(
+                os.path.join(directory, 'res', obs_name),
+                dat,
+                header='Sign: {} {}, above {} {}, below {} {}'.format(
+                    *sign, *above, *below)
+            )
 
     print("Equal time observables:")
     for obs_name in list_eq:
@@ -219,9 +227,10 @@ def analysis(directory,
             print("Too few bins, skipping.")
             continue
 
-        write_res_eq(directory, obs_name,
-                     m_k, e_k, m_k_sum, e_k_sum,
-                     m_r, e_r, m_r_sum, e_r_sum, latt)
+        if write_plain_text:
+            write_res_eq(directory, obs_name,
+                         m_k, e_k, m_k_sum, e_k_sum,
+                         m_r, e_r, m_r_sum, e_r_sum, latt)
 
         dic[obs_name+'K'] = m_k
         dic[obs_name+'K_err'] = e_k
@@ -249,8 +258,9 @@ def analysis(directory,
                 print("Too few bins, skipping.")
                 continue
 
-            write_res_tau(directory, obs_name,
-                          m_k, e_k, m_r, e_r, dtau, latt)
+            if write_plain_text:
+                write_res_tau(directory, obs_name,
+                              m_k, e_k, m_r, e_r, dtau, latt)
 
             dic[obs_name+'K'] = m_k
             dic[obs_name+'K_err'] = e_k
