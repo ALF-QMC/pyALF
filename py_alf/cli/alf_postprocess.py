@@ -57,6 +57,9 @@ def _get_arg_parser():
              'This file has to define the object symmetry, '
              'needed by py_alf.analysis. (default: None))')
     parser.add_argument(
+        '--no_plain_text', action="store_true",
+        help='Skip writing plain text results in folder "res".')
+    parser.add_argument(
         'directories', nargs='*',
         help='Directories to analyze. If empty, analyzes all '
             'directories containing file "data.h5" it can find, '
@@ -109,7 +112,8 @@ def _main():
     if args.do_analysis:
         for directory in directories:
             analysis(directory, custom_obs=custom_obs, symmetry=symmetry,
-                     do_tau=not args.no_tau, always=args.always)
+                     do_tau=not args.no_tau,
+                     write_plain_text=not args.no_plain_text, always=args.always)
 
     if args.gather:
         df = load_res(directories)
