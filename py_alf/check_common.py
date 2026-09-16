@@ -134,7 +134,7 @@ def _get_errors(directory, names, custom_obs, Nmax0):
             Nmax = min(N_bins1 // 3, Nmax0)
 
             dtype, shape = custom_obs_get_dtype_shape(obs_spec, bins)
-            size = np.prod(shape)
+            size = 1 if shape == tuple() else np.prod(shape)
             err = np.empty((Nmax, size))
 
             for N_rebin in range(1, Nmax+1):
